@@ -1,2 +1,3 @@
-# portfolio
-Visualize your investment portfolio.
+# Growfolio
+
+Visualize your investment portfolio 💰.
