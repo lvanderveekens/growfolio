@@ -28,6 +28,7 @@ func (s *Server) Start(port int) error {
 	}))
 
 	r.POST("/v1/ping", createHandlerFunc(s.handlers.ping.HandlePing))
+	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
 
 	return r.Run(":" + strconv.Itoa(port))
 }
@@ -48,9 +49,10 @@ func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
 }
 
 type Handlers struct {
-	ping *PingHandler
+	ping       *PingHandler
+	investment *InvestmentHandler
 }
 
-func NewHandlers(ping *PingHandler) *Handlers {
-	return &Handlers{ping: ping}
+func NewHandlers(ping *PingHandler, investment *InvestmentHandler) *Handlers {
+	return &Handlers{ping: ping, investment: investment}
 }

@@ -4,6 +4,7 @@ import { Colors, ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js'
 import Link from 'next/link';
 import { Doughnut } from 'react-chartjs-2';
 import AddTransactionForm from './add-transaction-form';
+import AddInvestmentForm from './add-investment-form';
 
 ChartJS.register(Colors, ArcElement, Tooltip, Legend);
 
@@ -39,6 +40,8 @@ export default function Home() {
       </nav>
       <div className="container mx-auto">
         <AddTransactionForm />
+        <br />
+        <AddInvestmentForm />
       </div>
     </main>
   );

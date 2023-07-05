@@ -1,17 +1,9 @@
 import { ChangeEvent, useState } from 'react';
+import { InvestmentType } from './investment-type';
 
 enum TransactionType {
   Buy = "buy",
   Sell = "sell",
-}
-
-enum InvestmentType {
-  Stock = "stock",
-  Bond = "bond",
-  Commodity = "commodity",
-  Fund = "fund",
-  Crypto = "crypto",
-  Cash = "cash",
 }
 
 const AddTransactionForm = () => {
@@ -36,7 +28,7 @@ const AddTransactionForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1 className='text-xl font-bold mb-3'>Add transaction form</h1>
+      <h1 className='text-xl font-bold mb-3'>Add transaction</h1>
       <div className='mb-3'>
         <label>
           <div>Transaction type</div>
