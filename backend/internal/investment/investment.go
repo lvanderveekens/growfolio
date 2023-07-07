@@ -31,3 +31,11 @@ type Investment struct {
 	Type Type
 	Name string
 }
+
+func New(id uuid.UUID, t Type, name string) *Investment {
+	return &Investment{
+		ID:   id,
+		Type: t,
+		Name: name,
+	}
+}
