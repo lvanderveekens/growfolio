@@ -52,11 +52,7 @@ func (h *InvestmentHandler) CreateInvestment(c *gin.Context) error {
 }
 
 func toInvestmentDto(i investment.Investment) investmentDto {
-	return newInvestmentDto(
-		i.ID.String(),
-		i.Type,
-		i.Name,
-	)
+	return newInvestmentDto(i.ID, i.Type, i.Name)
 }
 
 type createInvestmentRequest struct {

@@ -27,9 +27,11 @@ func (s *Server) Start(port int) error {
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 	}))
 
-	r.POST("/v1/ping", createHandlerFunc(s.handlers.ping.HandlePing))
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
+
+	r.GET("/v1/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
+	r.POST("/v1/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
 
 	return r.Run(":" + strconv.Itoa(port))
 }
@@ -50,10 +52,10 @@ func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
 }
 
 type Handlers struct {
-	ping       *PingHandler
-	investment *InvestmentHandler
+	investment  *InvestmentHandler
+	transaction *TransactionHandler
 }
 
-func NewHandlers(ping *PingHandler, investment *InvestmentHandler) *Handlers {
-	return &Handlers{ping: ping, investment: investment}
+func NewHandlers(investment *InvestmentHandler, transaction *TransactionHandler) *Handlers {
+	return &Handlers{investment: investment, transaction: transaction}
 }

@@ -1,7 +1,5 @@
 package investment
 
-import "github.com/google/uuid"
-
 type Type string
 
 const (
@@ -27,12 +25,12 @@ func NewCreateCommand(t Type, name string) CreateCommand {
 }
 
 type Investment struct {
-	ID   uuid.UUID
+	ID   string
 	Type Type
 	Name string
 }
 
-func New(id uuid.UUID, t Type, name string) *Investment {
+func New(id string, t Type, name string) *Investment {
 	return &Investment{
 		ID:   id,
 		Type: t,

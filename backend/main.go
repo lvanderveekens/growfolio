@@ -51,7 +51,12 @@ func main() {
 	}
 
 	var investmentRepository = postgres.NewInvestmentRepository(db)
-	var handlers = api.NewHandlers(api.NewPingHandler(), api.NewInvestmentHandler(investmentRepository))
+	var transactionRepository = postgres.NewTransactionRepository(db)
+
+	var investmentHandler = api.NewInvestmentHandler(investmentRepository)
+	var transactionHandler = api.NewTransactionHandler(transactionRepository, investmentRepository)
+
+	var handlers = api.NewHandlers(investmentHandler, transactionHandler)
 	var server = api.NewServer(handlers)
 
 	log.Fatal(server.Start(8888))

@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { InvestmentType } from './investment-type';
-import { unzipSync } from 'zlib';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
   name: string;
 }
-type FillInTheBlankExerciseInputProps = {
+
+type AddInvestmentFormProps = {
   onAdd: () => void
 };
 
-const AddInvestmentForm: React.FC<FillInTheBlankExerciseInputProps> = ({ onAdd }) => {
+const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
 

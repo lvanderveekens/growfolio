@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"growfolio/internal/investment"
 	"time"
@@ -18,7 +20,7 @@ type Investment struct {
 }
 
 func (i *Investment) toDomainObject() *investment.Investment {
-	return investment.New(i.ID, i.Type, i.Name)
+	return investment.New(i.ID.String(), i.Type, i.Name)
 }
 
 type InvestmentRepository struct {
@@ -32,7 +34,6 @@ func NewInvestmentRepository(db *sqlx.DB) *InvestmentRepository {
 func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
 	entities := []Investment{}
 	err := r.db.Select(&entities, "SELECT * FROM investment")
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to select investments: %w", err)
 	}
@@ -43,6 +44,25 @@ func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
 	}
 
 	return investments, nil
+}
+
+func (r *InvestmentRepository) FindByID(id string) (*investment.Investment, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		fmt.Println("error: id is not a uuid: " + err.Error())
+		return nil, investment.ErrNotFound
+	}
+
+	entity := Investment{}
+	err = r.db.Get(&entity, "SELECT * FROM investment WHERE id=$1", id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, investment.ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to select investment: %w", err)
+	}
+
+	return entity.toDomainObject(), nil
 }
 
 func (r *InvestmentRepository) Create(cmd investment.CreateCommand) (*investment.Investment, error) {
@@ -58,7 +78,7 @@ func (r *InvestmentRepository) Create(cmd investment.CreateCommand) (*investment
 		RETURNING *
 	`, id, cmd.Type, cmd.Name).StructScan(&entity)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert into table: %w", err)
+		return nil, fmt.Errorf("failed to insert investment: %w", err)
 	}
 
 	return entity.toDomainObject(), nil

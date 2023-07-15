@@ -3,23 +3,33 @@
 import { Colors, ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import Link from 'next/link';
 import { Doughnut } from 'react-chartjs-2';
-import AddTransactionForm from './add-transaction-form';
+import AddTransactionForm, { TransactionType } from './add-transaction-form';
 import AddInvestmentForm from './add-investment-form';
 import { useEffect, useState } from 'react';
+import { InvestmentType } from './investment-type';
 
 ChartJS.register(Colors, ArcElement, Tooltip, Legend);
 
-interface Investment {
+export interface Investment {
   id: string
-  type: string
+  type: InvestmentType
   name: string
+}
+
+export interface Transaction {
+  id: string
+  type: TransactionType
+  investmentId: string
+  amount: number
 }
 
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [transactons, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     fetchInvestments()
+    fetchTransactions()
   }, []);
 
   const fetchInvestments = async () => {
@@ -30,15 +40,17 @@ export default function Home() {
       });
   }
 
-  const data = {
-    labels: ["Stocks", "Bitcoin"],
-    datasets: [
-      {
-        data: [20_000, 4_900],
-        borderWidth: 1,
-      },
-    ],
-  };
+  const fetchTransactions = async () => {
+    fetch(`http://localhost:8888/v1/transactions`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTransactions(data);
+      });
+  }
+
+  const findInvestmentById = (id: string) => {
+    return investments.find((i) => i.id == id)
+  }
 
   return (
     <main>
@@ -50,15 +62,23 @@ export default function Home() {
         </div>
       </nav>
       <div className="container mx-auto">
-        <AddTransactionForm />
+        <AddTransactionForm onAdd={fetchTransactions} investments={investments} />
         <br />
-        <AddInvestmentForm onAdd={fetchInvestments}/>
+        <AddInvestmentForm onAdd={fetchInvestments} />
         <br />
         <h1 className="text-xl font-bold mb-3">Investments</h1>
         {investments.length > 0 &&
           investments.map((investment) => (
             <div key={investment.id}>
-              {JSON.stringify(investment)}
+              {investment.name} ({investment.type})
+            </div>
+          ))}
+        <br />
+        <h1 className="text-xl font-bold mb-3">Transactions</h1>
+        {transactons.length > 0 &&
+          transactons.map((transaction) => (
+            <div key={transaction.id}>
+              {transaction.type} {findInvestmentById(transaction.investmentId)?.name} € {transaction.amount / 100}
             </div>
           ))}
       </div>
