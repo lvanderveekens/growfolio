@@ -28,6 +28,7 @@ func (s *Server) Start(port int) error {
 	}))
 
 	r.POST("/v1/ping", createHandlerFunc(s.handlers.ping.HandlePing))
+	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
 
 	return r.Run(":" + strconv.Itoa(port))

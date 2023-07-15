@@ -29,6 +29,22 @@ func NewInvestmentRepository(db *sqlx.DB) *InvestmentRepository {
 	return &InvestmentRepository{db: db}
 }
 
+func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
+	entities := []Investment{}
+	err := r.db.Select(&entities, "SELECT * FROM investment")
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to select investments: %w", err)
+	}
+
+	investments := make([]investment.Investment, 0)
+	for _, entity := range entities {
+		investments = append(investments, *entity.toDomainObject())
+	}
+
+	return investments, nil
+}
+
 func (r *InvestmentRepository) Create(cmd investment.CreateCommand) (*investment.Investment, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {

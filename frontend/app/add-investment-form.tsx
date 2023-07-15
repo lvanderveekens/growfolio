@@ -1,17 +1,37 @@
 import { useState } from 'react';
 import { InvestmentType } from './investment-type';
+import { unzipSync } from 'zlib';
 
-const AddInvestmentForm = () => {
-  const [type, setType] = useState<InvestmentType | "">("");
-  const [name, setName] = useState<string>("");
+export interface CreateInvestmentRequest {
+  type: InvestmentType;
+  name: string;
+}
+type FillInTheBlankExerciseInputProps = {
+  onAdd: () => void
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
+const AddInvestmentForm: React.FC<FillInTheBlankExerciseInputProps> = ({ onAdd }) => {
+  const [type, setType] = useState<InvestmentType>();
+  const [name, setName] = useState<string>();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Perform form submission logic here
-    // console.log('Name:', name);
-    // Reset form fields
-    // setName('');
-    // setEmail('');
+
+    const req: CreateInvestmentRequest = {
+      type: type!,
+      name: name!,
+    };
+
+    const res = await fetch(`http://localhost:8888/v1/investments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+
+    setType(undefined);
+    setName(undefined);
+
+    onAdd()
   };
 
   return (
@@ -22,8 +42,9 @@ const AddInvestmentForm = () => {
           <div>Type</div>
           <select
             className="border"
-            value={type}
+            value={type || ""}
             onChange={(e) => setType(e.target.value as InvestmentType)}
+            required 
           >
             <option value="" disabled>
               Select type
@@ -42,8 +63,9 @@ const AddInvestmentForm = () => {
           <input
             className="border"
             type="text"
-            value={name}
+            value={name || ""}
             onChange={(e) => setName(e.target.value)}
+            required
           />
         </label>
       </div>

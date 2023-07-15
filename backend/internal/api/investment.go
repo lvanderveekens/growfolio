@@ -17,6 +17,21 @@ func NewInvestmentHandler(investmentRepository investment.Repository) *Investmen
 	return &InvestmentHandler{investmentRepository: investmentRepository}
 }
 
+func (h *InvestmentHandler) GetInvestments(c *gin.Context) error {
+	investments, err := h.investmentRepository.Find()
+	if err != nil {
+		return fmt.Errorf("failed to find investments: %w", err)
+	}
+
+	dtos := make([]investmentDto, 0)
+	for _, investment := range investments {
+		dtos = append(dtos, toInvestmentDto(investment))
+	}
+
+	c.JSON(http.StatusOK, dtos)
+	return nil
+}
+
 func (h *InvestmentHandler) CreateInvestment(c *gin.Context) error {
 	var req createInvestmentRequest
 	err := c.ShouldBindJSON(&req)
