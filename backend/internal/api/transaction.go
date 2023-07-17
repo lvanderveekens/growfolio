@@ -6,6 +6,7 @@ import (
 	"growfolio/internal/investment"
 	"growfolio/internal/transaction"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,7 +59,12 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) error {
 		return fmt.Errorf("failed to find investment: %w", err)
 	}
 
-	created, err := h.transactionRepository.Create(req.toCommand(*i))
+	cmd, err := req.toCommand(*i)
+	if err != nil {
+		return NewError(http.StatusBadRequest, err.Error())
+	}
+
+	created, err := h.transactionRepository.Create(*cmd)
 	if err != nil {
 		return fmt.Errorf("failed to create transaction: %w", err)
 	}
@@ -68,16 +74,20 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) error {
 }
 
 func toTransactionDto(t transaction.Transaction) transactionDto {
-	return newTransactionDto(t.ID, t.Type, t.InvestmentID, t.Amount)
+	return newTransactionDto(t.ID, t.Date.Format("2006-01-02"), t.Type, t.InvestmentID, t.Amount)
 }
 
 type createTransactionRequest struct {
+	Date         string           `json:"date"`
 	Type         transaction.Type `json:"type"`
 	InvestmentID string           `json:"investmentId"`
 	Amount       int64            `json:"amount"`
 }
 
 func (r *createTransactionRequest) validate() error {
+	if r.Date == "" {
+		return errors.New("field 'date' is missing")
+	}
 	if r.Type == "" {
 		return errors.New("field 'type' is missing")
 	}
@@ -90,20 +100,28 @@ func (r *createTransactionRequest) validate() error {
 	return nil
 }
 
-func (r *createTransactionRequest) toCommand(investment investment.Investment) transaction.CreateCommand {
-	return transaction.NewCreateCommand(r.Type, investment, r.Amount)
+func (r *createTransactionRequest) toCommand(investment investment.Investment) (*transaction.CreateCommand, error) {
+	date, err := time.Parse("2006-01-02", r.Date)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse date: %w", err)
+	}
+
+	cmd := transaction.NewCreateCommand(date, r.Type, investment, r.Amount)
+	return &cmd, nil
 }
 
 type transactionDto struct {
 	ID           string           `json:"id"`
+	Date         string           `json:"date"`
 	Type         transaction.Type `json:"type"`
 	InvestmentID string           `json:"investmentId"`
 	Amount       int64            `json:"amount"`
 }
 
-func newTransactionDto(id string, t transaction.Type, investmentId string, amount int64) transactionDto {
+func newTransactionDto(id string, date string, t transaction.Type, investmentId string, amount int64) transactionDto {
 	return transactionDto{
 		ID:           id,
+		Date:         date,
 		Type:         t,
 		InvestmentID: investmentId,
 		Amount:       amount,

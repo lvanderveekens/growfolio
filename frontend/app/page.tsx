@@ -18,6 +18,7 @@ export interface Investment {
 
 export interface Transaction {
   id: string
+  date: string
   type: TransactionType
   investmentId: string
   amount: number
@@ -78,7 +79,7 @@ export default function Home() {
         {transactons.length > 0 &&
           transactons.map((transaction) => (
             <div key={transaction.id}>
-              {transaction.type} {findInvestmentById(transaction.investmentId)?.name} € {transaction.amount / 100}
+              {transaction.date} {transaction.type} {findInvestmentById(transaction.investmentId)?.name} € {transaction.amount / 100}
             </div>
           ))}
       </div>

@@ -1,5 +1,10 @@
 import { ChangeEvent, useState } from 'react';
 import { Investment } from './page';
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+import moment from 'moment';
+
 
 export enum TransactionType {
   Buy = "buy",
@@ -7,9 +12,10 @@ export enum TransactionType {
 }
 
 export interface CreateTransactionRequest {
-  type: TransactionType;
-  investmentId: string;
-  amount: number;
+  date: string
+  type: TransactionType
+  investmentId: string
+  amount: number
 }
 
 type AddTransactionFormProps = {
@@ -21,6 +27,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   onAdd,
   investments,
 }) => {
+  const [date, setDate] = useState<Date>();
   const [type, setType] = useState<TransactionType>();
   const [investment, setInvestment] = useState<Investment>();
   const [amount, setAmount] = useState<string>();
@@ -29,17 +36,19 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
     e.preventDefault();
 
     const req: CreateTransactionRequest = {
+      date: moment(date).format("YYYY-MM-DD"),
       type: type!,
       investmentId: investment!.id,
       amount: Math.round(parseFloat(amount!) * 100),
     };
 
-    const res = await fetch(`http://localhost:8888/v1/transactions`, {
+    await fetch(`http://localhost:8888/v1/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
     });
 
+    setDate(undefined)
     setType(undefined);
     setInvestment(undefined);
     setAmount(undefined);
@@ -60,6 +69,16 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <h1 className="text-xl font-bold mb-3">Add transaction</h1>
+      <div className="mb-3">
+        <div>Date</div>
+        <DatePicker
+          className="border"
+          selected={date}
+          onChange={(date) => date && setDate(date)}
+          dateFormat="yyyy-MM-dd"
+          required
+        />
+      </div>
       <div className="mb-3">
         <label>
           <div>Type</div>

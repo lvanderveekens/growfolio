@@ -13,13 +13,14 @@ type Transaction struct {
 	ID           uuid.UUID
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
+	Date         time.Time
 	Type         transaction.Type
 	InvestmentID string `db:"investment_id"`
 	Amount       int64
 }
 
 func (t *Transaction) toDomainObject() *transaction.Transaction {
-	return transaction.New(t.ID.String(), t.Type, t.InvestmentID, t.Amount)
+	return transaction.New(t.ID.String(), t.Date, t.Type, t.InvestmentID, t.Amount)
 }
 
 type TransactionRepository struct {
@@ -54,10 +55,10 @@ func (r *TransactionRepository) Create(cmd transaction.CreateCommand) (*transact
 
 	var entity Transaction
 	err = r.db.QueryRowx(`
-		INSERT INTO transaction (id, "type", investment_id, amount) 
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO transaction (id, date, "type", investment_id, amount) 
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING *
-	`, id, cmd.Type, cmd.Investment.ID, cmd.Amount).StructScan(&entity)
+	`, id, cmd.Date, cmd.Type, cmd.Investment.ID, cmd.Amount).StructScan(&entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert transaction: %w", err)
 	}
