@@ -7,6 +7,7 @@ import AddTransactionForm, { TransactionType } from './add-transaction-form';
 import AddInvestmentForm from './add-investment-form';
 import { useEffect, useState } from 'react';
 import { InvestmentType } from './investment-type';
+import UpdateInvestmentForm from './update-investment-form copy';
 
 ChartJS.register(Colors, ArcElement, Tooltip, Legend);
 
@@ -63,9 +64,14 @@ export default function Home() {
         </div>
       </nav>
       <div className="container mx-auto">
-        <AddTransactionForm onAdd={fetchTransactions} investments={investments} />
+        <AddTransactionForm
+          onAdd={fetchTransactions}
+          investments={investments}
+        />
         <br />
         <AddInvestmentForm onAdd={fetchInvestments} />
+        <br />
+        <UpdateInvestmentForm investments={investments} />
         <br />
         <h1 className="text-xl font-bold mb-3">Investments</h1>
         {investments.length > 0 &&
@@ -79,7 +85,9 @@ export default function Home() {
         {transactons.length > 0 &&
           transactons.map((transaction) => (
             <div key={transaction.id}>
-              {transaction.date} {transaction.type} {findInvestmentById(transaction.investmentId)?.name} € {transaction.amount / 100}
+              {transaction.date} {transaction.type}{" "}
+              {findInvestmentById(transaction.investmentId)?.name} €{" "}
+              {transaction.amount / 100}
             </div>
           ))}
       </div>
