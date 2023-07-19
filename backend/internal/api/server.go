@@ -30,6 +30,8 @@ func (s *Server) Start(port int) error {
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
 
+	r.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))
+
 	r.GET("/v1/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
 	r.POST("/v1/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
 
@@ -52,8 +54,9 @@ func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
 }
 
 type Handlers struct {
-	investment  *InvestmentHandler
-	transaction *TransactionHandler
+	investment       *InvestmentHandler
+	investmentUpdate *InvestmentUpdateHandler
+	transaction      *TransactionHandler
 }
 
 func NewHandlers(investment *InvestmentHandler, transaction *TransactionHandler) *Handlers {

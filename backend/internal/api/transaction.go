@@ -100,13 +100,13 @@ func (r *createTransactionRequest) validate() error {
 	return nil
 }
 
-func (r *createTransactionRequest) toCommand(investment investment.Investment) (*transaction.CreateCommand, error) {
+func (r *createTransactionRequest) toCommand(i investment.Investment) (*transaction.CreateCommand, error) {
 	date, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	cmd := transaction.NewCreateCommand(date, r.Type, investment, r.Amount)
+	cmd := transaction.NewCreateCommand(date, r.Type, i, r.Amount)
 	return &cmd, nil
 }
 
