@@ -50,14 +50,15 @@ func main() {
 		log.Fatal("Failed to migrate the database: ", err)
 	}
 
-	var investmentRepository = postgres.NewInvestmentRepository(db)
-	var transactionRepository = postgres.NewTransactionRepository(db)
+	investmentRepository := postgres.NewInvestmentRepository(db)
+	transactionRepository := postgres.NewTransactionRepository(db)
 
-	var investmentHandler = api.NewInvestmentHandler(investmentRepository)
-	var transactionHandler = api.NewTransactionHandler(transactionRepository, investmentRepository)
+	investmentHandler := api.NewInvestmentHandler(investmentRepository)
+	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentRepository)
+	transactionHandler := api.NewTransactionHandler(transactionRepository, investmentRepository)
 
-	var handlers = api.NewHandlers(investmentHandler, transactionHandler)
-	var server = api.NewServer(handlers)
+	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler)
+	server := api.NewServer(handlers)
 
 	log.Fatal(server.Start(8888))
 }

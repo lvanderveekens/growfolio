@@ -3,12 +3,21 @@ import { Investment } from './page';
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
+import moment from 'moment';
+
+export interface CreateInvestmentUpdateRequest {
+  date: string
+  investmentId: string
+  value: number
+}
 
 type UpdateInvestmentFormProps = {
+  onAdd: () => void
   investments: Investment[]
 };
 
 const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
+  onAdd,
   investments,
 }) => {
   const [date, setDate] = useState<Date>();
@@ -18,19 +27,22 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // const req: CreateInvestmentRequest = {
-    //   type: type!,
-    //   name: name!,
-    // };
+    const req: CreateInvestmentUpdateRequest = {
+      date: moment(date).format("YYYY-MM-DD"),
+      investmentId: investment!.id,
+      value: Math.round(parseFloat(value!) * 100),
+    };
 
-    // const res = await fetch(`http://localhost:8888/v1/investments`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(req),
-    // });
+    const res = await fetch(`http://localhost:8888/v1/investment-updates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
 
-    // setType(undefined);
-    // setName(undefined);
+    setDate(undefined);
+    setInvestment(undefined);
+    setValue(undefined)
+    onAdd();
   };
 
   const handleInvestmentChange = (event: ChangeEvent<HTMLSelectElement>) => {

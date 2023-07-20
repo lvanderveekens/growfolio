@@ -30,6 +30,7 @@ func (s *Server) Start(port int) error {
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
 
+	r.GET("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
 	r.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))
 
 	r.GET("/v1/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
@@ -38,9 +39,19 @@ func (s *Server) Start(port int) error {
 	return r.Run(":" + strconv.Itoa(port))
 }
 
-func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
+type response[T any] struct {
+	Status int
+	Body   *T
+}
+
+func newResponse[T any](status int, body *T) *response[T] {
+	return &response[T]{Status: status, Body: body}
+}
+
+func createHandlerFunc[T any](f func(c *gin.Context) (*response[T], error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := f(c); err != nil {
+		response, err := f(c)
+		if err != nil {
 			if err, ok := err.(Error); ok {
 				c.JSON(err.Status, err)
 				return
@@ -50,6 +61,8 @@ func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
 			status := http.StatusInternalServerError
 			c.JSON(status, NewError(status, http.StatusText(status)))
 		}
+
+		c.JSON(response.Status, response.Body)
 	}
 }
 
@@ -59,6 +72,14 @@ type Handlers struct {
 	transaction      *TransactionHandler
 }
 
-func NewHandlers(investment *InvestmentHandler, transaction *TransactionHandler) *Handlers {
-	return &Handlers{investment: investment, transaction: transaction}
+func NewHandlers(
+	investment *InvestmentHandler,
+	investmentUpdate *InvestmentUpdateHandler,
+	transaction *TransactionHandler,
+) *Handlers {
+	return &Handlers{
+		investment:       investment,
+		investmentUpdate: investmentUpdate,
+		transaction:      transaction,
+	}
 }

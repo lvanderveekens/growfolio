@@ -17,10 +17,10 @@ func NewInvestmentHandler(investmentRepository investment.Repository) *Investmen
 	return &InvestmentHandler{investmentRepository: investmentRepository}
 }
 
-func (h *InvestmentHandler) GetInvestments(c *gin.Context) error {
+func (h *InvestmentHandler) GetInvestments(c *gin.Context) (*response[[]investmentDto], error) {
 	investments, err := h.investmentRepository.Find()
 	if err != nil {
-		return fmt.Errorf("failed to find investments: %w", err)
+		return nil, fmt.Errorf("failed to find investments: %w", err)
 	}
 
 	dtos := make([]investmentDto, 0)
@@ -28,39 +28,38 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) error {
 		dtos = append(dtos, toInvestmentDto(investment))
 	}
 
-	c.JSON(http.StatusOK, dtos)
-	return nil
+	return newResponse(http.StatusOK, &dtos), nil
 }
 
-func (h *InvestmentHandler) CreateInvestment(c *gin.Context) error {
-	var req createInvestmentRequest
+func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investmentDto], error) {
+	var req CreateInvestmentRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		return fmt.Errorf("failed to decode request body: %w", err)
+		return nil, fmt.Errorf("failed to decode request body: %w", err)
 	}
 	if err := req.validate(); err != nil {
-		return NewError(http.StatusBadRequest, err.Error())
+		return nil, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	created, err := h.investmentRepository.Create(req.toCommand())
 	if err != nil {
-		return fmt.Errorf("failed to create investment: %w", err)
+		return nil, fmt.Errorf("failed to create investment: %w", err)
 	}
 
-	c.JSON(http.StatusCreated, toInvestmentDto(*created))
-	return nil
+	dto := toInvestmentDto(*created)
+	return newResponse(http.StatusCreated, &dto), nil
 }
 
 func toInvestmentDto(i investment.Investment) investmentDto {
 	return newInvestmentDto(i.ID, i.Type, i.Name)
 }
 
-type createInvestmentRequest struct {
+type CreateInvestmentRequest struct {
 	Type investment.Type `json:"type"`
 	Name string          `json:"name"`
 }
 
-func (r *createInvestmentRequest) validate() error {
+func (r *CreateInvestmentRequest) validate() error {
 	if r.Type == "" {
 		return errors.New("field 'type' is missing")
 	}
@@ -70,7 +69,7 @@ func (r *createInvestmentRequest) validate() error {
 	return nil
 }
 
-func (r *createInvestmentRequest) toCommand() investment.CreateCommand {
+func (r *CreateInvestmentRequest) toCommand() investment.CreateCommand {
 	return investment.NewCreateCommand(r.Type, r.Name)
 }
 

@@ -65,7 +65,7 @@ func (r *InvestmentRepository) FindByID(id string) (*investment.Investment, erro
 	return entity.toDomainObject(), nil
 }
 
-func (r *InvestmentRepository) Create(cmd investment.CreateCommand) (*investment.Investment, error) {
+func (r *InvestmentRepository) Create(c investment.CreateCommand) (*investment.Investment, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -76,10 +76,57 @@ func (r *InvestmentRepository) Create(cmd investment.CreateCommand) (*investment
 		INSERT INTO investment (id, "type", "name") 
 		VALUES ($1, $2, $3)
 		RETURNING *
-	`, id, cmd.Type, cmd.Name).StructScan(&entity)
+	`, id, c.Type, c.Name).StructScan(&entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert investment: %w", err)
 	}
 
 	return entity.toDomainObject(), nil
+}
+
+type InvestmentUpdate struct {
+	ID           uuid.UUID
+	CreatedAt    time.Time `db:"created_at"`
+	UpdatedAt    time.Time `db:"updated_at"`
+	Date         time.Time
+	InvestmentID string `db:"investment_id"`
+	Value        int64
+}
+
+func (i *InvestmentUpdate) toDomainObject() *investment.Update {
+	return investment.NewUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
+}
+
+func (r *InvestmentRepository) CreateUpdate(c investment.CreateUpdateCommand) (*investment.Update, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate new UUID: %w", err)
+	}
+
+	var entity InvestmentUpdate
+	err = r.db.QueryRowx(`
+		INSERT INTO investment_update (id, investment_id, "date", "value") 
+		VALUES ($1, $2, $3, $4)
+		RETURNING *
+	`, id, c.Investment.ID, c.Date, c.Value).StructScan(&entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert investment update: %w", err)
+	}
+
+	return entity.toDomainObject(), nil
+}
+
+func (r *InvestmentRepository) FindUpdates() ([]investment.Update, error) {
+	entities := []InvestmentUpdate{}
+	err := r.db.Select(&entities, "SELECT * FROM investment_update")
+	if err != nil {
+		return nil, fmt.Errorf("failed to select investment updates: %w", err)
+	}
+
+	updates := make([]investment.Update, 0)
+	for _, entity := range entities {
+		updates = append(updates, *entity.toDomainObject())
+	}
+
+	return updates, nil
 }

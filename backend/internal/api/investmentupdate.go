@@ -17,33 +17,47 @@ func NewInvestmentUpdateHandler(investmentRepository investment.Repository) *Inv
 	return &InvestmentUpdateHandler{investmentRepository: investmentRepository}
 }
 
-func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) error {
+func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (*response[[]investmentUpdateDto], error) {
+	updates, err := h.investmentRepository.FindUpdates()
+	if err != nil {
+		return nil, fmt.Errorf("failed to find investment updates: %w", err)
+	}
+
+	dtos := make([]investmentUpdateDto, 0)
+	for _, u := range updates {
+		dtos = append(dtos, toInvestmentUpdateDto(u))
+	}
+
+	return newResponse(http.StatusOK, &dtos), nil
+}
+
+func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (*response[investmentUpdateDto], error) {
 	var r createInvestmentUpdateRequest
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		return fmt.Errorf("failed to decode request body: %w", err)
+		return nil, fmt.Errorf("failed to decode request body: %w", err)
 	}
 
 	i, err := h.investmentRepository.FindByID(r.InvestmentID)
 	if err != nil {
 		if err == investment.ErrNotFound {
-			return NewError(http.StatusBadRequest, err.Error())
+			return nil, NewError(http.StatusBadRequest, err.Error())
 		}
-		return fmt.Errorf("failed to find investment: %w", err)
+		return nil, fmt.Errorf("failed to find investment: %w", err)
 	}
 
 	cmd, err := r.toCommand(*i)
 	if err != nil {
-		return NewError(http.StatusBadRequest, err.Error())
+		return nil, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	u, err := h.investmentRepository.CreateUpdate(*cmd)
 	if err != nil {
-		return fmt.Errorf("failed to create investment update: %w", err)
+		return nil, fmt.Errorf("failed to create investment update: %w", err)
 	}
 
-	c.JSON(http.StatusCreated, toInvestmentUpdateDto(*u))
-	return nil
+	dto := toInvestmentUpdateDto(*u)
+	return newResponse(http.StatusCreated, &dto), nil
 }
 
 func toInvestmentUpdateDto(u investment.Update) investmentUpdateDto {

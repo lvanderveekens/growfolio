@@ -26,10 +26,10 @@ func NewTransactionHandler(
 	}
 }
 
-func (h *TransactionHandler) GetTransactions(c *gin.Context) error {
+func (h *TransactionHandler) GetTransactions(c *gin.Context) (*response[[]transactionDto], error) {
 	transactions, err := h.transactionRepository.Find()
 	if err != nil {
-		return fmt.Errorf("failed to find transactions: %w", err)
+		return nil, fmt.Errorf("failed to find transactions: %w", err)
 	}
 
 	dtos := make([]transactionDto, 0)
@@ -37,40 +37,39 @@ func (h *TransactionHandler) GetTransactions(c *gin.Context) error {
 		dtos = append(dtos, toTransactionDto(transaction))
 	}
 
-	c.JSON(http.StatusOK, dtos)
-	return nil
+	return newResponse(http.StatusOK, &dtos), nil
 }
 
-func (h *TransactionHandler) CreateTransaction(c *gin.Context) error {
+func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transactionDto], error) {
 	var req createTransactionRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		return NewError(http.StatusBadRequest, err.Error())
+		return nil, NewError(http.StatusBadRequest, err.Error())
 	}
 	if err := req.validate(); err != nil {
-		return NewError(http.StatusBadRequest, err.Error())
+		return nil, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	i, err := h.investmentRepository.FindByID(req.InvestmentID)
 	if err != nil {
 		if err == investment.ErrNotFound {
-			return NewError(http.StatusBadRequest, err.Error())
+			return nil, NewError(http.StatusBadRequest, err.Error())
 		}
-		return fmt.Errorf("failed to find investment: %w", err)
+		return nil, fmt.Errorf("failed to find investment: %w", err)
 	}
 
 	cmd, err := req.toCommand(*i)
 	if err != nil {
-		return NewError(http.StatusBadRequest, err.Error())
+		return nil, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	created, err := h.transactionRepository.Create(*cmd)
 	if err != nil {
-		return fmt.Errorf("failed to create transaction: %w", err)
+		return nil, fmt.Errorf("failed to create transaction: %w", err)
 	}
 
-	c.JSON(http.StatusCreated, toTransactionDto(*created))
-	return nil
+	dto := toTransactionDto(*created)
+	return newResponse(http.StatusCreated, &dto), nil
 }
 
 func toTransactionDto(t transaction.Transaction) transactionDto {

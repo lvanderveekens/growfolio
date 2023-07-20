@@ -19,9 +19,10 @@ type Update struct {
 	Value        int64
 }
 
-func NewUpdate(id, investmentID string, value int64) *Update {
+func NewUpdate(id string, date time.Time, investmentID string, value int64) *Update {
 	return &Update{
 		ID:           id,
+		Date:         date,
 		InvestmentID: investmentID,
 		Value:        value,
 	}
