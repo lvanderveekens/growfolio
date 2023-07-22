@@ -1,15 +1,81 @@
 'use client'
 
-import { Colors, ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import Link from 'next/link';
-import { Doughnut } from 'react-chartjs-2';
-import AddTransactionForm, { TransactionType } from './add-transaction-form';
-import AddInvestmentForm from './add-investment-form';
 import { useEffect, useState } from 'react';
+import AddInvestmentForm from './add-investment-form';
+import AddTransactionForm, { TransactionType } from './add-transaction-form';
 import { InvestmentType } from './investment-type';
-import UpdateInvestmentForm from './update-investment-form copy';
+import UpdateInvestmentForm from './update-investment-form';
 
-ChartJS.register(Colors, ArcElement, Tooltip, Legend);
+import {
+  Chart as ChartJS,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip
+} from 'chart.js';
+import 'chartjs-adapter-moment';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  Tooltip, 
+  Legend,
+  TimeScale, //Register timescale instead of category for X axis
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+export const options: any = {
+  plugins: {
+    title: {
+      text: "Chart.js Time Scale",
+      display: true,
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {},
+  },
+};
+
+const data = {
+  labels: [],
+  datasets: [
+    {
+      label: "Dataset with point data",
+      data: [
+        {
+          x: "2021-11-01 13:39:30",
+          y: 50,
+        },
+        {
+          x: "2021-11-03 13:39:30",
+          y: 55,
+        },
+        {
+          x: "2021-11-07 01:00:28",
+          y: 60,
+        },
+        {
+          x: "2021-11-07 09:00:28",
+          y: 20,
+        },
+      ],
+    },
+  ],
+};
 
 export interface Investment {
   id: string
@@ -71,6 +137,28 @@ export default function Home() {
     return investments.find((i) => i.id == id)
   }
 
+  function compareByDate(a: InvestmentUpdate, b: InvestmentUpdate): number {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  }
+
+  const toData = (investmentUpdates: InvestmentUpdate[]) => {
+    return {
+      labels: [],
+      datasets: [
+        {
+          label: findInvestmentById(investmentUpdates[0].investmentId)?.name,
+          data: investmentUpdates.sort(compareByDate).map((u) => ({
+              x: u.date,
+              y: u.value / 100,
+            })
+          )
+        },
+      ],
+    };
+  };
+
   return (
     <main>
       <nav className="py-4 b-4">
@@ -88,7 +176,10 @@ export default function Home() {
         <br />
         <AddInvestmentForm onAdd={fetchInvestments} />
         <br />
-        <UpdateInvestmentForm onAdd={fetchInvestmentUpdates} investments={investments} />
+        <UpdateInvestmentForm
+          onAdd={fetchInvestmentUpdates}
+          investments={investments}
+        />
         <br />
         <h1 className="text-xl font-bold mb-3">Investments</h1>
         {investments.length > 0 &&
@@ -117,6 +208,9 @@ export default function Home() {
               {investmentUpdate.value / 100}
             </div>
           ))}
+        {investmentUpdates.length > 0 && (
+            <Line options={options} data={toData(investmentUpdates)} />
+        )}
       </div>
     </main>
   );
