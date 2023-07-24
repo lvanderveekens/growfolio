@@ -32,10 +32,10 @@ ChartJS.register(
   Legend
 );
 
-export const options: any = {
+export const gainOrLossOptions: any = {
   plugins: {
     title: {
-      text: "Chart.js Time Scale",
+      text: "Gain/loss",
       display: true,
     },
   },
@@ -46,35 +46,38 @@ export const options: any = {
         unit: "day",
       },
     },
-    y: {},
+    y: {
+      ticks: {
+        callback: function(value: any, index: any, ticks: any) {
+            return '€ ' + value;
+        }
+    }
+    },
   },
 };
 
-const data = {
-  labels: [],
-  datasets: [
-    {
-      label: "Dataset with point data",
-      data: [
-        {
-          x: "2021-11-01 13:39:30",
-          y: 50,
-        },
-        {
-          x: "2021-11-03 13:39:30",
-          y: 55,
-        },
-        {
-          x: "2021-11-07 01:00:28",
-          y: 60,
-        },
-        {
-          x: "2021-11-07 09:00:28",
-          y: 20,
-        },
-      ],
+export const roiOptions: any = {
+  plugins: {
+    title: {
+      text: "ROI",
+      display: true,
     },
-  ],
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {
+      ticks: {
+        callback: function(value: any, index: any, ticks: any) {
+            return value + ' %';
+        }
+    }
+    },
+  },
 };
 
 export interface Investment {
@@ -98,16 +101,53 @@ export interface Transaction {
   amount: number
 }
 
+export interface InvestmentUpdateRow {
+  date: string
+  name: string
+  principal: number
+  value: number
+  gainOrLoss: number
+  returnOnInvestment: number
+}
+
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
   const [transactons, setTransactions] = useState<Transaction[]>([]);
+
+  const [investmentUpdateRows, setInvestmentUpdateRows] = useState<InvestmentUpdateRow[]>([]);
 
   useEffect(() => {
     fetchInvestments()
     fetchInvestmentUpdates()
     fetchTransactions()
   }, []);
+
+  useEffect(() => {
+    if (transactons && investmentUpdates) {
+      const investmentUpdateRows = investmentUpdates.map((u) => {
+        const investment = findInvestmentById(u.investmentId);
+        const principal = calculatePrincipalForDate(
+          new Date(u.date),
+          transactons
+        );
+        const gainOrLoss = u.value - principal;
+        const returnOnInvestment = gainOrLoss / principal;
+
+        return {
+          date: u.date,
+          name: investment!.name,
+          principal: principal,
+          value: u.value,
+          gainOrLoss: gainOrLoss,
+          returnOnInvestment: returnOnInvestment,
+        };
+      });
+
+      setInvestmentUpdateRows(investmentUpdateRows.sort(compareInvestmentUpdateRowByDate))
+    }
+
+  }, [transactons, investmentUpdates]);
 
   const fetchInvestments = async () => {
     fetch(`http://localhost:8888/v1/investments`)
@@ -137,27 +177,75 @@ export default function Home() {
     return investments.find((i) => i.id == id)
   }
 
-  function compareByDate(a: InvestmentUpdate, b: InvestmentUpdate): number {
+  function compareInvestmentUpdateRowByDate(a: InvestmentUpdateRow, b: InvestmentUpdateRow): number {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
     return dateA.getTime() - dateB.getTime();
   }
 
-  const toData = (investmentUpdates: InvestmentUpdate[]) => {
+  function compareTransactionByDate(a: Transaction, b: Transaction): number {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  }
+
+  const toGainOrLossData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
     return {
       labels: [],
       datasets: [
         {
-          label: findInvestmentById(investmentUpdates[0].investmentId)?.name,
-          data: investmentUpdates.sort(compareByDate).map((u) => ({
+          label: investmentUpdateRows[0].name,
+          data: investmentUpdateRows.map((u) => ({
               x: u.date,
-              y: u.value / 100,
+              y: u.gainOrLoss / 100,
             })
           )
         },
       ],
     };
   };
+
+  const toRoiData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
+    return {
+      labels: [],
+      datasets: [
+        {
+          label: investmentUpdateRows[0].name,
+          data: investmentUpdateRows.map((u) => ({
+              x: u.date,
+              y: u.returnOnInvestment * 100,
+            })
+          )
+        },
+      ],
+    };
+  };
+
+  const calculatePrincipalForDate = (date: Date, transactions: Transaction[]) => {
+    transactions.sort(compareTransactionByDate)
+
+    let sum = 0;
+    for (const transaction of transactions) {
+      const transactionDate = new Date(transaction.date);
+      if (transactionDate <= date) {
+        if (transaction.type == TransactionType.Buy) {
+          sum += transaction.amount;
+        } else {
+          sum -= transaction.amount;
+        }
+      }
+    }
+    return sum;
+  }
+
+  const formatAsEuroAmount = (amount: number) => {
+    const euroAmount = amount / 100
+    return "€ " + euroAmount.toFixed(2)
+  }
+
+  function formatAsPercentage(number: number) {
+    return (number * 100).toFixed(2) + "%";
+  }
 
   return (
     <main>
@@ -194,22 +282,52 @@ export default function Home() {
           transactons.map((transaction) => (
             <div key={transaction.id}>
               {transaction.date} {transaction.type}{" "}
-              {findInvestmentById(transaction.investmentId)?.name} €{" "}
-              {transaction.amount / 100}
+              {findInvestmentById(transaction.investmentId)?.name}{" "}
+              {formatAsEuroAmount(transaction.amount)}
             </div>
           ))}
         <br />
         <h1 className="text-xl font-bold mb-3">Investment updates</h1>
-        {investmentUpdates.length > 0 &&
-          investmentUpdates.map((investmentUpdate) => (
-            <div key={investmentUpdate.id}>
-              {investmentUpdate.date}{" "}
-              {findInvestmentById(investmentUpdate.investmentId)?.name} €{" "}
-              {investmentUpdate.value / 100}
-            </div>
-          ))}
-        {investmentUpdates.length > 0 && (
-            <Line options={options} data={toData(investmentUpdates)} />
+
+        {investmentUpdateRows.length > 0 && (
+          <table className="border px-3">
+            <tr className="border">
+              <th className="border px-3 text-left">Date</th>
+              <th className="border px-3 text-left">Name</th>
+              <th className="border px-3 text-left">Principal</th>
+              <th className="border px-3 text-left">Value</th>
+              <th className="border px-3 text-left">Gain/loss</th>
+              <th className="border px-3 text-left">ROI</th>
+            </tr>
+            {investmentUpdateRows.map((investmentUpdateRow) => {
+              return (
+                <tr className="border">
+                  <td className="border px-3">{investmentUpdateRow.date}</td>
+                  <td className="border px-3">
+                    {investmentUpdateRow.name}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(investmentUpdateRow.principal)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(investmentUpdateRow.value)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(investmentUpdateRow.gainOrLoss)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsPercentage(investmentUpdateRow.returnOnInvestment)}
+                  </td>
+                </tr>
+              );
+            })}
+          </table>
+        )}
+        {investmentUpdateRows.length > 0 && (
+          <Line options={gainOrLossOptions} data={toGainOrLossData(investmentUpdateRows)} />
+        )}
+        {investmentUpdateRows.length > 0 && (
+          <Line options={roiOptions} data={toRoiData(investmentUpdateRows)} />
         )}
       </div>
     </main>
