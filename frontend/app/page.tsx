@@ -9,6 +9,7 @@ import UpdateInvestmentForm from './update-investment-form';
 
 import {
   ArcElement,
+  ChartData,
   Chart as ChartJS,
   Legend,
   LineElement,
@@ -16,7 +17,7 @@ import {
   PointElement,
   TimeScale,
   Title,
-  Tooltip
+  Tooltip,
 } from 'chart.js';
 import 'chartjs-adapter-moment';
 import { Line, Pie } from 'react-chartjs-2';
@@ -31,7 +32,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 export const gainOrLossOptions: any = {
@@ -103,6 +104,16 @@ export interface Transaction {
   amount: number
 }
 
+export interface InvestmentRow {
+  id: string
+  name: string
+  lastUpdateDate: string
+  principal: number
+  value: number
+  gainOrLoss: number
+  roiPercentage: number
+}
+
 export interface InvestmentUpdateRow {
   id: string
   date: string
@@ -119,6 +130,7 @@ export default function Home() {
   const [transactons, setTransactions] = useState<Transaction[]>([]);
 
   const [investmentUpdateRows, setInvestmentUpdateRows] = useState<InvestmentUpdateRow[]>([]);
+  const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
 
   useEffect(() => {
     fetchInvestments()
@@ -149,6 +161,28 @@ export default function Home() {
       });
 
       setInvestmentUpdateRows(investmentUpdateRows.sort(compareInvestmentUpdateRowByDate))
+
+      const investmentRows = investments.map((i) => {
+        investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
+        const lastUpdate = investmentUpdates.findLast((u) => u.investmentId == i.id)!
+
+        const value = lastUpdate?.value ?? 0
+        const principal = getInvestmentPrincipal(i);
+        const gainOrLoss = value - principal;
+        const roiPercentage = gainOrLoss / principal;
+
+        return {
+          id: i.id,
+          name: i.name,
+          lastUpdateDate: lastUpdate?.date ?? "-",
+          principal: principal,
+          value: value,
+          gainOrLoss: gainOrLoss,
+          roiPercentage: roiPercentage,
+        } as InvestmentRow;
+      });
+
+      setInvestmentRows(investmentRows)
     }
 
   }, [transactons, investmentUpdates]);
@@ -264,27 +298,77 @@ export default function Home() {
 
   const getInvestmentValue = (investment: Investment) => {
     investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
-    console.log(investmentUpdates)
     return investmentUpdates.findLast((update) => update.investmentId == investment.id)?.value ?? 0
   }
 
   const calculateAllocationPieData = (investments: Investment[]) => {
+    // const totalValue = investments.reduce((acc, i) => acc + getInvestmentValue(i), 0)
+
     return {
       labels: investments.map((i) => i.name),
       datasets: [
         {
-          label: "%",
+          label: "Value",
+          backgroundColor: [
+            'rgb(255, 99, 132)',
+            'rgb(54, 162, 235)',
+            'rgb(255, 205, 86)',
+            'rgb(255, 86, 205)'
+          ],
           data: investments.map((i) => {
-            return getInvestmentValue(i)
+            return getInvestmentValue(i) / 100
           }),
         },
       ],
     };
   };
 
+  const calculateAllocationByTypePieData = (investments: Investment[]) => {
+    interface InvestmentTypeWithValue {
+      type: InvestmentType;
+      value: number;
+    }
+
+    const investmentTypeWithValues = investments.reduce<
+      InvestmentTypeWithValue[]
+    >((acc, obj) => {
+      const existing = acc.find((item) => item.type === obj.type);
+
+      if (existing) {
+        existing.value += getInvestmentValue(obj);
+      } else {
+        acc.push({ type: obj.type, value: getInvestmentValue(obj) });
+      }
+
+      return acc;
+    }, []);
+
+    return {
+      labels: investmentTypeWithValues.map((i) => i.type),
+      datasets: [
+        {
+          label: "Value",
+          backgroundColor: [
+            "rgb(255, 99, 132)",
+            "rgb(54, 162, 235)",
+            "rgb(255, 205, 86)",
+            "rgb(255, 86, 205)",
+          ],
+          data: investmentTypeWithValues.map((i) => i.value / 100),
+        },
+      ],
+    };
+  };
+
+
+  const totalPrincipal = investmentRows.reduce((acc, row) => acc + row.principal, 0)
+  const totalValue = investmentRows.reduce((acc, row) => acc + row.value, 0)
+  const totalGainOrLoss = totalValue - totalPrincipal;
+  const totalRoiPercentage = totalGainOrLoss / totalPrincipal;
+
   return (
     <main>
-      <nav className="mb-4 py-4 b-4 text-white bg-black">
+      <nav className="mb-8 py-4 b-4 text-white bg-black">
         <div className="container mx-auto text-xl flex justify-between align-center">
           <div className="text-4xl font-bold self-center">
             <Link href="/">growfolio</Link>
@@ -292,41 +376,76 @@ export default function Home() {
         </div>
       </nav>
       <div className="container mx-auto">
-        <div className="mb-4">
-          <h1 className="text-xl font-bold mb-3">Investments</h1>
-          <table className="w-full border px-3">
-            <tr className="border">
-              <th className="border px-3 text-left">Name</th>
-              <th className="border px-3 text-left">Principal</th>
-              <th className="border px-3 text-left">Value</th>
-              <th className="border px-3 text-left">Gain/loss</th>
-              <th className="border px-3 text-left">ROI</th>
-            </tr>
-            {investments.map((investment) => {
-              const value = getInvestmentValue(investment);
-              const principal = getInvestmentPrincipal(investment);
-              const gainOrLoss = value - principal;
-              const roi = gainOrLoss / principal;
-
-              return (
-                <tr key={investment.id} className="border">
-                  <td className="border px-3">{investment.name}</td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(principal)}
-                  </td>
-                  <td className="border px-3">{formatAsEuroAmount(value)}</td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(gainOrLoss)}
-                  </td>
-                  <td className="border px-3">{formatAsPercentage(roi)}</td>
-                </tr>
-              );
-            })}
-          </table>
+        <div className="mb-8">
+          <h1 className="text-xl font-bold mb-4">Investments</h1>
+          {investmentRows.length > 0 && (
+            <div className='overflow-x-auto'>
+              <table className="w-full whitespace-nowrap">
+                <thead>
+                  <tr className="border">
+                    <th className="border px-3 text-left">Name</th>
+                    <th className="border px-3 text-left">Principal</th>
+                    <th className="border px-3 text-left">Value</th>
+                    <th className="border px-3 text-left">Gain/loss</th>
+                    <th className="border px-3 text-left">ROI</th>
+                    <th className="border px-3 text-left">Last update</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {investmentRows.map((investmentRow) => {
+                    return (
+                      <tr key={investmentRow.id} className="border">
+                        <td className="border px-3">{investmentRow.name}</td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.principal)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.value)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.gainOrLoss)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsPercentage(investmentRow.roiPercentage)}
+                        </td>
+                        <td className="border px-3">
+                          {investmentRow.lastUpdateDate}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border">
+                    <td className="border px-3">Total</td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalPrincipal)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalValue)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalGainOrLoss)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsPercentage(totalRoiPercentage)}
+                    </td>
+                    <td className="border px-3"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
         </div>
-        <h1 className="text-xl font-bold mb-3">Allocation</h1>
-        <div className="w-[50%] aspect-square">
-          <Pie data={calculateAllocationPieData(investments)} />
+        <div className="flex">
+          <div className="w-[50%] aspect-square">
+            <h1 className="text-xl font-bold mb-4">Allocation</h1>
+            <Pie data={calculateAllocationPieData(investments)} />
+          </div>
+          <div className="w-[50%] aspect-square">
+            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
+            <Pie data={calculateAllocationByTypePieData(investments)} />
+          </div>
         </div>
 
         <br />
@@ -371,34 +490,40 @@ export default function Home() {
         <h1 className="text-xl font-bold mb-3">Investment updates</h1>
         {investmentUpdateRows.length > 0 && (
           <table className="border px-3">
-            <tr className="border">
-              <th className="border px-3 text-left">Date</th>
-              <th className="border px-3 text-left">Name</th>
-              <th className="border px-3 text-left">Principal</th>
-              <th className="border px-3 text-left">Value</th>
-              <th className="border px-3 text-left">Gain/loss</th>
-              <th className="border px-3 text-left">ROI</th>
-            </tr>
-            {investmentUpdateRows.map((investmentUpdateRow) => {
-              return (
-                <tr key={investmentUpdateRow.id} className="border">
-                  <td className="border px-3">{investmentUpdateRow.date}</td>
-                  <td className="border px-3">{investmentUpdateRow.name}</td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(investmentUpdateRow.principal)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(investmentUpdateRow.value)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(investmentUpdateRow.gainOrLoss)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsPercentage(investmentUpdateRow.returnOnInvestment)}
-                  </td>
-                </tr>
-              );
-            })}
+            <thead>
+              <tr className="border">
+                <th className="border px-3 text-left">Date</th>
+                <th className="border px-3 text-left">Name</th>
+                <th className="border px-3 text-left">Principal</th>
+                <th className="border px-3 text-left">Value</th>
+                <th className="border px-3 text-left">Gain/loss</th>
+                <th className="border px-3 text-left">ROI</th>
+              </tr>
+            </thead>
+            <tbody>
+              {investmentUpdateRows.map((investmentUpdateRow) => {
+                return (
+                  <tr key={investmentUpdateRow.id} className="border">
+                    <td className="border px-3">{investmentUpdateRow.date}</td>
+                    <td className="border px-3">{investmentUpdateRow.name}</td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(investmentUpdateRow.principal)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(investmentUpdateRow.value)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(investmentUpdateRow.gainOrLoss)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsPercentage(
+                        investmentUpdateRow.returnOnInvestment
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         )}
         {investmentUpdateRows.length > 0 && (
