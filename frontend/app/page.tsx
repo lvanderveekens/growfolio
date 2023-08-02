@@ -9,7 +9,6 @@ import UpdateInvestmentForm from './update-investment-form';
 
 import {
   ArcElement,
-  ChartData,
   Chart as ChartJS,
   Legend,
   LineElement,
@@ -17,7 +16,7 @@ import {
   PointElement,
   TimeScale,
   Title,
-  Tooltip,
+  Tooltip
 } from 'chart.js';
 import 'chartjs-adapter-moment';
 import { Line, Pie } from 'react-chartjs-2';
@@ -55,6 +54,29 @@ export const gainOrLossOptions: any = {
             return '€ ' + value;
         }
     }
+    },
+  },
+};
+
+export const valueOptions: any = {
+  plugins: {
+    legend: {
+      display: false,
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
     },
   },
 };
@@ -114,6 +136,11 @@ export interface InvestmentRow {
   roiPercentage: number
 }
 
+export interface ValueDatePair {
+  value: number
+  date: string
+}
+
 export interface InvestmentUpdateRow {
   id: string
   date: string
@@ -131,6 +158,8 @@ export default function Home() {
 
   const [investmentUpdateRows, setInvestmentUpdateRows] = useState<InvestmentUpdateRow[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
+
+  const [valueAndDatePairs, setValueAndDatePairs] = useState<ValueDatePair[]>([]);
 
   useEffect(() => {
     fetchInvestments()
@@ -161,16 +190,32 @@ export default function Home() {
       });
 
       setInvestmentUpdateRows(investmentUpdateRows.sort(compareInvestmentUpdateRowByDate))
+    }
 
+    if (investmentUpdates.length > 0) {
+      const uniqueUpdateDates = Array.from(new Set(investmentUpdates.map((update) => update.date)))
+      uniqueUpdateDates.sort()
+      console.log(uniqueUpdateDates)
+
+      const valueAndDatePairs = uniqueUpdateDates.map((date) => {
+        return {
+          date: date,
+          value: calculateValueForDate(date, investmentUpdates)
+        }
+      })
+
+      setValueAndDatePairs(valueAndDatePairs)
+    }
+
+    if (investments.length > 0) {
       const investmentRows = investments.map((i) => {
-        investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
         const lastUpdate = investmentUpdates.findLast((u) => u.investmentId == i.id)!
-
+  
         const value = lastUpdate?.value ?? 0
         const principal = getInvestmentPrincipal(i);
         const gainOrLoss = value - principal;
         const roiPercentage = gainOrLoss / principal;
-
+  
         return {
           id: i.id,
           name: i.name,
@@ -181,11 +226,11 @@ export default function Home() {
           roiPercentage: roiPercentage,
         } as InvestmentRow;
       });
-
+  
       setInvestmentRows(investmentRows)
     }
 
-  }, [transactons, investmentUpdates]);
+  }, [investments, transactons, investmentUpdates]);
 
   const fetchInvestments = async () => {
     fetch(`http://localhost:8888/v1/investments`)
@@ -198,8 +243,9 @@ export default function Home() {
   const fetchInvestmentUpdates = async () => {
     fetch(`http://localhost:8888/v1/investment-updates`)
       .then((res) => res.json())
-      .then((data) => {
-        setInvestmentUpdates(data);
+      .then((investmentUpdates: InvestmentUpdate[]) => {
+        investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
+        setInvestmentUpdates(investmentUpdates);
       });
   }
 
@@ -249,6 +295,21 @@ export default function Home() {
     };
   };
 
+  const toValueData = (valueDatePairs: ValueDatePair[]) => {
+    return {
+      datasets: [
+        {
+          borderColor: 'rgb(255, 99, 132)',
+          data: valueAndDatePairs.map((pair) => ({
+              x: pair.date,
+              y: pair.value / 100,
+            })
+          )
+        },
+      ],
+    };
+  };
+
   const toRoiData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
     return {
       labels: [],
@@ -282,6 +343,22 @@ export default function Home() {
     return sum;
   }
 
+  const calculateValueForDate = (
+    date: string,
+    investmentUpdates: InvestmentUpdate[]
+  ) => {
+    const latestValueByInvestmentId = new Map<string, number>();
+
+    for (const u of investmentUpdates) {
+      if (new Date(u.date) <= new Date(date)) {
+        latestValueByInvestmentId.set(u.investmentId, u.value);
+      }
+    }
+
+    return Array.from(latestValueByInvestmentId.values())
+      .reduce((acc, value) => acc + value, 0);
+  };
+
   const formatAsEuroAmount = (amount: number) => {
     const euroAmount = amount / 100
     return "€ " + euroAmount.toFixed(2)
@@ -297,7 +374,6 @@ export default function Home() {
   }
 
   const getInvestmentValue = (investment: Investment) => {
-    investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
     return investmentUpdates.findLast((update) => update.investmentId == investment.id)?.value ?? 0
   }
 
@@ -313,7 +389,8 @@ export default function Home() {
             'rgb(255, 99, 132)',
             'rgb(54, 162, 235)',
             'rgb(255, 205, 86)',
-            'rgb(255, 86, 205)'
+            'rgb(255, 86, 205)',
+            'rgb(87, 255, 205)'
           ],
           data: investments.map((i) => {
             return getInvestmentValue(i) / 100
@@ -377,9 +454,9 @@ export default function Home() {
       </nav>
       <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">Investments</h1>
+          <h1 className="text-xl font-bold mb-4">My investments</h1>
           {investmentRows.length > 0 && (
-            <div className='overflow-x-auto'>
+            <div className="overflow-x-auto">
               <table className="w-full whitespace-nowrap">
                 <thead>
                   <tr className="border">
@@ -415,7 +492,7 @@ export default function Home() {
                     );
                   })}
                 </tbody>
-                <tfoot>
+                <tfoot className="border-2 border-t-black">
                   <tr className="border">
                     <td className="border px-3">Total</td>
                     <td className="border px-3">
@@ -437,7 +514,7 @@ export default function Home() {
             </div>
           )}
         </div>
-        <div className="flex">
+        <div className="mb-8 flex">
           <div className="w-[50%] aspect-square">
             <h1 className="text-xl font-bold mb-4">Allocation</h1>
             <Pie data={calculateAllocationPieData(investments)} />
@@ -447,6 +524,16 @@ export default function Home() {
             <Pie data={calculateAllocationByTypePieData(investments)} />
           </div>
         </div>
+
+        {investmentUpdateRows.length > 0 && (
+          <div>
+            <h1 className="text-xl font-bold mb-4">Value</h1>
+            <Line
+              options={valueOptions}
+              data={toValueData(valueAndDatePairs)}
+            />
+          </div>
+        )}
 
         <br />
         <br />
