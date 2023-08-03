@@ -10,6 +10,7 @@ import UpdateInvestmentForm from './update-investment-form';
 import {
   ArcElement,
   Chart as ChartJS,
+  ChartOptions,
   Legend,
   LineElement,
   LinearScale,
@@ -58,11 +59,10 @@ export const gainOrLossOptions: any = {
   },
 };
 
-export const valueOptions: any = {
-  plugins: {
-    legend: {
-      display: false,
-    },
+export const principalVsValueLineOptions: any = {
+  interaction: {
+    mode: 'index',
+    intersect: false,
   },
   scales: {
     x: {
@@ -75,6 +75,67 @@ export const valueOptions: any = {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
           return "€ " + value;
+        },
+      },
+    },
+  },
+};
+
+export const returnVsRoiLineOptions: ChartOptions = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            if (context.datasetIndex == 0) {
+              label += "€ " + context.parsed.y
+            } else {
+              label += context.parsed.y + "%"
+            }
+
+
+            // label += new Intl.NumberFormat("en-US", {
+            //   style: "currency",
+            //   currency: "USD",
+            // }).format(context.parsed.y);
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {
+      position: "left",
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
+    },
+    y1: {
+      position: "right",
+      grid: {
+        drawOnChartArea: false, // only want the grid lines for one axis to show up
+      },
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return value + "%";
         },
       },
     },
@@ -132,13 +193,14 @@ export interface InvestmentRow {
   lastUpdateDate: string
   principal: number
   value: number
-  gainOrLoss: number
-  roiPercentage: number
+  return: number
+  roi: number
 }
 
-export interface ValueDatePair {
-  value: number
+export interface DateWithPrincipalAndValue {
   date: string
+  principal: number
+  value: number
 }
 
 export interface InvestmentUpdateRow {
@@ -159,7 +221,7 @@ export default function Home() {
   const [investmentUpdateRows, setInvestmentUpdateRows] = useState<InvestmentUpdateRow[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
 
-  const [valueAndDatePairs, setValueAndDatePairs] = useState<ValueDatePair[]>([]);
+  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<DateWithPrincipalAndValue[]>([]);
 
   useEffect(() => {
     fetchInvestments()
@@ -171,8 +233,8 @@ export default function Home() {
     if (investmentUpdates.length > 0) {
       const investmentUpdateRows = investmentUpdates.map((u) => {
         const investment = findInvestmentById(u.investmentId);
-        const principal = calculatePrincipalForDate(
-          new Date(u.date),
+        const principal = calculateTotalPrincipalForDate(
+          u.date,
           transactons
         );
         const gainOrLoss = u.value - principal;
@@ -195,16 +257,16 @@ export default function Home() {
     if (investmentUpdates.length > 0) {
       const uniqueUpdateDates = Array.from(new Set(investmentUpdates.map((update) => update.date)))
       uniqueUpdateDates.sort()
-      console.log(uniqueUpdateDates)
 
-      const valueAndDatePairs = uniqueUpdateDates.map((date) => {
+      const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
         return {
           date: date,
-          value: calculateValueForDate(date, investmentUpdates)
+          principal: calculateTotalPrincipalForDate(date, transactons),
+          value: calculateTotalValueForDate(date, investmentUpdates)
         }
       })
 
-      setValueAndDatePairs(valueAndDatePairs)
+      setDateWithPrincipalAndValues(dateWithPrincipalAndValues)
     }
 
     if (investments.length > 0) {
@@ -222,8 +284,8 @@ export default function Home() {
           lastUpdateDate: lastUpdate?.date ?? "-",
           principal: principal,
           value: value,
-          gainOrLoss: gainOrLoss,
-          roiPercentage: roiPercentage,
+          return: gainOrLoss,
+          roi: roiPercentage,
         } as InvestmentRow;
       });
   
@@ -252,8 +314,9 @@ export default function Home() {
   const fetchTransactions = async () => {
     fetch(`http://localhost:8888/v1/transactions`)
       .then((res) => res.json())
-      .then((data) => {
-        setTransactions(data);
+      .then((transactions) => {
+        transactions.sort(compareTransactionByDateAsc)
+        setTransactions(transactions);
       });
   }
 
@@ -273,7 +336,7 @@ export default function Home() {
     return dateA.getTime() - dateB.getTime();
   }
 
-  function compareTransactionByDate(a: Transaction, b: Transaction): number {
+  function compareTransactionByDateAsc(a: Transaction, b: Transaction): number {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
     return dateA.getTime() - dateB.getTime();
@@ -295,16 +358,53 @@ export default function Home() {
     };
   };
 
-  const toValueData = (valueDatePairs: ValueDatePair[]) => {
+  const toPrincipalVsValueLineData = (dateAndPrincipalAndValue: DateWithPrincipalAndValue[]) => {
     return {
       datasets: [
         {
-          borderColor: 'rgb(255, 99, 132)',
-          data: valueAndDatePairs.map((pair) => ({
-              x: pair.date,
-              y: pair.value / 100,
-            })
-          )
+          label: "Principal",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: x.principal / 100,
+          })),
+        },
+        {
+          label: "Value",
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgb(54, 162, 235)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: x.value / 100,
+          })),
+        },
+      ],
+    };
+  };
+
+  const toReturnVsRoiLineData = (dateAndPrincipalAndValue: DateWithPrincipalAndValue[]) => {
+    return {
+      datasets: [
+        {
+          label: "Return",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: (x.value - x.principal) / 100,
+          })),
+          yAxisID: "y",
+        },
+        {
+          label: "ROI",
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgb(54, 162, 235)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
+          })),
+          yAxisID: "y1",
         },
       ],
     };
@@ -326,33 +426,33 @@ export default function Home() {
     };
   };
 
-  const calculatePrincipalForDate = (date: Date, transactions: Transaction[]) => {
-    transactions.sort(compareTransactionByDate)
-
+  const calculateTotalPrincipalForDate = (date: string, transactions: Transaction[]) => {
     let sum = 0;
+
     for (const transaction of transactions) {
-      const transactionDate = new Date(transaction.date);
-      if (transactionDate <= date) {
-        if (transaction.type == TransactionType.Buy) {
-          sum += transaction.amount;
-        } else {
-          sum -= transaction.amount;
-        }
+      if (new Date(transaction.date) > new Date(date)) {
+        break;
+      }
+      if (transaction.type == TransactionType.Buy) {
+        sum += transaction.amount;
+      } else {
+        sum -= transaction.amount;
       }
     }
     return sum;
   }
 
-  const calculateValueForDate = (
+  const calculateTotalValueForDate = (
     date: string,
     investmentUpdates: InvestmentUpdate[]
   ) => {
     const latestValueByInvestmentId = new Map<string, number>();
 
     for (const u of investmentUpdates) {
-      if (new Date(u.date) <= new Date(date)) {
-        latestValueByInvestmentId.set(u.investmentId, u.value);
+      if (new Date(u.date) > new Date(date)) {
+        break
       }
+      latestValueByInvestmentId.set(u.investmentId, u.value);
     }
 
     return Array.from(latestValueByInvestmentId.values())
@@ -440,8 +540,8 @@ export default function Home() {
 
   const totalPrincipal = investmentRows.reduce((acc, row) => acc + row.principal, 0)
   const totalValue = investmentRows.reduce((acc, row) => acc + row.value, 0)
-  const totalGainOrLoss = totalValue - totalPrincipal;
-  const totalRoiPercentage = totalGainOrLoss / totalPrincipal;
+  const totalReturn = totalValue - totalPrincipal;
+  const totalRoi = totalReturn / totalPrincipal;
 
   return (
     <main>
@@ -463,7 +563,7 @@ export default function Home() {
                     <th className="border px-3 text-left">Name</th>
                     <th className="border px-3 text-left">Principal</th>
                     <th className="border px-3 text-left">Value</th>
-                    <th className="border px-3 text-left">Gain/loss</th>
+                    <th className="border px-3 text-left">Return</th>
                     <th className="border px-3 text-left">ROI</th>
                     <th className="border px-3 text-left">Last update</th>
                   </tr>
@@ -480,10 +580,10 @@ export default function Home() {
                           {formatAsEuroAmount(investmentRow.value)}
                         </td>
                         <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.gainOrLoss)}
+                          {formatAsEuroAmount(investmentRow.return)}
                         </td>
                         <td className="border px-3">
-                          {formatAsPercentage(investmentRow.roiPercentage)}
+                          {formatAsPercentage(investmentRow.roi)}
                         </td>
                         <td className="border px-3">
                           {investmentRow.lastUpdateDate}
@@ -502,10 +602,10 @@ export default function Home() {
                       {formatAsEuroAmount(totalValue)}
                     </td>
                     <td className="border px-3">
-                      {formatAsEuroAmount(totalGainOrLoss)}
+                      {formatAsEuroAmount(totalReturn)}
                     </td>
                     <td className="border px-3">
-                      {formatAsPercentage(totalRoiPercentage)}
+                      {formatAsPercentage(totalRoi)}
                     </td>
                     <td className="border px-3"></td>
                   </tr>
@@ -526,11 +626,21 @@ export default function Home() {
         </div>
 
         {investmentUpdateRows.length > 0 && (
-          <div>
-            <h1 className="text-xl font-bold mb-4">Value</h1>
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
             <Line
-              options={valueOptions}
-              data={toValueData(valueAndDatePairs)}
+              options={principalVsValueLineOptions}
+              data={toPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+            />
+          </div>
+        )}
+
+        {investmentUpdateRows.length > 0 && (
+          <div>
+            <h1 className="text-xl font-bold mb-4">Return vs. ROI</h1>
+            <Line
+              options={returnVsRoiLineOptions}
+              data={toReturnVsRoiLineData(dateWithPrincipalAndValues)}
             />
           </div>
         )}
