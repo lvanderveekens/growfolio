@@ -1,14 +1,15 @@
-'use client'
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import AddInvestmentForm from './add-investment-form';
-import AddTransactionForm, { TransactionType } from './add-transaction-form';
-import { InvestmentType } from './investment-type';
-import UpdateInvestmentForm from './update-investment-form';
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import AddInvestmentForm from "./add-investment-form";
+import AddTransactionForm, { TransactionType } from "./add-transaction-form";
+import { InvestmentType } from "./investment-type";
+import UpdateInvestmentForm from "./update-investment-form";
 
 import {
   ArcElement,
+  ChartData,
   Chart as ChartJS,
   ChartOptions,
   Legend,
@@ -17,14 +18,16 @@ import {
   PointElement,
   TimeScale,
   Title,
-  Tooltip
-} from 'chart.js';
-import 'chartjs-adapter-moment';
-import { Line, Pie } from 'react-chartjs-2';
+  Tooltip,
+  TooltipItem,
+} from "chart.js";
+import "chartjs-adapter-moment";
+import { Line, Pie } from "react-chartjs-2";
+import { _capitalize } from "chart.js/dist/helpers/helpers.core";
 
 ChartJS.register(
   ArcElement,
-  Tooltip, 
+  Tooltip,
   Legend,
   TimeScale, //Register timescale instead of category for X axis
   LinearScale,
@@ -32,7 +35,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 );
 
 export const gainOrLossOptions: any = {
@@ -51,17 +54,17 @@ export const gainOrLossOptions: any = {
     },
     y: {
       ticks: {
-        callback: function(value: any, index: any, ticks: any) {
-            return '€ ' + value;
-        }
-    }
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
     },
   },
 };
 
 export const principalVsValueLineOptions: any = {
   interaction: {
-    mode: 'index',
+    mode: "index",
     intersect: false,
   },
   scales: {
@@ -96,11 +99,10 @@ export const returnVsRoiLineOptions: ChartOptions = {
           }
           if (context.parsed.y !== null) {
             if (context.datasetIndex == 0) {
-              label += "€ " + context.parsed.y
+              label += "€ " + context.parsed.y;
             } else {
-              label += context.parsed.y + "%"
+              label += context.parsed.y + "%";
             }
-
 
             // label += new Intl.NumberFormat("en-US", {
             //   style: "currency",
@@ -158,85 +160,88 @@ export const roiOptions: any = {
     },
     y: {
       ticks: {
-        callback: function(value: any, index: any, ticks: any) {
-            return value + ' %';
-        }
-    }
+        callback: function (value: any, index: any, ticks: any) {
+          return value + " %";
+        },
+      },
     },
   },
 };
 
 export interface Investment {
-  id: string
-  type: InvestmentType
-  name: string
+  id: string;
+  type: InvestmentType;
+  name: string;
 }
 
 export interface InvestmentUpdate {
-  id: string
-  date: string
-  investmentId: string
-  value: number
+  id: string;
+  date: string;
+  investmentId: string;
+  value: number;
 }
 
 export interface Transaction {
-  id: string
-  date: string
-  type: TransactionType
-  investmentId: string
-  amount: number
+  id: string;
+  date: string;
+  type: TransactionType;
+  investmentId: string;
+  amount: number;
 }
 
 export interface InvestmentRow {
-  id: string
-  name: string
-  lastUpdateDate: string
-  principal: number
-  value: number
-  return: number
-  roi: number
+  id: string;
+  name: string;
+  lastUpdateDate: string;
+  principal: number;
+  value: number;
+  return: number;
+  roi: number;
 }
 
 export interface DateWithPrincipalAndValue {
-  date: string
-  principal: number
-  value: number
+  date: string;
+  principal: number;
+  value: number;
 }
 
 export interface InvestmentUpdateRow {
-  id: string
-  date: string
-  name: string
-  principal: number
-  value: number
-  gainOrLoss: number
-  returnOnInvestment: number
+  id: string;
+  date: string;
+  name: string;
+  principal: number;
+  value: number;
+  gainOrLoss: number;
+  returnOnInvestment: number;
 }
 
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
+  const [investmentUpdates, setInvestmentUpdates] = useState<
+    InvestmentUpdate[]
+  >([]);
   const [transactons, setTransactions] = useState<Transaction[]>([]);
 
-  const [investmentUpdateRows, setInvestmentUpdateRows] = useState<InvestmentUpdateRow[]>([]);
+  const [investmentUpdateRows, setInvestmentUpdateRows] = useState<
+    InvestmentUpdateRow[]
+  >([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
 
-  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<DateWithPrincipalAndValue[]>([]);
+  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<
+    DateWithPrincipalAndValue[]
+  >([]);
 
   useEffect(() => {
-    fetchInvestments()
-    fetchInvestmentUpdates()
-    fetchTransactions()
+    fetchInvestments();
+    fetchInvestmentUpdates();
+    fetchTransactions();
   }, []);
 
   useEffect(() => {
     if (investmentUpdates.length > 0) {
       const investmentUpdateRows = investmentUpdates.map((u) => {
         const investment = findInvestmentById(u.investmentId);
-        const principal = calculateTotalPrincipalForDate(
-          u.date,
-          transactons
-        );
+        const principal = calculateTotalPrincipalForDate(u.date, transactons);
         const gainOrLoss = u.value - principal;
         const returnOnInvestment = gainOrLoss / principal;
 
@@ -251,33 +256,39 @@ export default function Home() {
         };
       });
 
-      setInvestmentUpdateRows(investmentUpdateRows.sort(compareInvestmentUpdateRowByDate))
+      setInvestmentUpdateRows(
+        investmentUpdateRows.sort(compareInvestmentUpdateRowByDate)
+      );
     }
 
     if (investmentUpdates.length > 0) {
-      const uniqueUpdateDates = Array.from(new Set(investmentUpdates.map((update) => update.date)))
-      uniqueUpdateDates.sort()
+      const uniqueUpdateDates = Array.from(
+        new Set(investmentUpdates.map((update) => update.date))
+      );
+      uniqueUpdateDates.sort();
 
       const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
         return {
           date: date,
           principal: calculateTotalPrincipalForDate(date, transactons),
-          value: calculateTotalValueForDate(date, investmentUpdates)
-        }
-      })
+          value: calculateTotalValueForDate(date, investmentUpdates),
+        };
+      });
 
-      setDateWithPrincipalAndValues(dateWithPrincipalAndValues)
+      setDateWithPrincipalAndValues(dateWithPrincipalAndValues);
     }
 
     if (investments.length > 0) {
       const investmentRows = investments.map((i) => {
-        const lastUpdate = investmentUpdates.findLast((u) => u.investmentId == i.id)!
-  
-        const value = lastUpdate?.value ?? 0
+        const lastUpdate = investmentUpdates.findLast(
+          (u) => u.investmentId == i.id
+        )!;
+
+        const value = lastUpdate?.value ?? 0;
         const principal = getInvestmentPrincipal(i);
         const gainOrLoss = value - principal;
         const roiPercentage = gainOrLoss / principal;
-  
+
         return {
           id: i.id,
           name: i.name,
@@ -288,10 +299,9 @@ export default function Home() {
           roi: roiPercentage,
         } as InvestmentRow;
       });
-  
-      setInvestmentRows(investmentRows)
-    }
 
+      setInvestmentRows(investmentRows);
+    }
   }, [investments, transactons, investmentUpdates]);
 
   const fetchInvestments = async () => {
@@ -300,37 +310,43 @@ export default function Home() {
       .then((data) => {
         setInvestments(data);
       });
-  }
+  };
 
   const fetchInvestmentUpdates = async () => {
     fetch(`http://localhost:8888/v1/investment-updates`)
       .then((res) => res.json())
       .then((investmentUpdates: InvestmentUpdate[]) => {
-        investmentUpdates.sort(compareInvestmentUpdateByDateAsc)
+        investmentUpdates.sort(compareInvestmentUpdateByDateAsc);
         setInvestmentUpdates(investmentUpdates);
       });
-  }
+  };
 
   const fetchTransactions = async () => {
     fetch(`http://localhost:8888/v1/transactions`)
       .then((res) => res.json())
       .then((transactions) => {
-        transactions.sort(compareTransactionByDateAsc)
+        transactions.sort(compareTransactionByDateAsc);
         setTransactions(transactions);
       });
-  }
+  };
 
   const findInvestmentById = (id: string) => {
-    return investments.find((i) => i.id == id)
-  }
+    return investments.find((i) => i.id == id);
+  };
 
-  function compareInvestmentUpdateRowByDate(a: InvestmentUpdateRow, b: InvestmentUpdateRow): number {
+  function compareInvestmentUpdateRowByDate(
+    a: InvestmentUpdateRow,
+    b: InvestmentUpdateRow
+  ): number {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
     return dateA.getTime() - dateB.getTime();
   }
 
-  function compareInvestmentUpdateByDateAsc(a: InvestmentUpdate, b: InvestmentUpdate): number {
+  function compareInvestmentUpdateByDateAsc(
+    a: InvestmentUpdate,
+    b: InvestmentUpdate
+  ): number {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
     return dateA.getTime() - dateB.getTime();
@@ -349,16 +365,17 @@ export default function Home() {
         {
           label: investmentUpdateRows[0].name,
           data: investmentUpdateRows.map((u) => ({
-              x: u.date,
-              y: u.gainOrLoss / 100,
-            })
-          )
+            x: u.date,
+            y: u.gainOrLoss / 100,
+          })),
         },
       ],
     };
   };
 
-  const toPrincipalVsValueLineData = (dateAndPrincipalAndValue: DateWithPrincipalAndValue[]) => {
+  const toPrincipalVsValueLineData = (
+    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+  ) => {
     return {
       datasets: [
         {
@@ -383,7 +400,9 @@ export default function Home() {
     };
   };
 
-  const toReturnVsRoiLineData = (dateAndPrincipalAndValue: DateWithPrincipalAndValue[]) => {
+  const toReturnVsRoiLineData = (
+    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+  ) => {
     return {
       datasets: [
         {
@@ -417,16 +436,18 @@ export default function Home() {
         {
           label: investmentUpdateRows[0].name,
           data: investmentUpdateRows.map((u) => ({
-              x: u.date,
-              y: u.returnOnInvestment * 100,
-            })
-          )
+            x: u.date,
+            y: u.returnOnInvestment * 100,
+          })),
         },
       ],
     };
   };
 
-  const calculateTotalPrincipalForDate = (date: string, transactions: Transaction[]) => {
+  const calculateTotalPrincipalForDate = (
+    date: string,
+    transactions: Transaction[]
+  ) => {
     let sum = 0;
 
     for (const transaction of transactions) {
@@ -440,7 +461,7 @@ export default function Home() {
       }
     }
     return sum;
-  }
+  };
 
   const calculateTotalValueForDate = (
     date: string,
@@ -450,55 +471,107 @@ export default function Home() {
 
     for (const u of investmentUpdates) {
       if (new Date(u.date) > new Date(date)) {
-        break
+        break;
       }
       latestValueByInvestmentId.set(u.investmentId, u.value);
     }
 
-    return Array.from(latestValueByInvestmentId.values())
-      .reduce((acc, value) => acc + value, 0);
+    return Array.from(latestValueByInvestmentId.values()).reduce(
+      (acc, value) => acc + value,
+      0
+    );
   };
 
   const formatAsEuroAmount = (amount: number) => {
-    const euroAmount = amount / 100
-    return "€ " + euroAmount.toFixed(2)
-  }
+    const euroAmount = amount / 100;
+    return "€ " + euroAmount.toFixed(2);
+  };
 
   function formatAsPercentage(number: number) {
     return (number * 100).toFixed(2) + "%";
   }
 
   const getInvestmentPrincipal = (investment: Investment) => {
-    const investmentTransactions = transactons.filter((transaction) => transaction.investmentId == investment.id)
+    const investmentTransactions = transactons.filter(
+      (transaction) => transaction.investmentId == investment.id
+    );
     return investmentTransactions.reduce((acc, tx) => acc + tx.amount, 0);
-  }
+  };
 
-  const getInvestmentValue = (investment: Investment) => {
-    return investmentUpdates.findLast((update) => update.investmentId == investment.id)?.value ?? 0
-  }
+  const getLatestInvestmentValue = (investment: Investment) => {
+    return (
+      investmentUpdates.findLast(
+        (update) => update.investmentId == investment.id
+      )?.value ?? 0
+    );
+  };
+
+  const getTotalInvestmentValue = (investmentRows: InvestmentRow[]) => {
+    return investmentRows.reduce((acc, row) => acc + row.value, 0);
+  };
+
+  const allocationPieOptions: ChartOptions = {
+    plugins: {
+      tooltip: {
+        enabled: true,
+        usePointStyle: true,
+        callbacks: {
+          label: function (context: TooltipItem<"pie">) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            
+            const legendItems = context.chart.legend.legendItems
+            const totalVisibleValue = legendItems.reduce((acc, legendItem, index) => {
+              if (legendItem.hidden == false) {
+                return acc + context.dataset.data[index];
+              } else {
+                return acc;
+              }
+            }, 0);
+
+
+            console.log(totalVisibleValue)
+
+            if (context.parsed !== null) {
+              const valueString = formatAsEuroAmount(context.parsed);
+              const totalValuePercentage = formatAsPercentage(
+                context.parsed / totalVisibleValue
+              );
+              label += `${valueString} (${totalValuePercentage})`;
+            }
+            return label;
+          },
+        },
+      },
+    },
+  };
 
   const calculateAllocationPieData = (investments: Investment[]) => {
-    // const totalValue = investments.reduce((acc, i) => acc + getInvestmentValue(i), 0)
-
     return {
       labels: investments.map((i) => i.name),
       datasets: [
         {
           label: "Value",
           backgroundColor: [
-            'rgb(255, 99, 132)',
-            'rgb(54, 162, 235)',
-            'rgb(255, 205, 86)',
-            'rgb(255, 86, 205)',
-            'rgb(87, 255, 205)'
+            "rgb(255, 99, 132)",
+            "rgb(54, 162, 235)",
+            "rgb(255, 205, 86)",
+            "rgb(255, 86, 205)",
+            "rgb(87, 255, 205)",
           ],
           data: investments.map((i) => {
-            return getInvestmentValue(i) / 100
-          }),
+            return getLatestInvestmentValue(i)
+          }) ,
         },
       ],
-    };
+    } as ChartData<"pie">;
   };
+
+  function capitalize(input: string): string {
+    return input.charAt(0).toUpperCase() + input.slice(1);
+  }
 
   const calculateAllocationByTypePieData = (investments: Investment[]) => {
     interface InvestmentTypeWithValue {
@@ -508,20 +581,20 @@ export default function Home() {
 
     const investmentTypeWithValues = investments.reduce<
       InvestmentTypeWithValue[]
-    >((acc, obj) => {
-      const existing = acc.find((item) => item.type === obj.type);
+    >((acc, i) => {
+      const existing = acc.find((item) => item.type === i.type);
 
       if (existing) {
-        existing.value += getInvestmentValue(obj);
+        existing.value += getLatestInvestmentValue(i);
       } else {
-        acc.push({ type: obj.type, value: getInvestmentValue(obj) });
+        acc.push({ type: i.type, value: getLatestInvestmentValue(i) });
       }
 
       return acc;
     }, []);
 
     return {
-      labels: investmentTypeWithValues.map((i) => i.type),
+      labels: investmentTypeWithValues.map((i) => capitalize(i.type)),
       datasets: [
         {
           label: "Value",
@@ -531,15 +604,19 @@ export default function Home() {
             "rgb(255, 205, 86)",
             "rgb(255, 86, 205)",
           ],
-          data: investmentTypeWithValues.map((i) => i.value / 100),
+          data: investmentTypeWithValues.map((i) => {
+            return i.value;
+          }) 
         },
       ],
     };
   };
 
-
-  const totalPrincipal = investmentRows.reduce((acc, row) => acc + row.principal, 0)
-  const totalValue = investmentRows.reduce((acc, row) => acc + row.value, 0)
+  const totalPrincipal = investmentRows.reduce(
+    (acc, row) => acc + row.principal,
+    0
+  );
+  const totalValue = investmentRows.reduce((acc, row) => acc + row.value, 0);
   const totalReturn = totalValue - totalPrincipal;
   const totalRoi = totalReturn / totalPrincipal;
 
@@ -571,7 +648,7 @@ export default function Home() {
                 <tbody>
                   {investmentRows.map((investmentRow) => {
                     return (
-                      <tr key={investmentRow.id} className="border">
+                      <tr key={investmentRow.id} className="border cursor-pointer hover:bg-red-500">
                         <td className="border px-3">{investmentRow.name}</td>
                         <td className="border px-3">
                           {formatAsEuroAmount(investmentRow.principal)}
@@ -617,11 +694,11 @@ export default function Home() {
         <div className="mb-8 flex">
           <div className="w-[50%] aspect-square">
             <h1 className="text-xl font-bold mb-4">Allocation</h1>
-            <Pie data={calculateAllocationPieData(investments)} />
+            <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
           </div>
           <div className="w-[50%] aspect-square">
             <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-            <Pie data={calculateAllocationByTypePieData(investments)} />
+            <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
           </div>
         </div>
 
