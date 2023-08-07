@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"growfolio/internal/investment"
+	"growfolio/investment"
 	"net/http"
 	"time"
 

@@ -1,6 +1,6 @@
 package transaction
 
 type Repository interface {
-	Find() ([]Transaction, error)
+	Find(investmentId *string) ([]Transaction, error)
 	Create(command CreateCommand) (*Transaction, error)
 }

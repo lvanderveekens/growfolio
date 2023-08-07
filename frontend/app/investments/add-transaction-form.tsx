@@ -1,21 +1,17 @@
 import { ChangeEvent, useState } from 'react';
-import { Investment } from './page';
 import DatePicker from "react-datepicker";
 
-import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
+import "react-datepicker/dist/react-datepicker.css";
+import { Investment } from '../page';
+import { TransactionType } from './transaction';
 
-
-export enum TransactionType {
-  Buy = "buy",
-  Sell = "sell",
-}
 
 export interface CreateTransactionRequest {
-  date: string
-  type: TransactionType
-  investmentId: string
-  amount: number
+  date: string;
+  type: TransactionType;
+  investmentId: string;
+  amount: number;
 }
 
 type AddTransactionFormProps = {

@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"fmt"
-	"growfolio/internal/transaction"
+	"growfolio/transaction"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,10 +31,16 @@ func NewTransactionRepository(db *sqlx.DB) *TransactionRepository {
 	return &TransactionRepository{db: db}
 }
 
-func (r *TransactionRepository) Find() ([]transaction.Transaction, error) {
-	entities := []Transaction{}
-	err := r.db.Select(&entities, "SELECT * FROM transaction")
+func (r *TransactionRepository) Find(investmentId *string) ([]transaction.Transaction, error) {
+	query := "SELECT * FROM transaction"
+	args := make([]any, 0)
+	if investmentId != nil {
+		query += " WHERE investment_id = $1"
+		args = append(args, *investmentId)
+	}
 
+	entities := []Transaction{}
+	err := r.db.Select(&entities, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select transactions: %w", err)
 	}

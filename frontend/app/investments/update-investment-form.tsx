@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import { Investment } from './page';
+import { Investment } from '../page';
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";

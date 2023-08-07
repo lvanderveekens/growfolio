@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { InvestmentType } from './investment-type';
+import { InvestmentType } from '../investment-type';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;

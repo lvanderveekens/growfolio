@@ -3,8 +3,8 @@ package api
 import (
 	"errors"
 	"fmt"
-	"growfolio/internal/investment"
-	"growfolio/internal/transaction"
+	"growfolio/investment"
+	"growfolio/transaction"
 	"net/http"
 	"time"
 
@@ -27,7 +27,9 @@ func NewTransactionHandler(
 }
 
 func (h *TransactionHandler) GetTransactions(c *gin.Context) (*response[[]transactionDto], error) {
-	transactions, err := h.transactionRepository.Find()
+	investmentId := stringOrNil(c.Query("investmentId"))
+
+	transactions, err := h.transactionRepository.Find(investmentId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find transactions: %w", err)
 	}
@@ -38,6 +40,13 @@ func (h *TransactionHandler) GetTransactions(c *gin.Context) (*response[[]transa
 	}
 
 	return newResponse(http.StatusOK, &dtos), nil
+}
+
+func stringOrNil(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
 
 func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transactionDto], error) {

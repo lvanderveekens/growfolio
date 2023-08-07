@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"growfolio/internal/investment"
+	"growfolio/investment"
 	"time"
 
 	"github.com/google/uuid"

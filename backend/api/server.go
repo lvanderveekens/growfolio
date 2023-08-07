@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
 )
 
 type Server struct {
@@ -21,21 +20,7 @@ func NewServer(handlers *Handlers) *Server {
 
 func (s *Server) Start(port int) error {
 	r := gin.Default()
-
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000", "http://lucianos-macbook-pro.local:3000"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	}))
-
-	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
-	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
-
-	r.GET("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
-	r.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))
-
-	r.GET("/v1/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
-	r.POST("/v1/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
-
+	s.RegisterRoutes(r)
 	return r.Run(":" + strconv.Itoa(port))
 }
 

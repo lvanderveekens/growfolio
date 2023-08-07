@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"growfolio/internal/api"
-	"growfolio/internal/database/postgres"
+	"growfolio/api"
+	"growfolio/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -42,7 +42,7 @@ func main() {
 
 	fmt.Println("Database connection successful!")
 
-	m, err := migrate.New("file://migrations", postgresConnString)
+	m, err := migrate.New("file://postgres/migrations", postgresConnString)
 	if err != nil {
 		log.Fatal("Failed to create Migrate instance: ", err)
 	}

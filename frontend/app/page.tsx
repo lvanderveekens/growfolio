@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import AddInvestmentForm from "./add-investment-form";
-import AddTransactionForm, { TransactionType } from "./add-transaction-form";
+import AddInvestmentForm from "./investments/add-investment-form";
 import { InvestmentType } from "./investment-type";
-import UpdateInvestmentForm from "./update-investment-form";
+import { TransactionType } from "./investments/transaction";
+import UpdateInvestmentForm from "./investments/update-investment-form";
 
 import {
   ArcElement,
@@ -24,6 +24,9 @@ import {
 import "chartjs-adapter-moment";
 import { Line, Pie } from "react-chartjs-2";
 import { _capitalize } from "chart.js/dist/helpers/helpers.core";
+import { useRouter } from "next/navigation";
+import { Transaction } from "./investments/transaction";
+import AddTransactionForm from "./investments/add-transaction-form";
 
 ChartJS.register(
   ArcElement,
@@ -181,14 +184,6 @@ export interface InvestmentUpdate {
   value: number;
 }
 
-export interface Transaction {
-  id: string;
-  date: string;
-  type: TransactionType;
-  investmentId: string;
-  amount: number;
-}
-
 export interface InvestmentRow {
   id: string;
   name: string;
@@ -215,7 +210,7 @@ export interface InvestmentUpdateRow {
   returnOnInvestment: number;
 }
 
-export default function Home() {
+export default function HomePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentUpdates, setInvestmentUpdates] = useState<
     InvestmentUpdate[]
@@ -230,6 +225,8 @@ export default function Home() {
   const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<
     DateWithPrincipalAndValue[]
   >([]);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetchInvestments();
@@ -622,16 +619,9 @@ export default function Home() {
 
   return (
     <main>
-      <nav className="mb-8 py-4 b-4 text-white bg-black">
-        <div className="container mx-auto text-xl flex justify-between align-center">
-          <div className="text-4xl font-bold self-center">
-            <Link href="/">growfolio</Link>
-          </div>
-        </div>
-      </nav>
       <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">My investments</h1>
+          <h1 className="text-2xl font-bold mb-4">My investments</h1>
           {investmentRows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full whitespace-nowrap">
@@ -648,7 +638,11 @@ export default function Home() {
                 <tbody>
                   {investmentRows.map((investmentRow) => {
                     return (
-                      <tr key={investmentRow.id} className="border cursor-pointer hover:bg-red-500">
+                      <tr
+                        key={investmentRow.id}
+                        className="border cursor-pointer hover:bg-slate-100"
+                        onClick={() => router.push(`/investments/${investmentRow.id}`)}
+                      >
                         <td className="border px-3">{investmentRow.name}</td>
                         <td className="border px-3">
                           {formatAsEuroAmount(investmentRow.principal)}
@@ -693,18 +687,18 @@ export default function Home() {
         </div>
         <div className="mb-8 flex">
           <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation</h1>
+            <h1 className="text-2xl font-bold mb-4">Allocation</h1>
             <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
           </div>
           <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
+            <h1 className="text-2xl font-bold mb-4">Allocation by type</h1>
             <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
           </div>
         </div>
 
         {investmentUpdateRows.length > 0 && (
           <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+            <h1 className="text-2xl font-bold mb-4">Principal vs. Value</h1>
             <Line
               options={principalVsValueLineOptions}
               data={toPrincipalVsValueLineData(dateWithPrincipalAndValues)}
@@ -714,7 +708,7 @@ export default function Home() {
 
         {investmentUpdateRows.length > 0 && (
           <div>
-            <h1 className="text-xl font-bold mb-4">Return vs. ROI</h1>
+            <h1 className="text-2xl font-bold mb-4">Return vs. ROI</h1>
             <Line
               options={returnVsRoiLineOptions}
               data={toReturnVsRoiLineData(dateWithPrincipalAndValues)}

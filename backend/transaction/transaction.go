@@ -3,7 +3,7 @@ package transaction
 import (
 	"encoding/json"
 	"fmt"
-	"growfolio/internal/investment"
+	"growfolio/investment"
 	"time"
 )
 

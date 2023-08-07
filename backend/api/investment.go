@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
-	"growfolio/internal/investment"
+	"growfolio/investment"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +29,20 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) (*response[[]investme
 	}
 
 	return newResponse(http.StatusOK, &dtos), nil
+}
+
+func (h *InvestmentHandler) GetInvestment(c *gin.Context) (*response[investmentDto], error) {
+	id := c.Param("id")
+	i, err := h.investmentRepository.FindByID(id)
+	if err != nil {
+		if err == investment.ErrNotFound {
+			return nil, NewError(http.StatusBadRequest, err.Error())
+		}
+		return nil, fmt.Errorf("failed to find investment by id %s: %w", id, err)
+	}
+
+	dto := toInvestmentDto(*i)
+	return newResponse(http.StatusOK, &dto), nil
 }
 
 func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investmentDto], error) {
