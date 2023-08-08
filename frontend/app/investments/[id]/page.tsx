@@ -1,8 +1,39 @@
 "use client"
 
-import { Investment } from "@/app/page";
+import { Investment, InvestmentUpdate } from "@/app/page";
 import { Transaction } from "@/app/investments/transaction";
 import { useEffect, useState } from "react";
+import { capitalize, formatAsEuroAmount } from "@/app/string";
+import {
+  ArcElement,
+  ChartData,
+  Chart as ChartJS,
+  ChartOptions,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip,
+  TooltipItem,
+} from "chart.js";
+import "chartjs-adapter-moment";
+import { Line, Pie } from "react-chartjs-2";
+import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "@/app/calculator";
+
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  TimeScale, //Register timescale instead of category for X axis
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -10,11 +41,34 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string>()
 
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
+
+  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<DateWithPrincipalAndValue[]>([])
 
   useEffect(() => {
     fetchInvestment()
     fetchTransactions()
+    fetchUpdates()
   }, []);
+
+  useEffect(() => {
+    if (transactions.length > 0 && updates.length > 0) {
+      const uniqueUpdateDates = Array.from(
+        new Set(updates.map((update) => update.date))
+      );
+      uniqueUpdateDates.sort()
+
+      const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
+        return {
+          date: date,
+          principal: calculateTotalPrincipalForDate(date, transactions),
+          value: calculateTotalValueForDate(date, updates),
+        };
+      });
+
+      setDateWithPrincipalAndValues(dateWithPrincipalAndValues);
+    }
+  }, [transactions, updates]);
 
   const fetchInvestment = () => {
     fetch(`http://localhost:8888/v1/investments/${params.id}`)
@@ -33,6 +87,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       .then((data) => setTransactions(data));
   }
 
+  const fetchUpdates = () => {
+    fetch(`http://localhost:8888/v1/investment-updates?investmentId=${params.id}`)
+      .then((res) => res.json())
+      .then((data) => setUpdates(data));
+  }
+
   return (
     <div className="container mx-auto">
       {loading && <p>Loading...</p>}
@@ -44,17 +104,283 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-4">Transactions</h1>
+            <h1 className="text-xl font-bold mb-4">Transactions</h1>
             {transactions.length > 0 && (
-              <div>{JSON.stringify(transactions)}</div>
+              <div className="overflow-x-auto">
+                <table className="whitespace-nowrap">
+                  <thead>
+                    <tr className="border">
+                      <th className="border px-3 text-left">Date</th>
+                      <th className="border px-3 text-left">Type</th>
+                      <th className="border px-3 text-left">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((transaction) => {
+                      return (
+                        <tr key={transaction.id} className="border">
+                          <td className="border px-3">{transaction.date}</td>
+                          <td className="border px-3">{capitalize(transaction.type)}</td>
+                          <td className="border px-3">
+                            {formatAsEuroAmount(transaction.amount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
-          <div className="">
-            <h1 className="text-2xl font-bold mb-4">Updates</h1>
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Updates</h1>
+            {updates.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="whitespace-nowrap">
+                  <thead>
+                    <tr className="border">
+                      <th className="border px-3 text-left">Date</th>
+                      <th className="border px-3 text-left">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {updates.map((update) => {
+                      return (
+                        <tr key={update.id} className="border">
+                          <td className="border px-3">{update.date}</td>
+                          <td className="border px-3">
+                            {formatAsEuroAmount(update.value)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+            <Line
+              options={principalVsValueLineOptions}
+              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+            />
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Return</h1>
+            <Line
+              options={returnLineOptions}
+              data={buildReturnLineData(dateWithPrincipalAndValues)}
+            />
+          </div>
+
+          <div>
+            <h1 className="text-xl font-bold mb-4">ROI</h1>
+            <Line
+              options={roiLineOptions}
+              data={buildROILineData(dateWithPrincipalAndValues)}
+            />
           </div>
         </>
       )}
     </div>
   );
 }
+
+  const buildPrincipalVsValueLineData = (
+    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+  ) => {
+    return {
+      datasets: [
+        {
+          label: "Principal",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: x.principal / 100,
+          })),
+        },
+        {
+          label: "Value",
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgb(54, 162, 235)",
+          data: dateAndPrincipalAndValue.map((x) => ({
+            x: x.date,
+            y: x.value / 100,
+          })),
+        },
+      ],
+    };
+  };
+
+  const principalVsValueLineOptions: any = {
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += "€ " + context.parsed.y;
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day",
+          tooltipFormat: "YYYY-MM-DD",
+        },
+      },
+      y: {
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return "€ " + value;
+          },
+        },
+      },
+    },
+  };
+
+  const returnLineOptions: ChartOptions<"line"> = {
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += "€ " + context.parsed.y;
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day",
+          tooltipFormat: "YYYY-MM-DD",
+        },
+      },
+      y: {
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return "€ " + value;
+          },
+        },
+      },
+    },
+  };
+
+  const roiLineOptions: ChartOptions<"line"> = {
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += context.parsed.y + "%";
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day",
+          tooltipFormat: "YYYY-MM-DD",
+        },
+      },
+      y: {
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return value + "%";
+          },
+        },
+      },
+    },
+  };
+
+  interface DateWithPrincipalAndValue {
+    date: string;
+    principal: number;
+    value: number;
+  }
+
+  const buildReturnLineData = (
+    dateWithPrincipalAndValues: DateWithPrincipalAndValue[]
+  ) => {
+    return {
+      datasets: [
+        {
+          label: "Return",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateWithPrincipalAndValues.map((x) => ({
+            x: x.date,
+            y: (x.value - x.principal) / 100,
+          })),
+        },
+      ],
+    };
+  };
+
+  const buildROILineData = (
+    dateWithPrincipalAndValues: DateWithPrincipalAndValue[]
+  ) => {
+    return {
+      datasets: [
+        {
+          label: "ROI",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateWithPrincipalAndValues.map((x) => ({
+            x: x.date,
+            y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
+          })),
+        },
+      ],
+    };
+  };

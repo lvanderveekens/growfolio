@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import AddInvestmentForm from "./investments/add-investment-form";
 import { InvestmentType } from "./investment-type";
+import AddInvestmentForm from "./investments/add-investment-form";
 import { TransactionType } from "./investments/transaction";
 import UpdateInvestmentForm from "./investments/update-investment-form";
 
@@ -23,10 +22,11 @@ import {
 } from "chart.js";
 import "chartjs-adapter-moment";
 import { Line, Pie } from "react-chartjs-2";
-import { _capitalize } from "chart.js/dist/helpers/helpers.core";
 import { useRouter } from "next/navigation";
-import { Transaction } from "./investments/transaction";
 import AddTransactionForm from "./investments/add-transaction-form";
+import { Transaction } from "./investments/transaction";
+import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 
 ChartJS.register(
   ArcElement,
@@ -70,28 +70,6 @@ export const principalVsValueLineOptions: any = {
     mode: "index",
     intersect: false,
   },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
-        },
-      },
-    },
-  },
-};
-
-export const returnVsRoiLineOptions: ChartOptions = {
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
   plugins: {
     tooltip: {
       callbacks: {
@@ -101,16 +79,7 @@ export const returnVsRoiLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            if (context.datasetIndex == 0) {
-              label += "€ " + context.parsed.y;
-            } else {
-              label += context.parsed.y + "%";
-            }
-
-            // label += new Intl.NumberFormat("en-US", {
-            //   style: "currency",
-            //   currency: "USD",
-            // }).format(context.parsed.y);
+            label += "€ " + context.parsed.y;
           }
 
           return label;
@@ -123,21 +92,96 @@ export const returnVsRoiLineOptions: ChartOptions = {
       type: "time",
       time: {
         unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
       },
     },
     y: {
-      position: "left",
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
           return "€ " + value;
         },
       },
     },
-    y1: {
-      position: "right",
-      grid: {
-        drawOnChartArea: false, // only want the grid lines for one axis to show up
+  },
+};
+
+export const returnLineOptions: ChartOptions = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += "€ " + context.parsed.y;
+          }
+
+          return label;
+        },
       },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
+    },
+  },
+};
+
+export const roiLineOptions: ChartOptions = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += context.parsed.y + "%";
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
+      },
+    },
+    y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
           return value + "%";
@@ -355,7 +399,7 @@ export default function HomePage() {
     return dateA.getTime() - dateB.getTime();
   }
 
-  const toGainOrLossData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
+  const buildGainOrLossLineData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
     return {
       labels: [],
       datasets: [
@@ -370,7 +414,7 @@ export default function HomePage() {
     };
   };
 
-  const toPrincipalVsValueLineData = (
+  const buildPrincipalVsValueLineData = (
     dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
   ) => {
     return {
@@ -397,8 +441,8 @@ export default function HomePage() {
     };
   };
 
-  const toReturnVsRoiLineData = (
-    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+  const buildReturnLineData = (
+    dateWithPrincipalAndValue: DateWithPrincipalAndValue[]
   ) => {
     return {
       datasets: [
@@ -406,21 +450,28 @@ export default function HomePage() {
           label: "Return",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          data: dateWithPrincipalAndValue.map((x) => ({
             x: x.date,
             y: (x.value - x.principal) / 100,
           })),
-          yAxisID: "y",
         },
+      ],
+    };
+  };
+
+  const buildROILineData = (
+    dateWithPrincipalAndValue: DateWithPrincipalAndValue[]
+  ) => {
+    return {
+      datasets: [
         {
           label: "ROI",
-          borderColor: "rgb(54, 162, 235)",
-          backgroundColor: "rgb(54, 162, 235)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: dateWithPrincipalAndValue.map((x) => ({
             x: x.date,
             y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
           })),
-          yAxisID: "y1",
         },
       ],
     };
@@ -440,53 +491,6 @@ export default function HomePage() {
       ],
     };
   };
-
-  const calculateTotalPrincipalForDate = (
-    date: string,
-    transactions: Transaction[]
-  ) => {
-    let sum = 0;
-
-    for (const transaction of transactions) {
-      if (new Date(transaction.date) > new Date(date)) {
-        break;
-      }
-      if (transaction.type == TransactionType.Buy) {
-        sum += transaction.amount;
-      } else {
-        sum -= transaction.amount;
-      }
-    }
-    return sum;
-  };
-
-  const calculateTotalValueForDate = (
-    date: string,
-    investmentUpdates: InvestmentUpdate[]
-  ) => {
-    const latestValueByInvestmentId = new Map<string, number>();
-
-    for (const u of investmentUpdates) {
-      if (new Date(u.date) > new Date(date)) {
-        break;
-      }
-      latestValueByInvestmentId.set(u.investmentId, u.value);
-    }
-
-    return Array.from(latestValueByInvestmentId.values()).reduce(
-      (acc, value) => acc + value,
-      0
-    );
-  };
-
-  const formatAsEuroAmount = (amount: number) => {
-    const euroAmount = amount / 100;
-    return "€ " + euroAmount.toFixed(2);
-  };
-
-  function formatAsPercentage(number: number) {
-    return (number * 100).toFixed(2) + "%";
-  }
 
   const getInvestmentPrincipal = (investment: Investment) => {
     const investmentTransactions = transactons.filter(
@@ -566,10 +570,6 @@ export default function HomePage() {
     } as ChartData<"pie">;
   };
 
-  function capitalize(input: string): string {
-    return input.charAt(0).toUpperCase() + input.slice(1);
-  }
-
   const calculateAllocationByTypePieData = (investments: Investment[]) => {
     interface InvestmentTypeWithValue {
       type: InvestmentType;
@@ -621,7 +621,7 @@ export default function HomePage() {
     <main>
       <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-4">My investments</h1>
+          <h1 className="text-xl font-bold mb-4">My investments</h1>
           {investmentRows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full whitespace-nowrap">
@@ -687,31 +687,41 @@ export default function HomePage() {
         </div>
         <div className="mb-8 flex">
           <div className="w-[50%] aspect-square">
-            <h1 className="text-2xl font-bold mb-4">Allocation</h1>
+            <h1 className="text-xl font-bold mb-4">Allocation</h1>
             <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
           </div>
           <div className="w-[50%] aspect-square">
-            <h1 className="text-2xl font-bold mb-4">Allocation by type</h1>
+            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
             <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
           </div>
         </div>
 
         {investmentUpdateRows.length > 0 && (
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-4">Principal vs. Value</h1>
+            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
             <Line
               options={principalVsValueLineOptions}
-              data={toPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
             />
           </div>
         )}
 
-        {investmentUpdateRows.length > 0 && (
-          <div>
-            <h1 className="text-2xl font-bold mb-4">Return vs. ROI</h1>
+        {dateWithPrincipalAndValues.length > 0 && (
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Return</h1>
             <Line
-              options={returnVsRoiLineOptions}
-              data={toReturnVsRoiLineData(dateWithPrincipalAndValues)}
+              options={returnLineOptions}
+              data={buildReturnLineData(dateWithPrincipalAndValues)}
+            />
+          </div>
+        )}
+
+        {dateWithPrincipalAndValues.length > 0 && (
+          <div>
+            <h1 className="text-xl font-bold mb-4">ROI</h1>
+            <Line
+              options={roiLineOptions}
+              data={buildROILineData(dateWithPrincipalAndValues)}
             />
           </div>
         )}
@@ -797,7 +807,7 @@ export default function HomePage() {
         {investmentUpdateRows.length > 0 && (
           <Line
             options={gainOrLossOptions}
-            data={toGainOrLossData(investmentUpdateRows)}
+            data={buildGainOrLossLineData(investmentUpdateRows)}
           />
         )}
         {investmentUpdateRows.length > 0 && (

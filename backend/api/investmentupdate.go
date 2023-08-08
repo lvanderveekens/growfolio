@@ -18,7 +18,9 @@ func NewInvestmentUpdateHandler(investmentRepository investment.Repository) *Inv
 }
 
 func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (*response[[]investmentUpdateDto], error) {
-	updates, err := h.investmentRepository.FindUpdates()
+	investmentID := stringOrNil(c.Query("investmentId"))
+
+	updates, err := h.investmentRepository.FindUpdates(investmentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find investment updates: %w", err)
 	}

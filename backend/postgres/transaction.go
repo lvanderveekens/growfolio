@@ -31,13 +31,14 @@ func NewTransactionRepository(db *sqlx.DB) *TransactionRepository {
 	return &TransactionRepository{db: db}
 }
 
-func (r *TransactionRepository) Find(investmentId *string) ([]transaction.Transaction, error) {
+func (r *TransactionRepository) Find(investmentID *string) ([]transaction.Transaction, error) {
 	query := "SELECT * FROM transaction"
 	args := make([]any, 0)
-	if investmentId != nil {
+	if investmentID != nil {
 		query += " WHERE investment_id = $1"
-		args = append(args, *investmentId)
+		args = append(args, *investmentID)
 	}
+	query += " ORDER BY created_at ASC"
 
 	entities := []Transaction{}
 	err := r.db.Select(&entities, query, args...)

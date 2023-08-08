@@ -33,7 +33,7 @@ func NewInvestmentRepository(db *sqlx.DB) *InvestmentRepository {
 
 func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
 	entities := []Investment{}
-	err := r.db.Select(&entities, "SELECT * FROM investment")
+	err := r.db.Select(&entities, "SELECT * FROM investment ORDER BY created_at ASC")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select investments: %w", err)
 	}
@@ -116,9 +116,17 @@ func (r *InvestmentRepository) CreateUpdate(c investment.CreateUpdateCommand) (*
 	return entity.toDomainObject(), nil
 }
 
-func (r *InvestmentRepository) FindUpdates() ([]investment.Update, error) {
+func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]investment.Update, error) {
+	query := "SELECT * FROM investment_update"
+	args := make([]any, 0)
+	if investmentID != nil {
+		query += " WHERE investment_id = $1"
+		args = append(args, *investmentID)
+	}
+	query += " ORDER BY created_at ASC"
+
 	entities := []InvestmentUpdate{}
-	err := r.db.Select(&entities, "SELECT * FROM investment_update")
+	err := r.db.Select(&entities, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select investment updates: %w", err)
 	}
