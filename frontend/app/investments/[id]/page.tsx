@@ -3,7 +3,7 @@
 import { Investment, InvestmentUpdate } from "@/app/page";
 import { Transaction } from "@/app/investments/transaction";
 import { useEffect, useState } from "react";
-import { capitalize, formatAsEuroAmount } from "@/app/string";
+import { capitalize, formatAsEuroAmount, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
   ChartData,
@@ -21,6 +21,8 @@ import {
 import "chartjs-adapter-moment";
 import { Line, Pie } from "react-chartjs-2";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "@/app/calculator";
+import AddTransactionForm from "../add-transaction-form";
+import UpdateInvestmentForm from "../update-investment-form";
 
 ChartJS.register(
   ArcElement,
@@ -43,7 +45,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
-  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<DateWithPrincipalAndValue[]>([])
+  const [updateRows, setUpdateRows] = useState<UpdateRow[]>([])
 
   useEffect(() => {
     fetchInvestment()
@@ -53,20 +55,21 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (transactions.length > 0 && updates.length > 0) {
-      const uniqueUpdateDates = Array.from(
-        new Set(updates.map((update) => update.date))
-      );
-      uniqueUpdateDates.sort()
+      setUpdateRows(updates.map((update) => {
+        const principal = calculateTotalPrincipalForDate(update.date, transactions)
+        const value = calculateTotalValueForDate(update.date, updates)
+        const returnValue = value - principal
+        const roi = returnValue / principal;
 
-      const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
         return {
-          date: date,
-          principal: calculateTotalPrincipalForDate(date, transactions),
-          value: calculateTotalValueForDate(date, updates),
+          id: update.id,
+          date: update.date,
+          principal: principal,
+          value: value,
+          return: returnValue,
+          roi: roi
         };
-      });
-
-      setDateWithPrincipalAndValues(dateWithPrincipalAndValues);
+      }));
     }
   }, [transactions, updates]);
 
@@ -104,9 +107,57 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Updates</h1>
+            {updateRows.length > 0 && (
+              <div className="overflow-x-auto mb-4">
+                <table className="whitespace-nowrap">
+                  <thead>
+                    <tr className="border">
+                      <th className="border px-3 text-left">Date</th>
+                      <th className="border px-3 text-left">Principal</th>
+                      <th className="border px-3 text-left">Value</th>
+                      <th className="border px-3 text-left">Return</th>
+                      <th className="border px-3 text-left">ROI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {updateRows.map((update) => {
+                      return (
+                        <tr key={update.id} className="border">
+                          <td className="border px-3">{update.date}</td>
+                          <td className="border px-3">
+                            {formatAsEuroAmount(update.principal)}
+                          </td>
+                          <td className="border px-3">
+                            {formatAsEuroAmount(update.value)}
+                          </td>
+                          <td className="border px-3">
+                            {formatAsEuroAmount(update.return)}
+                          </td>
+                          <td className="border px-3">
+                            {formatAsPercentage(update.roi)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div>
+              <h2 className="font-bold mb-4">Update transaction</h2>
+              <UpdateInvestmentForm
+                onAdd={fetchUpdates}
+                investmentId={params.id}
+              />
+            </div>
+          </div>
+
+          <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Transactions</h1>
             {transactions.length > 0 && (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto mb-4">
                 <table className="whitespace-nowrap">
                   <thead>
                     <tr className="border">
@@ -120,7 +171,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       return (
                         <tr key={transaction.id} className="border">
                           <td className="border px-3">{transaction.date}</td>
-                          <td className="border px-3">{capitalize(transaction.type)}</td>
+                          <td className="border px-3">
+                            {capitalize(transaction.type)}
+                          </td>
                           <td className="border px-3">
                             {formatAsEuroAmount(transaction.amount)}
                           </td>
@@ -131,41 +184,21 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 </table>
               </div>
             )}
-          </div>
 
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Updates</h1>
-            {updates.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="whitespace-nowrap">
-                  <thead>
-                    <tr className="border">
-                      <th className="border px-3 text-left">Date</th>
-                      <th className="border px-3 text-left">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {updates.map((update) => {
-                      return (
-                        <tr key={update.id} className="border">
-                          <td className="border px-3">{update.date}</td>
-                          <td className="border px-3">
-                            {formatAsEuroAmount(update.value)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="mb-4">
+              <h2 className="font-bold mb-4">Add transaction</h2>
+              <AddTransactionForm
+                onAdd={fetchTransactions}
+                investmentId={params.id}
+              />
+            </div>
           </div>
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
             <Line
               options={principalVsValueLineOptions}
-              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+              data={buildPrincipalVsValueLineData(updateRows)}
             />
           </div>
 
@@ -173,15 +206,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             <h1 className="text-xl font-bold mb-4">Return</h1>
             <Line
               options={returnLineOptions}
-              data={buildReturnLineData(dateWithPrincipalAndValues)}
+              data={buildReturnLineData(updateRows)}
             />
           </div>
 
-          <div>
+          <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">ROI</h1>
             <Line
               options={roiLineOptions}
-              data={buildROILineData(dateWithPrincipalAndValues)}
+              data={buildROILineData(updateRows)}
             />
           </div>
         </>
@@ -191,7 +224,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 }
 
   const buildPrincipalVsValueLineData = (
-    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+    updateRows: UpdateRow[]
   ) => {
     return {
       datasets: [
@@ -199,7 +232,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "Principal",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          data: updateRows.map((x) => ({
             x: x.date,
             y: x.principal / 100,
           })),
@@ -208,7 +241,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "Value",
           borderColor: "rgb(54, 162, 235)",
           backgroundColor: "rgb(54, 162, 235)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          data: updateRows.map((x) => ({
             x: x.date,
             y: x.value / 100,
           })),
@@ -343,14 +376,17 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     },
   };
 
-  interface DateWithPrincipalAndValue {
+  interface UpdateRow {
+    id: string
     date: string;
     principal: number;
     value: number;
+    return: number;
+    roi: number;
   }
 
   const buildReturnLineData = (
-    dateWithPrincipalAndValues: DateWithPrincipalAndValue[]
+    updateRows: UpdateRow[]
   ) => {
     return {
       datasets: [
@@ -358,7 +394,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "Return",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: dateWithPrincipalAndValues.map((x) => ({
+          data: updateRows.map((x) => ({
             x: x.date,
             y: (x.value - x.principal) / 100,
           })),
@@ -368,7 +404,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const buildROILineData = (
-    dateWithPrincipalAndValues: DateWithPrincipalAndValue[]
+    updateRows: UpdateRow[]
   ) => {
     return {
       datasets: [
@@ -376,7 +412,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "ROI",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: dateWithPrincipalAndValues.map((x) => ({
+          data: updateRows.map((x) => ({
             x: x.date,
             y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
           })),

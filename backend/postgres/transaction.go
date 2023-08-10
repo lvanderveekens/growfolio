@@ -38,7 +38,7 @@ func (r *TransactionRepository) Find(investmentID *string) ([]transaction.Transa
 		query += " WHERE investment_id = $1"
 		args = append(args, *investmentID)
 	}
-	query += " ORDER BY created_at ASC"
+	query += " ORDER BY date ASC"
 
 	entities := []Transaction{}
 	err := r.db.Select(&entities, query, args...)

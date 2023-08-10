@@ -250,8 +250,8 @@ export interface InvestmentUpdateRow {
   name: string;
   principal: number;
   value: number;
-  gainOrLoss: number;
-  returnOnInvestment: number;
+  return: number;
+  roi: number;
 }
 
 export default function HomePage() {
@@ -283,8 +283,8 @@ export default function HomePage() {
       const investmentUpdateRows = investmentUpdates.map((u) => {
         const investment = findInvestmentById(u.investmentId);
         const principal = calculateTotalPrincipalForDate(u.date, transactons);
-        const gainOrLoss = u.value - principal;
-        const returnOnInvestment = gainOrLoss / principal;
+        const returnValue = u.value - principal;
+        const roi = returnValue / principal;
 
         return {
           id: u.id,
@@ -292,8 +292,8 @@ export default function HomePage() {
           name: investment?.name ?? "-- whut --",
           principal: principal,
           value: u.value,
-          gainOrLoss: gainOrLoss,
-          returnOnInvestment: returnOnInvestment,
+          return: returnValue,
+          roi: roi,
         };
       });
 
@@ -327,8 +327,8 @@ export default function HomePage() {
 
         const value = lastUpdate?.value ?? 0;
         const principal = getInvestmentPrincipal(i);
-        const gainOrLoss = value - principal;
-        const roiPercentage = gainOrLoss / principal;
+        const returnValue = value - principal;
+        const roi = returnValue / principal;
 
         return {
           id: i.id,
@@ -336,8 +336,8 @@ export default function HomePage() {
           lastUpdateDate: lastUpdate?.date ?? "-",
           principal: principal,
           value: value,
-          return: gainOrLoss,
-          roi: roiPercentage,
+          return: returnValue,
+          roi: roi,
         } as InvestmentRow;
       });
 
@@ -398,21 +398,6 @@ export default function HomePage() {
     const dateB = new Date(b.date);
     return dateA.getTime() - dateB.getTime();
   }
-
-  const buildGainOrLossLineData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
-    return {
-      labels: [],
-      datasets: [
-        {
-          label: investmentUpdateRows[0].name,
-          data: investmentUpdateRows.map((u) => ({
-            x: u.date,
-            y: u.gainOrLoss / 100,
-          })),
-        },
-      ],
-    };
-  };
 
   const buildPrincipalVsValueLineData = (
     dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
@@ -477,21 +462,6 @@ export default function HomePage() {
     };
   };
 
-  const toRoiData = (investmentUpdateRows: InvestmentUpdateRow[]) => {
-    return {
-      labels: [],
-      datasets: [
-        {
-          label: investmentUpdateRows[0].name,
-          data: investmentUpdateRows.map((u) => ({
-            x: u.date,
-            y: u.returnOnInvestment * 100,
-          })),
-        },
-      ],
-    };
-  };
-
   const getInvestmentPrincipal = (investment: Investment) => {
     const investmentTransactions = transactons.filter(
       (transaction) => transaction.investmentId == investment.id
@@ -505,10 +475,6 @@ export default function HomePage() {
         (update) => update.investmentId == investment.id
       )?.value ?? 0
     );
-  };
-
-  const getTotalInvestmentValue = (investmentRows: InvestmentRow[]) => {
-    return investmentRows.reduce((acc, row) => acc + row.value, 0);
   };
 
   const allocationPieOptions: ChartOptions = {
@@ -623,7 +589,7 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-xl font-bold mb-4">My investments</h1>
           {investmentRows.length > 0 && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto mb-4">
               <table className="w-full whitespace-nowrap">
                 <thead>
                   <tr className="border">
@@ -641,7 +607,9 @@ export default function HomePage() {
                       <tr
                         key={investmentRow.id}
                         className="border cursor-pointer hover:bg-slate-100"
-                        onClick={() => router.push(`/investments/${investmentRow.id}`)}
+                        onClick={() =>
+                          router.push(`/investments/${investmentRow.id}`)
+                        }
                       >
                         <td className="border px-3">{investmentRow.name}</td>
                         <td className="border px-3">
@@ -684,15 +652,25 @@ export default function HomePage() {
               </table>
             </div>
           )}
+          <div>
+            <h2 className="font-bold mb-4">Add investment</h2>
+            <AddInvestmentForm onAdd={fetchInvestments} />
+          </div>
         </div>
         <div className="mb-8 flex">
           <div className="w-[50%] aspect-square">
             <h1 className="text-xl font-bold mb-4">Allocation</h1>
-            <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
+            <Pie
+              options={allocationPieOptions}
+              data={calculateAllocationPieData(investments)}
+            />
           </div>
           <div className="w-[50%] aspect-square">
             <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-            <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
+            <Pie
+              options={allocationPieOptions}
+              data={calculateAllocationByTypePieData(investments)}
+            />
           </div>
         </div>
 
@@ -717,101 +695,13 @@ export default function HomePage() {
         )}
 
         {dateWithPrincipalAndValues.length > 0 && (
-          <div>
+          <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">ROI</h1>
             <Line
               options={roiLineOptions}
               data={buildROILineData(dateWithPrincipalAndValues)}
             />
           </div>
-        )}
-
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <AddTransactionForm
-          onAdd={fetchTransactions}
-          investments={investments}
-        />
-        <br />
-        <AddInvestmentForm onAdd={fetchInvestments} />
-        <br />
-        <UpdateInvestmentForm
-          onAdd={fetchInvestmentUpdates}
-          investments={investments}
-        />
-        <br />
-        <h1 className="text-xl font-bold mb-3">Investments</h1>
-        {investments.length > 0 &&
-          investments.map((investment) => (
-            <div key={investment.id}>
-              {investment.name} ({investment.type})
-            </div>
-          ))}
-        <br />
-        <h1 className="text-xl font-bold mb-3">Transactions</h1>
-        {transactons.length > 0 &&
-          transactons.map((transaction) => (
-            <div key={transaction.id}>
-              {transaction.date} {transaction.type}{" "}
-              {findInvestmentById(transaction.investmentId)?.name}{" "}
-              {formatAsEuroAmount(transaction.amount)}
-            </div>
-          ))}
-        <br />
-        <h1 className="text-xl font-bold mb-3">Investment updates</h1>
-        {investmentUpdateRows.length > 0 && (
-          <table className="border px-3">
-            <thead>
-              <tr className="border">
-                <th className="border px-3 text-left">Date</th>
-                <th className="border px-3 text-left">Name</th>
-                <th className="border px-3 text-left">Principal</th>
-                <th className="border px-3 text-left">Value</th>
-                <th className="border px-3 text-left">Gain/loss</th>
-                <th className="border px-3 text-left">ROI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {investmentUpdateRows.map((investmentUpdateRow) => {
-                return (
-                  <tr key={investmentUpdateRow.id} className="border">
-                    <td className="border px-3">{investmentUpdateRow.date}</td>
-                    <td className="border px-3">{investmentUpdateRow.name}</td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(investmentUpdateRow.principal)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(investmentUpdateRow.value)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(investmentUpdateRow.gainOrLoss)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsPercentage(
-                        investmentUpdateRow.returnOnInvestment
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-        {investmentUpdateRows.length > 0 && (
-          <Line
-            options={gainOrLossOptions}
-            data={buildGainOrLossLineData(investmentUpdateRows)}
-          />
-        )}
-        {investmentUpdateRows.length > 0 && (
-          <Line options={roiOptions} data={toRoiData(investmentUpdateRows)} />
         )}
       </div>
     </main>

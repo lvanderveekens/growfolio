@@ -15,17 +15,16 @@ export interface CreateTransactionRequest {
 }
 
 type AddTransactionFormProps = {
+  investmentId: string
   onAdd: () => void
-  investments: Investment[]
 };
 
 const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
+  investmentId,
   onAdd,
-  investments,
 }) => {
   const [date, setDate] = useState<Date>();
   const [type, setType] = useState<TransactionType>();
-  const [investment, setInvestment] = useState<Investment>();
   const [amount, setAmount] = useState<string>();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +33,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
     const req: CreateTransactionRequest = {
       date: moment(date).format("YYYY-MM-DD"),
       type: type!,
-      investmentId: investment!.id,
+      investmentId: investmentId,
       amount: Math.round(parseFloat(amount!) * 100),
     };
 
@@ -46,7 +45,6 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 
     setDate(undefined)
     setType(undefined);
-    setInvestment(undefined);
     setAmount(undefined);
 
     onAdd()
@@ -58,14 +56,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
     setAmount(numericValue);
   };
 
-  const handleInvestmentChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setInvestment(JSON.parse(event.target.value));
-  };
-
   return (
     <form onSubmit={handleSubmit}>
-      <h1 className="text-xl font-bold mb-3">Add transaction</h1>
-      <div className="mb-3">
+      <div className="mb-4">
         <div>Date</div>
         <DatePicker
           className="border"
@@ -75,7 +68,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
           required
         />
       </div>
-      <div className="mb-3">
+      <div className="mb-4">
         <label>
           <div>Type</div>
           <select
@@ -95,27 +88,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
           </select>
         </label>
       </div>
-      <div className="mb-3">
-        <label>
-          <div>Investment</div>
-          <select
-            className="border"
-            value={(investment && JSON.stringify(investment)) ?? ""}
-            onChange={handleInvestmentChange}
-            required
-          >
-            <option value="" disabled>
-              Select investment
-            </option>
-            {investments.map((investment) => (
-              <option key={investment.id} value={JSON.stringify(investment)}>
-                {investment.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="mb-3">
+      <div className="mb-4">
         <label>
           <div>Amount</div>
           <input

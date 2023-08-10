@@ -13,15 +13,14 @@ export interface CreateInvestmentUpdateRequest {
 
 type UpdateInvestmentFormProps = {
   onAdd: () => void
-  investments: Investment[]
+  investmentId: string
 };
 
 const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
   onAdd,
-  investments,
+  investmentId,
 }) => {
   const [date, setDate] = useState<Date>();
-  const [investment, setInvestment] = useState<Investment>();
   const [value, setValue] = useState<string>();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +28,7 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
 
     const req: CreateInvestmentUpdateRequest = {
       date: moment(date).format("YYYY-MM-DD"),
-      investmentId: investment!.id,
+      investmentId: investmentId,
       value: Math.round(parseFloat(value!) * 100),
     };
 
@@ -40,13 +39,8 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
     });
 
     setDate(undefined);
-    setInvestment(undefined);
     setValue(undefined)
     onAdd();
-  };
-
-  const handleInvestmentChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setInvestment(JSON.parse(event.target.value));
   };
 
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +51,6 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1 className="text-xl font-bold mb-3">Update investment</h1>
       <div className="mb-3">
         <div>Date</div>
         <DatePicker
@@ -67,26 +60,6 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
           dateFormat="yyyy-MM-dd"
           required
         />
-      </div>
-      <div className="mb-3">
-        <label>
-          <div>Investment</div>
-          <select
-            className="border"
-            value={(investment && JSON.stringify(investment)) ?? ""}
-            onChange={handleInvestmentChange}
-            required
-          >
-            <option value="" disabled>
-              Select investment
-            </option>
-            {investments.map((investment) => (
-              <option key={investment.id} value={JSON.stringify(investment)}>
-                {investment.name}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
       <div className="mb-3">
         <label>
@@ -100,7 +73,6 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
           />
         </label>
       </div>
-
       <button className="border px-3 py-2" type="submit">
         Submit
       </button>

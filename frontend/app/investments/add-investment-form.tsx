@@ -36,7 +36,6 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1 className="text-xl font-bold mb-3">Add investment</h1>
       <div className="mb-3">
         <label>
           <div>Type</div>

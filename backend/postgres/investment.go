@@ -123,7 +123,7 @@ func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]investment.U
 		query += " WHERE investment_id = $1"
 		args = append(args, *investmentID)
 	}
-	query += " ORDER BY created_at ASC"
+	query += " ORDER BY date ASC"
 
 	entities := []InvestmentUpdate{}
 	err := r.db.Select(&entities, query, args...)
