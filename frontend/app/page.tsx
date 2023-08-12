@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { InvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
-import { TransactionType } from "./investments/transaction";
-import UpdateInvestmentForm from "./investments/update-investment-form";
+import { FaHouse, FaSackDollar } from "react-icons/fa6";
 
 import {
   ArcElement,
@@ -21,12 +20,11 @@ import {
   TooltipItem,
 } from "chart.js";
 import "chartjs-adapter-moment";
-import { Line, Pie } from "react-chartjs-2";
 import { useRouter } from "next/navigation";
-import AddTransactionForm from "./investments/add-transaction-form";
+import { Line, Pie } from "react-chartjs-2";
+import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
-import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 
 ChartJS.register(
   ArcElement,
@@ -40,219 +38,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-export const gainOrLossOptions: any = {
-  plugins: {
-    title: {
-      text: "Gain/loss",
-      display: true,
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
-        },
-      },
-    },
-  },
-};
-
-export const principalVsValueLineOptions: any = {
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  plugins: {
-    tooltip: {
-      callbacks: {
-        label: function (context) {
-          let label = context.dataset.label || "";
-          if (label) {
-            label += ": ";
-          }
-          if (context.parsed.y !== null) {
-            label += "€ " + context.parsed.y;
-          }
-
-          return label;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-        tooltipFormat: 'YYYY-MM-DD' 
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
-        },
-      },
-    },
-  },
-};
-
-export const returnLineOptions: ChartOptions = {
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  plugins: {
-    legend: {
-      display: false
-    },
-    tooltip: {
-      callbacks: {
-        label: function (context) {
-          let label = context.dataset.label || "";
-          if (label) {
-            label += ": ";
-          }
-          if (context.parsed.y !== null) {
-            label += "€ " + context.parsed.y;
-          }
-
-          return label;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-        tooltipFormat: 'YYYY-MM-DD' 
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
-        },
-      },
-    },
-  },
-};
-
-export const roiLineOptions: ChartOptions = {
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  plugins: {
-    legend: {
-      display: false
-    },
-    tooltip: {
-      callbacks: {
-        label: function (context) {
-          let label = context.dataset.label || "";
-          if (label) {
-            label += ": ";
-          }
-          if (context.parsed.y !== null) {
-            label += context.parsed.y + "%";
-          }
-
-          return label;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-        tooltipFormat: 'YYYY-MM-DD' 
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return value + "%";
-        },
-      },
-    },
-  },
-};
-
-export const roiOptions: any = {
-  plugins: {
-    title: {
-      text: "ROI",
-      display: true,
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return value + " %";
-        },
-      },
-    },
-  },
-};
-
-export interface Investment {
-  id: string;
-  type: InvestmentType;
-  name: string;
-}
-
-export interface InvestmentUpdate {
-  id: string;
-  date: string;
-  investmentId: string;
-  value: number;
-}
-
-export interface InvestmentRow {
-  id: string;
-  name: string;
-  lastUpdateDate: string;
-  principal: number;
-  value: number;
-  return: number;
-  roi: number;
-}
-
-export interface DateWithPrincipalAndValue {
-  date: string;
-  principal: number;
-  value: number;
-}
-
-export interface InvestmentUpdateRow {
-  id: string;
-  date: string;
-  name: string;
-  principal: number;
-  value: number;
-  return: number;
-  roi: number;
-}
 
 export default function HomePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -269,8 +54,6 @@ export default function HomePage() {
   const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<
     DateWithPrincipalAndValue[]
   >([]);
-
-  const router = useRouter();
 
   useEffect(() => {
     fetchInvestments();
@@ -585,125 +368,330 @@ export default function HomePage() {
 
   return (
     <main>
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">My investments</h1>
-          {investmentRows.length > 0 && (
-            <div className="overflow-x-auto mb-4">
-              <table className="w-full whitespace-nowrap">
-                <thead>
-                  <tr className="border">
-                    <th className="border px-3 text-left">Name</th>
-                    <th className="border px-3 text-left">Principal</th>
-                    <th className="border px-3 text-left">Value</th>
-                    <th className="border px-3 text-left">Return</th>
-                    <th className="border px-3 text-left">ROI</th>
-                    <th className="border px-3 text-left">Last update</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {investmentRows.map((investmentRow) => {
-                    return (
-                      <tr
-                        key={investmentRow.id}
-                        className="border cursor-pointer hover:bg-slate-100"
-                        onClick={() =>
-                          router.push(`/investments/${investmentRow.id}`)
-                        }
-                      >
-                        <td className="border px-3">{investmentRow.name}</td>
-                        <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.principal)}
-                        </td>
-                        <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.value)}
-                        </td>
-                        <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.return)}
-                        </td>
-                        <td className="border px-3">
-                          {formatAsPercentage(investmentRow.roi)}
-                        </td>
-                        <td className="border px-3">
-                          {investmentRow.lastUpdateDate}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot className="border-2 border-t-black">
-                  <tr className="border">
-                    <td className="border px-3">Total</td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(totalPrincipal)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(totalValue)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(totalReturn)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsPercentage(totalRoi)}
-                    </td>
-                    <td className="border px-3"></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          )}
-          <div>
-            <h2 className="font-bold mb-4">Add investment</h2>
-            <AddInvestmentForm onAdd={fetchInvestments} />
+      <div className="mb-8">
+        <h1 className="text-xl font-bold mb-4">My investments</h1>
+        {investmentRows.length > 0 && (
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full whitespace-nowrap">
+              <thead>
+                <tr className="border">
+                  <th className="border px-3 text-left">Name</th>
+                  <th className="border px-3 text-left">Principal</th>
+                  <th className="border px-3 text-left">Value</th>
+                  <th className="border px-3 text-left">Return</th>
+                  <th className="border px-3 text-left">ROI</th>
+                  <th className="border px-3 text-left">Last update</th>
+                </tr>
+              </thead>
+              <tbody>
+                {investmentRows.map((investmentRow) => {
+                  return (
+                    <tr key={investmentRow.id} className="border">
+                      <td className="border px-3">{investmentRow.name}</td>
+                      <td className="border px-3">
+                        {formatAsEuroAmount(investmentRow.principal)}
+                      </td>
+                      <td className="border px-3">
+                        {formatAsEuroAmount(investmentRow.value)}
+                      </td>
+                      <td className="border px-3">
+                        {formatAsEuroAmount(investmentRow.return)}
+                      </td>
+                      <td className="border px-3">
+                        {formatAsPercentage(investmentRow.roi)}
+                      </td>
+                      <td className="border px-3">
+                        {investmentRow.lastUpdateDate}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot className="border-2 border-t-black">
+                <tr className="border">
+                  <td className="border px-3">Total</td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(totalPrincipal)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(totalValue)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsEuroAmount(totalReturn)}
+                  </td>
+                  <td className="border px-3">
+                    {formatAsPercentage(totalRoi)}
+                  </td>
+                  <td className="border px-3"></td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
+        )}
+        <div>
+          <h2 className="font-bold mb-4">Add investment</h2>
+          <AddInvestmentForm onAdd={fetchInvestments} />
         </div>
-        <div className="mb-8 flex">
-          <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation</h1>
-            <Pie
-              options={allocationPieOptions}
-              data={calculateAllocationPieData(investments)}
-            />
-          </div>
-          <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-            <Pie
-              options={allocationPieOptions}
-              data={calculateAllocationByTypePieData(investments)}
-            />
-          </div>
-        </div>
-
-        {investmentUpdateRows.length > 0 && (
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
-            <Line
-              options={principalVsValueLineOptions}
-              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
-            />
-          </div>
-        )}
-
-        {dateWithPrincipalAndValues.length > 0 && (
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Return</h1>
-            <Line
-              options={returnLineOptions}
-              data={buildReturnLineData(dateWithPrincipalAndValues)}
-            />
-          </div>
-        )}
-
-        {dateWithPrincipalAndValues.length > 0 && (
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">ROI</h1>
-            <Line
-              options={roiLineOptions}
-              data={buildROILineData(dateWithPrincipalAndValues)}
-            />
-          </div>
-        )}
       </div>
+      <div className="mb-8 flex">
+        <div className="w-[50%] aspect-square">
+          <h1 className="text-xl font-bold mb-4">Allocation</h1>
+          <Pie
+            options={allocationPieOptions}
+            data={calculateAllocationPieData(investments)}
+          />
+        </div>
+        <div className="w-[50%] aspect-square">
+          <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
+          <Pie
+            options={allocationPieOptions}
+            data={calculateAllocationByTypePieData(investments)}
+          />
+        </div>
+      </div>
+
+      {investmentUpdateRows.length > 0 && (
+        <div className="mb-8">
+          <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+          <Line
+            options={principalVsValueLineOptions}
+            data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+          />
+        </div>
+      )}
+
+      {dateWithPrincipalAndValues.length > 0 && (
+        <div className="mb-8">
+          <h1 className="text-xl font-bold mb-4">Return</h1>
+          <Line
+            options={returnLineOptions}
+            data={buildReturnLineData(dateWithPrincipalAndValues)}
+          />
+        </div>
+      )}
+
+      {dateWithPrincipalAndValues.length > 0 && (
+        <div className="mb-8">
+          <h1 className="text-xl font-bold mb-4">ROI</h1>
+          <Line
+            options={roiLineOptions}
+            data={buildROILineData(dateWithPrincipalAndValues)}
+          />
+        </div>
+      )}
     </main>
   );
+}
+
+export const gainOrLossOptions: any = {
+  plugins: {
+    title: {
+      text: "Gain/loss",
+      display: true,
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
+    },
+  },
+};
+
+export const principalVsValueLineOptions: any = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += "€ " + context.parsed.y;
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
+    },
+  },
+};
+
+export const returnLineOptions: ChartOptions = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += "€ " + context.parsed.y;
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return "€ " + value;
+        },
+      },
+    },
+  },
+};
+
+export const roiLineOptions: ChartOptions = {
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += context.parsed.y + "%";
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+        tooltipFormat: 'YYYY-MM-DD' 
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return value + "%";
+        },
+      },
+    },
+  },
+};
+
+export const roiOptions: any = {
+  plugins: {
+    title: {
+      text: "ROI",
+      display: true,
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "day",
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return value + " %";
+        },
+      },
+    },
+  },
+};
+
+export interface Investment {
+  id: string;
+  type: InvestmentType;
+  name: string;
+}
+
+export interface InvestmentUpdate {
+  id: string;
+  date: string;
+  investmentId: string;
+  value: number;
+}
+
+export interface InvestmentRow {
+  id: string;
+  name: string;
+  lastUpdateDate: string;
+  principal: number;
+  value: number;
+  return: number;
+  roi: number;
+}
+
+export interface DateWithPrincipalAndValue {
+  date: string;
+  principal: number;
+  value: number;
+}
+
+export interface InvestmentUpdateRow {
+  id: string;
+  date: string;
+  name: string;
+  principal: number;
+  value: number;
+  return: number;
+  roi: number;
 }
