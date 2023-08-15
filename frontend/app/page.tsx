@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { InvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
-import { FaHouse, FaSackDollar } from "react-icons/fa6";
 
 import {
   ArcElement,
@@ -20,13 +19,14 @@ import {
   TooltipItem,
 } from "chart.js";
 import "chartjs-adapter-moment";
-import { useRouter } from "next/navigation";
 import { Line, Pie } from "react-chartjs-2";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+// import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
+  // ChartDataLabels,
   ArcElement,
   Tooltip,
   Legend,
@@ -428,10 +428,10 @@ export default function HomePage() {
             </table>
           </div>
         )}
-        <div>
+        {/* <div>
           <h2 className="font-bold mb-4">Add investment</h2>
           <AddInvestmentForm onAdd={fetchInvestments} />
-        </div>
+        </div> */}
       </div>
       <div className="mb-8 flex">
         <div className="w-[50%] aspect-square">

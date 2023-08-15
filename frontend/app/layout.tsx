@@ -17,12 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex">
-          <div className="flex-0">
-            <Navbar />
-          </div>
-          <div className='flex-1 p-8 overflow-hidden'>{children}</div>
-        </div>
+        <Navbar>{children}</Navbar>
       </body>
     </html>
   );
