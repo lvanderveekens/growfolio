@@ -30,7 +30,7 @@ func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (*respons
 		dtos = append(dtos, toInvestmentUpdateDto(u))
 	}
 
-	return newResponse(http.StatusOK, &dtos), nil
+	return newResponse(http.StatusOK, dtos), nil
 }
 
 func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (*response[investmentUpdateDto], error) {
@@ -59,7 +59,17 @@ func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (*respo
 	}
 
 	dto := toInvestmentUpdateDto(*u)
-	return newResponse(http.StatusCreated, &dto), nil
+	return newResponse(http.StatusCreated, dto), nil
+}
+
+func (h *InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (*response[empty], error) {
+	id := c.Param("id")
+	err := h.investmentRepository.DeleteUpdateByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete investment update: %w", err)
+	}
+
+	return newEmptyResponse(http.StatusNoContent), nil
 }
 
 func toInvestmentUpdateDto(u investment.Update) investmentUpdateDto {

@@ -65,6 +65,20 @@ func (r *InvestmentRepository) FindByID(id string) (*investment.Investment, erro
 	return entity.toDomainObject(), nil
 }
 
+func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.db.Exec("DELETE FROM investment_update WHERE id=$1", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete investment update: %w", err)
+	}
+
+	return nil
+}
+
 func (r *InvestmentRepository) Create(c investment.CreateCommand) (*investment.Investment, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {

@@ -28,7 +28,7 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) (*response[[]investme
 		dtos = append(dtos, toInvestmentDto(investment))
 	}
 
-	return newResponse(http.StatusOK, &dtos), nil
+	return newResponse(http.StatusOK, dtos), nil
 }
 
 func (h *InvestmentHandler) GetInvestment(c *gin.Context) (*response[investmentDto], error) {
@@ -42,7 +42,7 @@ func (h *InvestmentHandler) GetInvestment(c *gin.Context) (*response[investmentD
 	}
 
 	dto := toInvestmentDto(*i)
-	return newResponse(http.StatusOK, &dto), nil
+	return newResponse(http.StatusOK, dto), nil
 }
 
 func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investmentDto], error) {
@@ -61,7 +61,7 @@ func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investme
 	}
 
 	dto := toInvestmentDto(*created)
-	return newResponse(http.StatusCreated, &dto), nil
+	return newResponse(http.StatusCreated, dto), nil
 }
 
 func toInvestmentDto(i investment.Investment) investmentDto {

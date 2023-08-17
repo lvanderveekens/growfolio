@@ -39,7 +39,7 @@ func (h *TransactionHandler) GetTransactions(c *gin.Context) (*response[[]transa
 		dtos = append(dtos, toTransactionDto(transaction))
 	}
 
-	return newResponse(http.StatusOK, &dtos), nil
+	return newResponse(http.StatusOK, dtos), nil
 }
 
 func stringOrNil(s string) *string {
@@ -78,7 +78,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transa
 	}
 
 	dto := toTransactionDto(*created)
-	return newResponse(http.StatusCreated, &dto), nil
+	return newResponse(http.StatusCreated, dto), nil
 }
 
 func toTransactionDto(t transaction.Transaction) transactionDto {

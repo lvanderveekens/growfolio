@@ -26,11 +26,17 @@ func (s *Server) Start(port int) error {
 
 type response[T any] struct {
 	Status int
-	Body   *T
+	Body   T
 }
 
-func newResponse[T any](status int, body *T) *response[T] {
+type empty any
+
+func newResponse[T any](status int, body T) *response[T] {
 	return &response[T]{Status: status, Body: body}
+}
+
+func newEmptyResponse(status int) *response[empty] {
+	return &response[empty]{Status: status, Body: nil}
 }
 
 func createHandlerFunc[T any](f func(c *gin.Context) (*response[T], error)) gin.HandlerFunc {

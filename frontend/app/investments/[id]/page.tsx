@@ -23,6 +23,8 @@ import { Line, Pie } from "react-chartjs-2";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "@/app/calculator";
 import AddTransactionForm from "../add-transaction-form";
 import UpdateInvestmentForm from "../update-investment-form";
+import Modal from "@/app/modal";
+import { FaXmark } from "react-icons/fa6";
 
 ChartJS.register(
   ArcElement,
@@ -46,6 +48,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateRows, setUpdateRows] = useState<UpdateRow[]>([])
+
+  const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
+  const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchInvestment()
@@ -96,6 +101,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       .then((data) => setUpdates(data));
   }
 
+  const deleteUpdate = async (id: string) => {
+    await fetch(`http://localhost:8888/v1/investment-updates/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   return (
     <div className="container mx-auto">
       {loading && <p>Loading...</p>}
@@ -105,6 +116,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-4">{investment.name}</h1>
           </div>
+
+          {/* TODO: do I need to show the table at all? Aren't the charts more important? 
+          Maybe only show the current principal and value (with last update) */}
+
+          {/* TODO: how to handle transaction deletes? */}
+          {/* TODO: how to handle update deletes? */}
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Updates</h1>
@@ -118,6 +135,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       <th className="border px-3 text-left">Value</th>
                       <th className="border px-3 text-left">Return</th>
                       <th className="border px-3 text-left">ROI</th>
+                      <th className="border px-3 text-left">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,6 +155,17 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                           <td className="border px-3">
                             {formatAsPercentage(update.roi)}
                           </td>
+                          <td className="border px-3">
+                            <FaXmark
+                              className="hover:cursor-pointer"
+                              size={24}
+                              color="red"
+                              onClick={async () => {
+                                await deleteUpdate(update.id)
+                                fetchUpdates()
+                              }}
+                            />
+                          </td>
                         </tr>
                       );
                     })}
@@ -146,11 +175,27 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             )}
 
             <div>
-              <h2 className="font-bold mb-4">Update transaction</h2>
-              <UpdateInvestmentForm
-                onAdd={fetchUpdates}
-                investmentId={params.id}
-              />
+              <button
+                className="border px-3 py-2"
+                type="submit"
+                onClick={() => setShowUpdateInvestmentModal(true)}
+              >
+                Add update
+              </button>
+              {showUpdateInvestmentModal && (
+                <Modal
+                  title="Update investment"
+                  onClose={() => setShowUpdateInvestmentModal(false)}
+                >
+                  <UpdateInvestmentForm
+                    onAdd={() => {
+                      setShowUpdateInvestmentModal(false);
+                      fetchUpdates();
+                    }}
+                    investmentId={params.id}
+                  />
+                </Modal>
+              )}
             </div>
           </div>
 
@@ -185,12 +230,28 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            <div className="mb-4">
-              <h2 className="font-bold mb-4">Add transaction</h2>
-              <AddTransactionForm
-                onAdd={fetchTransactions}
-                investmentId={params.id}
-              />
+            <div>
+              <button
+                className="border px-3 py-2"
+                type="submit"
+                onClick={() => setShowAddTransactionModal(true)}
+              >
+                Add transaction
+              </button>
+              {showAddTransactionModal && (
+                <Modal
+                  title="Add transaction"
+                  onClose={() => setShowAddTransactionModal(false)}
+                >
+                  <AddTransactionForm
+                    onAdd={() => {
+                      setShowAddTransactionModal(false);
+                      fetchTransactions();
+                    }}
+                    investmentId={params.id}
+                  />
+                </Modal>
+              )}
             </div>
           </div>
 

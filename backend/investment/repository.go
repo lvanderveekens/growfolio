@@ -5,6 +5,7 @@ type Repository interface {
 	FindByID(id string) (*Investment, error)
 	Create(c CreateCommand) (*Investment, error)
 
-	CreateUpdate(c CreateUpdateCommand) (*Update, error)
 	FindUpdates(investmentID *string) ([]Update, error)
+	CreateUpdate(c CreateUpdateCommand) (*Update, error)
+	DeleteUpdateByID(id string) error
 }
