@@ -108,7 +108,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="">
       {loading && <p>Loading...</p>}
       {error && <p>Error: ${error}</p>}
       {investment && (
@@ -119,9 +119,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
           {/* TODO: do I need to show the table at all? Aren't the charts more important? 
           Maybe only show the current principal and value (with last update) */}
-
-          {/* TODO: how to handle transaction deletes? */}
-          {/* TODO: how to handle update deletes? */}
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Updates</h1>

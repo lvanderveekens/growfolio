@@ -23,6 +23,8 @@ import { Line, Pie } from "react-chartjs-2";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+import { FaPlus } from "react-icons/fa6";
+import Modal from "./modal";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -366,6 +368,9 @@ export default function HomePage() {
   const totalReturn = totalValue - totalPrincipal;
   const totalRoi = totalReturn / totalPrincipal;
 
+  const [showAddInvestmentModal, setShowAddInvestmentModal] =
+    useState<boolean>(false);
+
   return (
     <main>
       <div className="mb-8">
@@ -428,10 +433,27 @@ export default function HomePage() {
             </table>
           </div>
         )}
-        {/* <div>
-          <h2 className="font-bold mb-4">Add investment</h2>
-          <AddInvestmentForm onAdd={fetchInvestments} />
-        </div> */}
+
+        <button
+          className="border px-3 py-2"
+          type="submit"
+          onClick={() => setShowAddInvestmentModal(true)}
+        >
+          Add investment
+        </button>
+        {showAddInvestmentModal && (
+          <Modal
+            title="Add investment"
+            onClose={() => setShowAddInvestmentModal(false)}
+          >
+            <AddInvestmentForm
+              onAdd={() => {
+                setShowAddInvestmentModal(false);
+                window.location.reload();
+              }}
+            />
+          </Modal>
+        )}
       </div>
       <div className="mb-8 flex">
         <div className="w-[50%] aspect-square">
