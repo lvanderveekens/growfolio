@@ -1,11 +1,8 @@
 "use client"
 
 import Link from "next/link";
-import { usePathname } from 'next/navigation';
 import { useEffect, useState } from "react";
-import { FaCaretDown, FaHouse, FaPlus, FaSackDollar } from "react-icons/fa6";
-import AddInvestmentForm from "./investments/add-investment-form";
-import Modal from "./modal";
+import { FaCaretDown } from "react-icons/fa6";
 import { Investment } from "./page";
 
 interface NavbarProps {

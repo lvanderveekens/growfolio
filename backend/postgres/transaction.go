@@ -72,3 +72,17 @@ func (r *TransactionRepository) Create(cmd transaction.CreateCommand) (*transact
 
 	return entity.toDomainObject(), nil
 }
+
+func (r *TransactionRepository) DeleteByID(id string) error {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.db.Exec("DELETE FROM transaction WHERE id=$1", id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

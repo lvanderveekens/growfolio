@@ -81,6 +81,16 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transa
 	return newResponse(http.StatusCreated, dto), nil
 }
 
+func (h *TransactionHandler) DeleteTransaction(c *gin.Context) (*response[empty], error) {
+	id := c.Param("id")
+	err := h.transactionRepository.DeleteByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete transaction: %w", err)
+	}
+
+	return newEmptyResponse(http.StatusNoContent), nil
+}
+
 func toTransactionDto(t transaction.Transaction) transactionDto {
 	return newTransactionDto(t.ID, t.Date.Format("2006-01-02"), t.Type, t.InvestmentID, t.Amount)
 }

@@ -21,4 +21,5 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 
 	r.GET("/v1/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
 	r.POST("/v1/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
+	r.DELETE("/v1/transactions/:id", createHandlerFunc(s.handlers.transaction.DeleteTransaction))
 }

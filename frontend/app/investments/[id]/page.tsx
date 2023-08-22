@@ -47,7 +47,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
-  const [updateRows, setUpdateRows] = useState<UpdateRow[]>([])
+  const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
 
   const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
   const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
@@ -60,7 +60,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (transactions.length > 0 && updates.length > 0) {
-      setUpdateRows(updates.map((update) => {
+      setUpdateDataPoints(updates.map((update) => {
         const principal = calculateTotalPrincipalForDate(update.date, transactions)
         const value = calculateTotalValueForDate(update.date, updates)
         const returnValue = value - principal
@@ -107,6 +107,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     });
   }
 
+  const deleteTransaction = async (id: string) => {
+    await fetch(`http://localhost:8888/v1/transactions/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   return (
     <div className="">
       {loading && <p>Loading...</p>}
@@ -122,35 +128,23 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Updates</h1>
-            {updateRows.length > 0 && (
+            {updates.length > 0 && (
               <div className="overflow-x-auto mb-4">
                 <table className="whitespace-nowrap">
                   <thead>
                     <tr className="border">
                       <th className="border px-3 text-left">Date</th>
-                      <th className="border px-3 text-left">Principal</th>
                       <th className="border px-3 text-left">Value</th>
-                      <th className="border px-3 text-left">Return</th>
-                      <th className="border px-3 text-left">ROI</th>
                       <th className="border px-3 text-left">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {updateRows.map((update) => {
+                    {updates.map((update) => {
                       return (
                         <tr key={update.id} className="border">
                           <td className="border px-3">{update.date}</td>
                           <td className="border px-3">
-                            {formatAsEuroAmount(update.principal)}
-                          </td>
-                          <td className="border px-3">
                             {formatAsEuroAmount(update.value)}
-                          </td>
-                          <td className="border px-3">
-                            {formatAsEuroAmount(update.return)}
-                          </td>
-                          <td className="border px-3">
-                            {formatAsPercentage(update.roi)}
                           </td>
                           <td className="border px-3">
                             <FaXmark
@@ -206,6 +200,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       <th className="border px-3 text-left">Date</th>
                       <th className="border px-3 text-left">Type</th>
                       <th className="border px-3 text-left">Amount</th>
+                      <th className="border px-3 text-left">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,6 +213,17 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                           </td>
                           <td className="border px-3">
                             {formatAsEuroAmount(transaction.amount)}
+                          </td>
+                          <td className="border px-3">
+                            <FaXmark
+                              className="hover:cursor-pointer"
+                              size={24}
+                              color="red"
+                              onClick={async () => {
+                                await deleteTransaction(transaction.id)
+                                fetchTransactions()
+                              }}
+                            />
                           </td>
                         </tr>
                       );
@@ -256,7 +262,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
             <Line
               options={principalVsValueLineOptions}
-              data={buildPrincipalVsValueLineData(updateRows)}
+              data={buildPrincipalVsValueLineData(updateDataPoints)}
             />
           </div>
 
@@ -264,7 +270,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             <h1 className="text-xl font-bold mb-4">Return</h1>
             <Line
               options={returnLineOptions}
-              data={buildReturnLineData(updateRows)}
+              data={buildReturnLineData(updateDataPoints)}
             />
           </div>
 
@@ -272,7 +278,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             <h1 className="text-xl font-bold mb-4">ROI</h1>
             <Line
               options={roiLineOptions}
-              data={buildROILineData(updateRows)}
+              data={buildROILineData(updateDataPoints)}
             />
           </div>
         </>
@@ -282,7 +288,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 }
 
   const buildPrincipalVsValueLineData = (
-    updateRows: UpdateRow[]
+    updateRows: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -434,7 +440,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     },
   };
 
-  interface UpdateRow {
+  interface UpdateDataPoint {
     id: string
     date: string;
     principal: number;
@@ -444,7 +450,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }
 
   const buildReturnLineData = (
-    updateRows: UpdateRow[]
+    updateRows: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -462,7 +468,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const buildROILineData = (
-    updateRows: UpdateRow[]
+    updateRows: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
