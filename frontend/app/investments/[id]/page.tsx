@@ -114,7 +114,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       {investment && (
         <>
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-4">{investment.name}</h1>
+            <h1 className="text-2xl font-bold mb-4">Investment: {investment.name}</h1>
           </div>
 
           {/* TODO: do I need to show the table at all? Aren't the charts more important? 

@@ -14,8 +14,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const pathname = usePathname();
+  const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   useEffect(() => {
     fetchInvestments();
@@ -31,6 +30,14 @@ export const Navbar: React.FC<NavbarProps> = () => {
       .finally(() => setLoading(false));
   };
 
+  const toggleDropdown = () => {
+    setDropdownOpen(!isDropdownOpen);
+  };
+
+  const closeDropdown = () => {
+    setDropdownOpen(false);
+  };
+
   return (
     <nav>
       <div className="px-8 py-4 w-full bg-gray-200 flex items-center gap-8 font-bold ">
@@ -38,28 +45,31 @@ export const Navbar: React.FC<NavbarProps> = () => {
           <Link href="/">growfolio</Link>
         </div>
         <div className="flex gap-6 text-lg">
-          <Link
-            className={`hover:text-green-400`}
-            href="/"
-          >
+          <Link className={`hover:text-green-400`} href="/">
             Overview
           </Link>
-          <div className="relative group hover:cursor-pointer">
-            <div className="flex items-center gap-1">
+          <div className="relative">
+            <div
+              className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+              onClick={toggleDropdown}
+            >
               Investments
               <FaCaretDown />
             </div>
-
-            <div className="absolute left-0 bg-gray-300 px-4 py-2 hidden group-hover:block whitespace-nowrap">
+            <div
+              className={`absolute left-0 bg-gray-300 px-4 py-2 ${
+                isDropdownOpen ? "block" : "hidden"
+              } whitespace-nowrap`}
+            >
               {loading && <p>Loading...</p>}
               {investments.length > 0 &&
                 investments.map((i) => {
-                  const active = pathname == `/investments/${i.id}`;
                   return (
                     <div className={`py-1`}>
                       <Link
                         className={`hover:text-green-400`}
                         href={`/investments/${i.id}`}
+                        onClick={closeDropdown}
                       >
                         <p className="overflow-hidden text-ellipsis">
                           {i.name}
