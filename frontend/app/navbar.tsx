@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { Investment } from "./page";
 
@@ -12,6 +12,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     fetchInvestments();
@@ -35,6 +36,19 @@ export const Navbar: React.FC<NavbarProps> = () => {
     setDropdownOpen(false);
   };
 
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        closeDropdown();
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
+
   return (
     <nav>
       <div className="px-8 py-4 w-full bg-gray-200 flex items-center gap-8 font-bold ">
@@ -45,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
           <Link className={`hover:text-green-400`} href="/">
             Overview
           </Link>
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <div
               className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
               onClick={toggleDropdown}

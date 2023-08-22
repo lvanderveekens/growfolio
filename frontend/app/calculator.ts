@@ -17,7 +17,7 @@ export const calculateTotalPrincipalForDate = (
       sum -= transaction.amount;
     }
   }
-  return sum;
+  return Math.max(0, sum);
 };
 
 export const calculateTotalValueForDate = (

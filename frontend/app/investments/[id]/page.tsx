@@ -120,11 +120,35 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       {investment && (
         <>
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-4">Investment: {investment.name}</h1>
+            <h1 className="text-2xl font-bold mb-4">
+              Investment: {investment.name}
+            </h1>
           </div>
 
           {/* TODO: do I need to show the table at all? Aren't the charts more important? 
           Maybe only show the current principal and value (with last update) */}
+
+          <div className="mb-8">
+            {updateDataPoints.length > 0 && (
+              <div>
+                <div>
+                  Date: {updateDataPoints[updateDataPoints.length - 1].date}
+                </div>
+                <div>
+                  Principal: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].principal)}
+                </div>
+                <div>
+                  Value: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].value)}
+                </div>
+                <div>
+                  Return: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].return)}
+                </div>
+                <div>
+                  ROI: {formatAsPercentage( updateDataPoints[updateDataPoints.length - 1].roi)}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Updates</h1>
@@ -152,8 +176,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                               size={24}
                               color="red"
                               onClick={async () => {
-                                await deleteUpdate(update.id)
-                                fetchUpdates()
+                                await deleteUpdate(update.id);
+                                fetchUpdates();
                               }}
                             />
                           </td>
@@ -220,8 +244,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                               size={24}
                               color="red"
                               onClick={async () => {
-                                await deleteTransaction(transaction.id)
-                                fetchTransactions()
+                                await deleteTransaction(transaction.id);
+                                fetchTransactions();
                               }}
                             />
                           </td>
