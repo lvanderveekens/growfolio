@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { Investment } from "./page";
+import { AiOutlineStock } from "react-icons/ai";
 
 interface NavbarProps {
 }
@@ -53,7 +54,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
     <nav>
       <div className="px-8 py-4 w-full bg-gray-200 flex items-center gap-8 font-bold ">
         <div className="text-4xl text-green-400">
-          <Link href="/">growfolio</Link>
+          <Link href="/">
+            <AiOutlineStock size={48} className="inline mr-1" />growfolio
+          </Link>
         </div>
         <div className="flex gap-6 text-lg">
           <Link className={`hover:text-green-400`} href="/">

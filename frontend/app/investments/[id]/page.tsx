@@ -25,6 +25,7 @@ import AddTransactionForm from "../add-transaction-form";
 import UpdateInvestmentForm from "../update-investment-form";
 import Modal from "@/app/modal";
 import { FaXmark } from "react-icons/fa6";
+import Link from "next/link";
 
 ChartJS.register(
   ArcElement,
@@ -120,167 +121,82 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       {investment && (
         <>
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-4">
+            <h1 className="text-3xl font-bold">
               Investment: {investment.name}
             </h1>
           </div>
 
-          {/* TODO: do I need to show the table at all? Aren't the charts more important? 
-          Maybe only show the current principal and value (with last update) */}
-
-          <div className="mb-8">
-            {updateDataPoints.length > 0 && (
+          {updateDataPoints.length > 0 && (
+            <div className="mb-8">
+              <div className="mb-4">
+                Last update:{" "}
+                {updateDataPoints[updateDataPoints.length - 1].date}
+              </div>
+              <div className="flex gap-8 justify-between mb-4">
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Principal</div>
+                    <div className="text-3xl font-bold">
+                      {formatAsEuroAmount(
+                        updateDataPoints[updateDataPoints.length - 1].principal
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Value</div>
+                    <div className="text-3xl font-bold">
+                      {formatAsEuroAmount(
+                        updateDataPoints[updateDataPoints.length - 1].value
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Return</div>
+                    <div
+                      className={`text-3xl font-bold ${
+                        updateDataPoints[updateDataPoints.length - 1].return >=
+                        0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {formatAsEuroAmount(
+                        updateDataPoints[updateDataPoints.length - 1].return
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>ROI</div>
+                    <div
+                      className={`text-3xl font-bold ${
+                        updateDataPoints[updateDataPoints.length - 1].roi >= 0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {formatAsPercentage(
+                        updateDataPoints[updateDataPoints.length - 1].roi
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div>
-                <div>
-                  Date: {updateDataPoints[updateDataPoints.length - 1].date}
-                </div>
-                <div>
-                  Principal: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].principal)}
-                </div>
-                <div>
-                  Value: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].value)}
-                </div>
-                <div>
-                  Return: {formatAsEuroAmount( updateDataPoints[updateDataPoints.length - 1].return)}
-                </div>
-                <div>
-                  ROI: {formatAsPercentage( updateDataPoints[updateDataPoints.length - 1].roi)}
-                </div>
+                <button className="border px-3 py-2 mr-4">
+                  <Link href={`/investments/${params.id}/updates`}>View updates</Link>
+                </button>
+                <button className="border px-3 py-2">
+                  <Link href={`/investments/${params.id}/transactions`}>View transactions</Link>
+                </button>
               </div>
-            )}
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Updates</h1>
-            {updates.length > 0 && (
-              <div className="overflow-x-auto mb-4">
-                <table className="whitespace-nowrap">
-                  <thead>
-                    <tr className="border">
-                      <th className="border px-3 text-left">Date</th>
-                      <th className="border px-3 text-left">Value</th>
-                      <th className="border px-3 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {updates.map((update) => {
-                      return (
-                        <tr key={update.id} className="border">
-                          <td className="border px-3">{update.date}</td>
-                          <td className="border px-3">
-                            {formatAsEuroAmount(update.value)}
-                          </td>
-                          <td className="border px-3">
-                            <FaXmark
-                              className="hover:cursor-pointer"
-                              size={24}
-                              color="red"
-                              onClick={async () => {
-                                await deleteUpdate(update.id);
-                                fetchUpdates();
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div>
-              <button
-                className="border px-3 py-2"
-                type="submit"
-                onClick={() => setShowUpdateInvestmentModal(true)}
-              >
-                Add update
-              </button>
-              {showUpdateInvestmentModal && (
-                <Modal
-                  title="Update investment"
-                  onClose={() => setShowUpdateInvestmentModal(false)}
-                >
-                  <UpdateInvestmentForm
-                    onAdd={() => {
-                      setShowUpdateInvestmentModal(false);
-                      fetchUpdates();
-                    }}
-                    investmentId={params.id}
-                  />
-                </Modal>
-              )}
             </div>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Transactions</h1>
-            {transactions.length > 0 && (
-              <div className="overflow-x-auto mb-4">
-                <table className="whitespace-nowrap">
-                  <thead>
-                    <tr className="border">
-                      <th className="border px-3 text-left">Date</th>
-                      <th className="border px-3 text-left">Type</th>
-                      <th className="border px-3 text-left">Amount</th>
-                      <th className="border px-3 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((transaction) => {
-                      return (
-                        <tr key={transaction.id} className="border">
-                          <td className="border px-3">{transaction.date}</td>
-                          <td className="border px-3">
-                            {capitalize(transaction.type)}
-                          </td>
-                          <td className="border px-3">
-                            {formatAsEuroAmount(transaction.amount)}
-                          </td>
-                          <td className="border px-3">
-                            <FaXmark
-                              className="hover:cursor-pointer"
-                              size={24}
-                              color="red"
-                              onClick={async () => {
-                                await deleteTransaction(transaction.id);
-                                fetchTransactions();
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div>
-              <button
-                className="border px-3 py-2"
-                type="submit"
-                onClick={() => setShowAddTransactionModal(true)}
-              >
-                Add transaction
-              </button>
-              {showAddTransactionModal && (
-                <Modal
-                  title="Add transaction"
-                  onClose={() => setShowAddTransactionModal(false)}
-                >
-                  <AddTransactionForm
-                    onAdd={() => {
-                      setShowAddTransactionModal(false);
-                      fetchTransactions();
-                    }}
-                    investmentId={params.id}
-                  />
-                </Modal>
-              )}
-            </div>
-          </div>
+          )}
 
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>

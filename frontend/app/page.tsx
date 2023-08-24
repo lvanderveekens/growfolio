@@ -374,7 +374,7 @@ export default function HomePage() {
   return (
     <main>
       <div className="mb-8">
-        <h1 className="text-xl font-bold mb-4">My investments</h1>
+        <h1 className="text-3xl font-bold mb-8">Overview</h1>
         {investmentRows.length > 0 && (
           <div className="overflow-x-auto mb-4">
             <table className="w-full whitespace-nowrap">
@@ -455,7 +455,7 @@ export default function HomePage() {
           </Modal>
         )}
       </div>
-      <div className="mb-8 flex">
+      <div className="mb-8 flex gap-8">
         <div className="w-[50%] aspect-square">
           <h1 className="text-xl font-bold mb-4">Allocation</h1>
           <Pie
