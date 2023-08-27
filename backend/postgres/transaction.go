@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"fmt"
-	"growfolio/transaction"
+	"growfolio/domain"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,13 +14,13 @@ type Transaction struct {
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 	Date         time.Time
-	Type         transaction.Type
+	Type         domain.TransactionType
 	InvestmentID string `db:"investment_id"`
 	Amount       int64
 }
 
-func (t *Transaction) toDomainObject() *transaction.Transaction {
-	return transaction.New(t.ID.String(), t.Date, t.Type, t.InvestmentID, t.Amount)
+func (t *Transaction) toDomainObject() *domain.Transaction {
+	return domain.NewTransaction(t.ID.String(), t.Date, t.Type, t.InvestmentID, t.Amount)
 }
 
 type TransactionRepository struct {
@@ -31,7 +31,7 @@ func NewTransactionRepository(db *sqlx.DB) *TransactionRepository {
 	return &TransactionRepository{db: db}
 }
 
-func (r *TransactionRepository) Find(investmentID *string) ([]transaction.Transaction, error) {
+func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
 	query := "SELECT * FROM transaction"
 	args := make([]any, 0)
 	if investmentID != nil {
@@ -46,7 +46,7 @@ func (r *TransactionRepository) Find(investmentID *string) ([]transaction.Transa
 		return nil, fmt.Errorf("failed to select transactions: %w", err)
 	}
 
-	transactions := make([]transaction.Transaction, 0)
+	transactions := make([]domain.Transaction, 0)
 	for _, entity := range entities {
 		transactions = append(transactions, *entity.toDomainObject())
 	}
@@ -54,7 +54,7 @@ func (r *TransactionRepository) Find(investmentID *string) ([]transaction.Transa
 	return transactions, nil
 }
 
-func (r *TransactionRepository) Create(cmd transaction.CreateCommand) (*transaction.Transaction, error) {
+func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (*domain.Transaction, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new UUID: %w", err)

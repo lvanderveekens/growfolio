@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"growfolio/investment"
+	"growfolio/domain"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,12 +15,12 @@ type Investment struct {
 	ID        uuid.UUID
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
-	Type      investment.Type
+	Type      domain.InvestmentType
 	Name      string
 }
 
-func (i *Investment) toDomainObject() *investment.Investment {
-	return investment.New(i.ID.String(), i.Type, i.Name)
+func (i *Investment) toDomainObject() *domain.Investment {
+	return domain.NewInvestment(i.ID.String(), i.Type, i.Name)
 }
 
 type InvestmentRepository struct {
@@ -31,14 +31,14 @@ func NewInvestmentRepository(db *sqlx.DB) *InvestmentRepository {
 	return &InvestmentRepository{db: db}
 }
 
-func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
+func (r *InvestmentRepository) Find() ([]domain.Investment, error) {
 	entities := []Investment{}
 	err := r.db.Select(&entities, "SELECT * FROM investment ORDER BY created_at ASC")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select investments: %w", err)
 	}
 
-	investments := make([]investment.Investment, 0)
+	investments := make([]domain.Investment, 0)
 	for _, entity := range entities {
 		investments = append(investments, *entity.toDomainObject())
 	}
@@ -46,18 +46,18 @@ func (r *InvestmentRepository) Find() ([]investment.Investment, error) {
 	return investments, nil
 }
 
-func (r *InvestmentRepository) FindByID(id string) (*investment.Investment, error) {
+func (r *InvestmentRepository) FindByID(id string) (*domain.Investment, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		fmt.Println("error: id is not a uuid: " + err.Error())
-		return nil, investment.ErrNotFound
+		return nil, domain.ErrInvestmentNotFound
 	}
 
 	entity := Investment{}
 	err = r.db.Get(&entity, "SELECT * FROM investment WHERE id=$1", id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, investment.ErrNotFound
+			return nil, domain.ErrInvestmentNotFound
 		}
 		return nil, fmt.Errorf("failed to select investment: %w", err)
 	}
@@ -79,7 +79,7 @@ func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
 	return nil
 }
 
-func (r *InvestmentRepository) Create(c investment.CreateCommand) (*investment.Investment, error) {
+func (r *InvestmentRepository) Create(c domain.CreateInvestmentCommand) (*domain.Investment, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -107,11 +107,11 @@ type InvestmentUpdate struct {
 	Value        int64
 }
 
-func (i *InvestmentUpdate) toDomainObject() *investment.Update {
-	return investment.NewUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
+func (i *InvestmentUpdate) toDomainObject() *domain.InvestmentUpdate {
+	return domain.NewInvestmentUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
 }
 
-func (r *InvestmentRepository) CreateUpdate(c investment.CreateUpdateCommand) (*investment.Update, error) {
+func (r *InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateCommand) (*domain.InvestmentUpdate, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -130,7 +130,7 @@ func (r *InvestmentRepository) CreateUpdate(c investment.CreateUpdateCommand) (*
 	return entity.toDomainObject(), nil
 }
 
-func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]investment.Update, error) {
+func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error) {
 	query := "SELECT * FROM investment_update"
 	args := make([]any, 0)
 	if investmentID != nil {
@@ -145,7 +145,7 @@ func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]investment.U
 		return nil, fmt.Errorf("failed to select investment updates: %w", err)
 	}
 
-	updates := make([]investment.Update, 0)
+	updates := make([]domain.InvestmentUpdate, 0)
 	for _, entity := range entities {
 		updates = append(updates, *entity.toDomainObject())
 	}

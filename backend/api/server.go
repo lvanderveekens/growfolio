@@ -69,6 +69,7 @@ type Handlers struct {
 	investment       *InvestmentHandler
 	investmentUpdate *InvestmentUpdateHandler
 	transaction      *TransactionHandler
+	auth             *AuthHandler
 }
 
 func NewHandlers(

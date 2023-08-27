@@ -2,7 +2,8 @@ package api
 
 import (
 	"fmt"
-	"growfolio/investment"
+	"growfolio/domain"
+	"growfolio/domain/services"
 	"net/http"
 	"time"
 
@@ -10,10 +11,10 @@ import (
 )
 
 type InvestmentUpdateHandler struct {
-	investmentRepository investment.Repository
+	investmentRepository services.InvestmentRepository
 }
 
-func NewInvestmentUpdateHandler(investmentRepository investment.Repository) *InvestmentUpdateHandler {
+func NewInvestmentUpdateHandler(investmentRepository services.InvestmentRepository) *InvestmentUpdateHandler {
 	return &InvestmentUpdateHandler{investmentRepository: investmentRepository}
 }
 
@@ -42,7 +43,7 @@ func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (*respo
 
 	i, err := h.investmentRepository.FindByID(r.InvestmentID)
 	if err != nil {
-		if err == investment.ErrNotFound {
+		if err == domain.ErrInvestmentNotFound {
 			return nil, NewError(http.StatusBadRequest, err.Error())
 		}
 		return nil, fmt.Errorf("failed to find investment: %w", err)
@@ -72,7 +73,7 @@ func (h *InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (*respo
 	return newEmptyResponse(http.StatusNoContent), nil
 }
 
-func toInvestmentUpdateDto(u investment.Update) investmentUpdateDto {
+func toInvestmentUpdateDto(u domain.InvestmentUpdate) investmentUpdateDto {
 	return newInvestmentUpdateDto(u.ID, u.Date.Format("2006-01-02"), u.InvestmentID, u.Value)
 }
 
@@ -82,13 +83,13 @@ type createInvestmentUpdateRequest struct {
 	Value        int64  `json:"value"`
 }
 
-func (r *createInvestmentUpdateRequest) toCommand(i investment.Investment) (*investment.CreateUpdateCommand, error) {
+func (r *createInvestmentUpdateRequest) toCommand(i domain.Investment) (*domain.CreateInvestmentUpdateCommand, error) {
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	c := investment.NewCreateUpdateCommand(d, i, r.Value)
+	c := domain.NewCreateInvestmentUpdateCommand(d, i, r.Value)
 	return &c, nil
 }
 

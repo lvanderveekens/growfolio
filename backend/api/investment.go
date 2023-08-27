@@ -3,17 +3,18 @@ package api
 import (
 	"errors"
 	"fmt"
-	"growfolio/investment"
+	"growfolio/domain"
+	"growfolio/domain/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type InvestmentHandler struct {
-	investmentRepository investment.Repository
+	investmentRepository services.InvestmentRepository
 }
 
-func NewInvestmentHandler(investmentRepository investment.Repository) *InvestmentHandler {
+func NewInvestmentHandler(investmentRepository services.InvestmentRepository) *InvestmentHandler {
 	return &InvestmentHandler{investmentRepository: investmentRepository}
 }
 
@@ -35,7 +36,7 @@ func (h *InvestmentHandler) GetInvestment(c *gin.Context) (*response[investmentD
 	id := c.Param("id")
 	i, err := h.investmentRepository.FindByID(id)
 	if err != nil {
-		if err == investment.ErrNotFound {
+		if err == domain.ErrInvestmentNotFound {
 			return nil, NewError(http.StatusBadRequest, err.Error())
 		}
 		return nil, fmt.Errorf("failed to find investment by id %s: %w", id, err)
@@ -64,13 +65,13 @@ func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investme
 	return newResponse(http.StatusCreated, dto), nil
 }
 
-func toInvestmentDto(i investment.Investment) investmentDto {
+func toInvestmentDto(i domain.Investment) investmentDto {
 	return newInvestmentDto(i.ID, i.Type, i.Name)
 }
 
 type CreateInvestmentRequest struct {
-	Type investment.Type `json:"type"`
-	Name string          `json:"name"`
+	Type domain.InvestmentType `json:"type"`
+	Name string                `json:"name"`
 }
 
 func (r *CreateInvestmentRequest) validate() error {
@@ -83,16 +84,16 @@ func (r *CreateInvestmentRequest) validate() error {
 	return nil
 }
 
-func (r *CreateInvestmentRequest) toCommand() investment.CreateCommand {
-	return investment.NewCreateCommand(r.Type, r.Name)
+func (r *CreateInvestmentRequest) toCommand() domain.CreateInvestmentCommand {
+	return domain.NewCreateInvestmentCommand(r.Type, r.Name)
 }
 
 type investmentDto struct {
-	ID   string          `json:"id"`
-	Type investment.Type `json:"type"`
-	Name string          `json:"name"`
+	ID   string                `json:"id"`
+	Type domain.InvestmentType `json:"type"`
+	Name string                `json:"name"`
 }
 
-func newInvestmentDto(id string, t investment.Type, name string) investmentDto {
+func newInvestmentDto(id string, t domain.InvestmentType, name string) investmentDto {
 	return investmentDto{ID: id, Type: t, Name: name}
 }

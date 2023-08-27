@@ -1,9 +1,6 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -22,24 +19,8 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		google.New(s.googleClientId, s.googleClientSecret, "http://localhost:8080/auth/google/callback"),
 	)
 
-	r.GET("/auth/:provider", func(c *gin.Context) {
-		gothic.GetProviderName = func(r *http.Request) (string, error) { return c.Param("provider"), nil }
-		if user, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
-			fmt.Printf("Hi, %#v\n", user)
-		} else {
-			gothic.BeginAuthHandler(c.Writer, c.Request)
-		}
-	})
-
-	r.GET("/auth/:provider/callback", func(c *gin.Context) {
-		gothic.GetProviderName = func(r *http.Request) (string, error) { return c.Param("provider"), nil }
-		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
-		if err != nil {
-			fmt.Printf("Error: %s\n", err.Error())
-			return
-		}
-		fmt.Printf("Hi, %#v\n", user)
-	})
+	r.GET("/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
+	r.GET("/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
 
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))

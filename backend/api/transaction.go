@@ -3,8 +3,8 @@ package api
 import (
 	"errors"
 	"fmt"
-	"growfolio/investment"
-	"growfolio/transaction"
+	"growfolio/domain"
+	"growfolio/domain/services"
 	"net/http"
 	"time"
 
@@ -12,13 +12,13 @@ import (
 )
 
 type TransactionHandler struct {
-	transactionRepository transaction.Repository
-	investmentRepository  investment.Repository
+	transactionRepository services.TransactionRepository
+	investmentRepository  services.InvestmentRepository
 }
 
 func NewTransactionHandler(
-	transactionRepository transaction.Repository,
-	investmentRepository investment.Repository,
+	transactionRepository services.TransactionRepository,
+	investmentRepository services.InvestmentRepository,
 ) *TransactionHandler {
 	return &TransactionHandler{
 		transactionRepository: transactionRepository,
@@ -61,7 +61,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transa
 
 	i, err := h.investmentRepository.FindByID(req.InvestmentID)
 	if err != nil {
-		if err == investment.ErrNotFound {
+		if err == domain.ErrInvestmentNotFound {
 			return nil, NewError(http.StatusBadRequest, err.Error())
 		}
 		return nil, fmt.Errorf("failed to find investment: %w", err)
@@ -91,15 +91,15 @@ func (h *TransactionHandler) DeleteTransaction(c *gin.Context) (*response[empty]
 	return newEmptyResponse(http.StatusNoContent), nil
 }
 
-func toTransactionDto(t transaction.Transaction) transactionDto {
+func toTransactionDto(t domain.Transaction) transactionDto {
 	return newTransactionDto(t.ID, t.Date.Format("2006-01-02"), t.Type, t.InvestmentID, t.Amount)
 }
 
 type createTransactionRequest struct {
-	Date         string           `json:"date"`
-	Type         transaction.Type `json:"type"`
-	InvestmentID string           `json:"investmentId"`
-	Amount       int64            `json:"amount"`
+	Date         string                 `json:"date"`
+	Type         domain.TransactionType `json:"type"`
+	InvestmentID string                 `json:"investmentId"`
+	Amount       int64                  `json:"amount"`
 }
 
 func (r *createTransactionRequest) validate() error {
@@ -118,25 +118,25 @@ func (r *createTransactionRequest) validate() error {
 	return nil
 }
 
-func (r *createTransactionRequest) toCommand(i investment.Investment) (*transaction.CreateCommand, error) {
+func (r *createTransactionRequest) toCommand(i domain.Investment) (*domain.CreateTransactionCommand, error) {
 	date, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	cmd := transaction.NewCreateCommand(date, r.Type, i, r.Amount)
+	cmd := domain.NewCreateTransactionCommand(date, r.Type, i, r.Amount)
 	return &cmd, nil
 }
 
 type transactionDto struct {
-	ID           string           `json:"id"`
-	Date         string           `json:"date"`
-	Type         transaction.Type `json:"type"`
-	InvestmentID string           `json:"investmentId"`
-	Amount       int64            `json:"amount"`
+	ID           string                 `json:"id"`
+	Date         string                 `json:"date"`
+	Type         domain.TransactionType `json:"type"`
+	InvestmentID string                 `json:"investmentId"`
+	Amount       int64                  `json:"amount"`
 }
 
-func newTransactionDto(id string, date string, t transaction.Type, investmentId string, amount int64) transactionDto {
+func newTransactionDto(id string, date string, t domain.TransactionType, investmentId string, amount int64) transactionDto {
 	return transactionDto{
 		ID:           id,
 		Date:         date,
