@@ -1,15 +1,45 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
+	"github.com/gorilla/sessions"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/google"
 )
 
 func (s *Server) RegisterRoutes(r *gin.Engine) {
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000", "http://lucianos-macbook-pro.local:3000"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	}))
+	store := sessions.NewCookieStore([]byte(s.sessionSecret))
+	store.Options.Path = "/"
+	store.Options.HttpOnly = true
+
+	gothic.Store = store
+
+	goth.UseProviders(
+		google.New(s.googleClientId, s.googleClientSecret, "http://localhost:8080/auth/google/callback"),
+	)
+
+	r.GET("/auth/:provider", func(c *gin.Context) {
+		gothic.GetProviderName = func(r *http.Request) (string, error) { return c.Param("provider"), nil }
+		if user, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
+			fmt.Printf("Hi, %#v\n", user)
+		} else {
+			gothic.BeginAuthHandler(c.Writer, c.Request)
+		}
+	})
+
+	r.GET("/auth/:provider/callback", func(c *gin.Context) {
+		gothic.GetProviderName = func(r *http.Request) (string, error) { return c.Param("provider"), nil }
+		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			return
+		}
+		fmt.Printf("Hi, %#v\n", user)
+	})
 
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))

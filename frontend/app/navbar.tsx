@@ -21,7 +21,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const fetchInvestments = async () => {
     setLoading(true);
-    fetch(`http://localhost:8888/v1/investments`)
+    fetch(`/api/v1/investments`)
       .then((res) => res.json())
       .then((data) => {
         setInvestments(data);

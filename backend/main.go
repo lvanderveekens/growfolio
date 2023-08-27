@@ -25,6 +25,8 @@ func main() {
 		log.Fatal("Failed loading .env file: ", err)
 	}
 
+	fmt.Println("@>main(): " + os.Getenv("SESSION_SECRET"))
+
 	zoneName, _ := time.Now().Zone()
 	fmt.Println("Configured time zone: ", zoneName)
 
@@ -58,7 +60,12 @@ func main() {
 	transactionHandler := api.NewTransactionHandler(transactionRepository, investmentRepository)
 
 	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler)
-	server := api.NewServer(handlers)
+	server := api.NewServer(
+		os.Getenv("GOOGLE_CLIENT_ID"),
+		os.Getenv("GOOGLE_CLIENT_SECRET"),
+		os.Getenv("SESSION_SECRET"),
+		handlers,
+	)
 
 	log.Fatal(server.Start(8888))
 }

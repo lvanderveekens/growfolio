@@ -22,7 +22,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
       name: name!,
     };
 
-    const res = await fetch(`http://localhost:8888/v1/investments`, {
+    const res = await fetch(`/api/v1/investments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),

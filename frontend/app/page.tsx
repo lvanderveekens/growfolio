@@ -22,9 +22,8 @@ import "chartjs-adapter-moment";
 import { Line, Pie } from "react-chartjs-2";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
-import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
-import { FaPlus } from "react-icons/fa6";
 import Modal from "./modal";
+import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -131,7 +130,7 @@ export default function HomePage() {
   }, [investments, transactons, investmentUpdates]);
 
   const fetchInvestments = async () => {
-    fetch(`http://localhost:8888/v1/investments`)
+    fetch(`/api/v1/investments`)
       .then((res) => res.json())
       .then((data) => {
         setInvestments(data);
@@ -139,7 +138,7 @@ export default function HomePage() {
   };
 
   const fetchInvestmentUpdates = async () => {
-    fetch(`http://localhost:8888/v1/investment-updates`)
+    fetch(`/api/v1/investment-updates`)
       .then((res) => res.json())
       .then((investmentUpdates: InvestmentUpdate[]) => {
         investmentUpdates.sort(compareInvestmentUpdateByDateAsc);
@@ -148,7 +147,7 @@ export default function HomePage() {
   };
 
   const fetchTransactions = async () => {
-    fetch(`http://localhost:8888/v1/transactions`)
+    fetch(`/api/v1/transactions`)
       .then((res) => res.json())
       .then((transactions) => {
         transactions.sort(compareTransactionByDateAsc);
@@ -374,6 +373,8 @@ export default function HomePage() {
   return (
     <main>
       <div className="mb-8">
+        <a href="/api/auth/google" className="border">Sign in with Google</a>
+
         <h1 className="text-3xl font-bold mb-8">Overview</h1>
         {investmentRows.length > 0 && (
           <div className="overflow-x-auto mb-4">

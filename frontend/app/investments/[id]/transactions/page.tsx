@@ -29,7 +29,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }, []);
 
   const fetchInvestment = () => {
-    fetch(`http://localhost:8888/v1/investments/${params.id}`)
+    fetch(`/api/v1/investments/${params.id}`)
       .then((res) => res.json())
       .then((data) => setInvestment(data))
       .catch((error) => {
@@ -41,7 +41,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
 
   const fetchTransactions = () => {
     fetch(
-      `http://localhost:8888/v1/transactions?investmentId=${params.id}`
+      `/api/v1/transactions?investmentId=${params.id}`
     )
       .then((res) => res.json())
       .then((data) => setTransactions(data))
@@ -53,7 +53,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }
 
   const deleteTransaction = async (id: string) => {
-    await fetch(`http://localhost:8888/v1/transactions/${id}`, {
+    await fetch(`/api/v1/transactions/${id}`, {
       method: "DELETE",
     });
   }

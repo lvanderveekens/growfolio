@@ -32,7 +32,7 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
       value: Math.round(parseFloat(value!) * 100),
     };
 
-    const res = await fetch(`http://localhost:8888/v1/investment-updates`, {
+    const res = await fetch(`/api/v1/investment-updates`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),

@@ -80,7 +80,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, [transactions, updates]);
 
   const fetchInvestment = () => {
-    fetch(`http://localhost:8888/v1/investments/${params.id}`)
+    fetch(`/api/v1/investments/${params.id}`)
       .then((res) => res.json())
       .then((data) => setInvestment(data))
       .catch((error) => {
@@ -91,25 +91,25 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     }
 
   const fetchTransactions = () => {
-    fetch(`http://localhost:8888/v1/transactions?investmentId=${params.id}`)
+    fetch(`/api/v1/transactions?investmentId=${params.id}`)
       .then((res) => res.json())
       .then((data) => setTransactions(data));
   }
 
   const fetchUpdates = () => {
-    fetch(`http://localhost:8888/v1/investment-updates?investmentId=${params.id}`)
+    fetch(`/api/v1/investment-updates?investmentId=${params.id}`)
       .then((res) => res.json())
       .then((data) => setUpdates(data));
   }
 
   const deleteUpdate = async (id: string) => {
-    await fetch(`http://localhost:8888/v1/investment-updates/${id}`, {
+    await fetch(`/api/v1/investment-updates/${id}`, {
       method: "DELETE",
     });
   }
 
   const deleteTransaction = async (id: string) => {
-    await fetch(`http://localhost:8888/v1/transactions/${id}`, {
+    await fetch(`/api/v1/transactions/${id}`, {
       method: "DELETE",
     });
   }

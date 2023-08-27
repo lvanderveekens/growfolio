@@ -27,7 +27,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }, []);
 
   const fetchInvestment = () => {
-    fetch(`http://localhost:8888/v1/investments/${params.id}`)
+    fetch(`/api/v1/investments/${params.id}`)
       .then((res) => res.json())
       .then((data) => setInvestment(data))
       .catch((error) => {
@@ -39,7 +39,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
   const fetchUpdates = () => {
     fetch(
-      `http://localhost:8888/v1/investment-updates?investmentId=${params.id}`
+      `/api/v1/investment-updates?investmentId=${params.id}`
     )
       .then((res) => res.json())
       .then((data) => setUpdates(data))
@@ -51,7 +51,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }
 
   const deleteUpdate = async (id: string) => {
-    await fetch(`http://localhost:8888/v1/investment-updates/${id}`, {
+    await fetch(`/api/v1/investment-updates/${id}`, {
       method: "DELETE",
     });
   }

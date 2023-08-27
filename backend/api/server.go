@@ -9,12 +9,20 @@ import (
 )
 
 type Server struct {
+	googleClientId     string
+	googleClientSecret string
+
+	sessionSecret string
+
 	handlers *Handlers
 }
 
-func NewServer(handlers *Handlers) *Server {
+func NewServer(googleClientId, googleClientSecret, sessionSecret string, handlers *Handlers) *Server {
 	return &Server{
-		handlers: handlers,
+		googleClientId:     googleClientId,
+		googleClientSecret: googleClientSecret,
+		sessionSecret:      sessionSecret,
+		handlers:           handlers,
 	}
 }
 

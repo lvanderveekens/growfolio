@@ -37,7 +37,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       amount: Math.round(parseFloat(amount!) * 100),
     };
 
-    await fetch(`http://localhost:8888/v1/transactions`, {
+    await fetch(`/api/v1/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
