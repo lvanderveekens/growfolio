@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Server) RegisterRoutes(r *gin.Engine) {
-	store := sessions.NewCookieStore([]byte(s.sessionSecret))
+	store := sessions.NewCookieStore([]byte(s.gorillaSessionsSecret))
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true
 

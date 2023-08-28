@@ -25,8 +25,6 @@ func main() {
 		log.Fatal("Failed loading .env file: ", err)
 	}
 
-	fmt.Println("@>main(): " + os.Getenv("SESSION_SECRET"))
-
 	zoneName, _ := time.Now().Zone()
 	fmt.Println("Configured time zone: ", zoneName)
 
@@ -54,16 +52,18 @@ func main() {
 
 	investmentRepository := postgres.NewInvestmentRepository(db)
 	transactionRepository := postgres.NewTransactionRepository(db)
+	userRepository := postgres.NewUserRepository(db)
 
 	investmentHandler := api.NewInvestmentHandler(investmentRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentRepository)
 	transactionHandler := api.NewTransactionHandler(transactionRepository, investmentRepository)
+	authHandler := api.NewAuthHandler(userRepository, os.Getenv("JWT_SECRET"))
 
-	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler)
+	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler, authHandler)
 	server := api.NewServer(
 		os.Getenv("GOOGLE_CLIENT_ID"),
 		os.Getenv("GOOGLE_CLIENT_SECRET"),
-		os.Getenv("SESSION_SECRET"),
+		os.Getenv("GORILLA_SESSIONS_SECRET"),
 		handlers,
 	)
 

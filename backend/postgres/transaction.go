@@ -19,7 +19,7 @@ type Transaction struct {
 	Amount       int64
 }
 
-func (t *Transaction) toDomainObject() *domain.Transaction {
+func (t *Transaction) toDomainTransaction() *domain.Transaction {
 	return domain.NewTransaction(t.ID.String(), t.Date, t.Type, t.InvestmentID, t.Amount)
 }
 
@@ -48,7 +48,7 @@ func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction
 
 	transactions := make([]domain.Transaction, 0)
 	for _, entity := range entities {
-		transactions = append(transactions, *entity.toDomainObject())
+		transactions = append(transactions, *entity.toDomainTransaction())
 	}
 
 	return transactions, nil
@@ -70,7 +70,7 @@ func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (*do
 		return nil, fmt.Errorf("failed to insert transaction: %w", err)
 	}
 
-	return entity.toDomainObject(), nil
+	return entity.toDomainTransaction(), nil
 }
 
 func (r *TransactionRepository) DeleteByID(id string) error {

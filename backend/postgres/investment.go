@@ -19,7 +19,7 @@ type Investment struct {
 	Name      string
 }
 
-func (i *Investment) toDomainObject() *domain.Investment {
+func (i *Investment) toDomainInvestment() *domain.Investment {
 	return domain.NewInvestment(i.ID.String(), i.Type, i.Name)
 }
 
@@ -40,7 +40,7 @@ func (r *InvestmentRepository) Find() ([]domain.Investment, error) {
 
 	investments := make([]domain.Investment, 0)
 	for _, entity := range entities {
-		investments = append(investments, *entity.toDomainObject())
+		investments = append(investments, *entity.toDomainInvestment())
 	}
 
 	return investments, nil
@@ -62,7 +62,7 @@ func (r *InvestmentRepository) FindByID(id string) (*domain.Investment, error) {
 		return nil, fmt.Errorf("failed to select investment: %w", err)
 	}
 
-	return entity.toDomainObject(), nil
+	return entity.toDomainInvestment(), nil
 }
 
 func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
@@ -95,7 +95,7 @@ func (r *InvestmentRepository) Create(c domain.CreateInvestmentCommand) (*domain
 		return nil, fmt.Errorf("failed to insert investment: %w", err)
 	}
 
-	return entity.toDomainObject(), nil
+	return entity.toDomainInvestment(), nil
 }
 
 type InvestmentUpdate struct {
@@ -107,7 +107,7 @@ type InvestmentUpdate struct {
 	Value        int64
 }
 
-func (i *InvestmentUpdate) toDomainObject() *domain.InvestmentUpdate {
+func (i *InvestmentUpdate) toDomainInvestmentUpdate() *domain.InvestmentUpdate {
 	return domain.NewInvestmentUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
 }
 
@@ -127,7 +127,7 @@ func (r *InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateComma
 		return nil, fmt.Errorf("failed to insert investment update: %w", err)
 	}
 
-	return entity.toDomainObject(), nil
+	return entity.toDomainInvestmentUpdate(), nil
 }
 
 func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error) {
@@ -147,7 +147,7 @@ func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]domain.Inves
 
 	updates := make([]domain.InvestmentUpdate, 0)
 	for _, entity := range entities {
-		updates = append(updates, *entity.toDomainObject())
+		updates = append(updates, *entity.toDomainInvestmentUpdate())
 	}
 
 	return updates, nil

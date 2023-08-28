@@ -12,17 +12,17 @@ type Server struct {
 	googleClientId     string
 	googleClientSecret string
 
-	sessionSecret string
+	gorillaSessionsSecret string
 
 	handlers *Handlers
 }
 
-func NewServer(googleClientId, googleClientSecret, sessionSecret string, handlers *Handlers) *Server {
+func NewServer(googleClientId, googleClientSecret, gorillaSessionsSecret string, handlers *Handlers) *Server {
 	return &Server{
-		googleClientId:     googleClientId,
-		googleClientSecret: googleClientSecret,
-		sessionSecret:      sessionSecret,
-		handlers:           handlers,
+		googleClientId:        googleClientId,
+		googleClientSecret:    googleClientSecret,
+		gorillaSessionsSecret: gorillaSessionsSecret,
+		handlers:              handlers,
 	}
 }
 
@@ -76,10 +76,12 @@ func NewHandlers(
 	investment *InvestmentHandler,
 	investmentUpdate *InvestmentUpdateHandler,
 	transaction *TransactionHandler,
+	auth *AuthHandler,
 ) *Handlers {
 	return &Handlers{
 		investment:       investment,
 		investmentUpdate: investmentUpdate,
 		transaction:      transaction,
+		auth:             auth,
 	}
 }

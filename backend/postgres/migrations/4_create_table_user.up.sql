@@ -1,0 +1,17 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS "user"(
+    id TEXT NOT NULL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    email TEXT NOT NULL,
+    "provider" TEXT NOT NULL
+);
+
+CREATE TRIGGER set_updated_at
+    BEFORE UPDATE
+    ON "user"
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_updated_at();
+
+COMMIT;
