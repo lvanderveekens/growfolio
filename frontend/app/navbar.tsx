@@ -3,21 +3,33 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
-import { Investment } from "./page";
+import { Investment, User } from "./page";
 import { AiOutlineStock } from "react-icons/ai";
 
 interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = () => {
+  const [user, setUser] = useState<User[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    fetchCurrentUser();
     fetchInvestments();
   }, []);
+
+  const fetchCurrentUser = async () => {
+    setLoading(true);
+    fetch(`/api/v1/users/current`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data);
+      })
+      .finally(() => setLoading(false));
+  };
 
   const fetchInvestments = async () => {
     setLoading(true);

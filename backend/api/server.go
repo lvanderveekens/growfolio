@@ -14,15 +14,21 @@ type Server struct {
 
 	gorillaSessionsSecret string
 
-	handlers *Handlers
+	handlers    *Handlers
+	middlewares *Middlewares
 }
 
-func NewServer(googleClientId, googleClientSecret, gorillaSessionsSecret string, handlers *Handlers) *Server {
+func NewServer(
+	googleClientId, googleClientSecret, gorillaSessionsSecret string,
+	handlers *Handlers,
+	middlewares *Middlewares,
+) *Server {
 	return &Server{
 		googleClientId:        googleClientId,
 		googleClientSecret:    googleClientSecret,
 		gorillaSessionsSecret: gorillaSessionsSecret,
 		handlers:              handlers,
+		middlewares:           middlewares,
 	}
 }
 
@@ -70,6 +76,7 @@ type Handlers struct {
 	investmentUpdate *InvestmentUpdateHandler
 	transaction      *TransactionHandler
 	auth             *AuthHandler
+	user             *UserHandler
 }
 
 func NewHandlers(
@@ -77,11 +84,23 @@ func NewHandlers(
 	investmentUpdate *InvestmentUpdateHandler,
 	transaction *TransactionHandler,
 	auth *AuthHandler,
+	user *UserHandler,
 ) *Handlers {
 	return &Handlers{
 		investment:       investment,
 		investmentUpdate: investmentUpdate,
 		transaction:      transaction,
 		auth:             auth,
+		user:             user,
+	}
+}
+
+type Middlewares struct {
+	token gin.HandlerFunc
+}
+
+func NewMiddlewares(token gin.HandlerFunc) *Middlewares {
+	return &Middlewares{
+		token: token,
 	}
 }

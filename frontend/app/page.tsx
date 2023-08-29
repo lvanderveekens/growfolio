@@ -680,6 +680,12 @@ export const roiOptions: any = {
   },
 };
 
+export interface User {
+  id: string;
+  email: string;
+  provider: string;
+}
+
 export interface Investment {
   id: string;
   type: InvestmentType;

@@ -5,21 +5,19 @@ import (
 	"growfolio/domain"
 	"growfolio/domain/services"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
 
 type AuthHandler struct {
 	userRepository services.UserRepository
-	jwtSecret      string
+	tokenService   *TokenService
 }
 
-func NewAuthHandler(userRepository services.UserRepository, jwtSecret string) *AuthHandler {
-	return &AuthHandler{userRepository: userRepository, jwtSecret: jwtSecret}
+func NewAuthHandler(userRepository services.UserRepository, tokenService *TokenService) *AuthHandler {
+	return &AuthHandler{userRepository: userRepository, tokenService: tokenService}
 }
 
 func (h *AuthHandler) Begin(c *gin.Context) (*response[empty], error) {
@@ -45,12 +43,12 @@ func (h *AuthHandler) Callback(c *gin.Context) (*response[empty], error) {
 		return nil, fmt.Errorf("failed to find or create user: %w", err)
 	}
 
-	jwt, err := h.generateJWT(user.ID)
+	jwt, err := h.tokenService.generateToken(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	c.SetCookie("jwt", jwt, 3600, "/", "localhost", false, true)
+	c.SetCookie("token", jwt, 3600, "/", "localhost", false, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
@@ -68,33 +66,6 @@ func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (*domain.User, error)
 	}
 
 	return user, nil
-}
-
-func (h *AuthHandler) generateJWT(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":    time.Now().Add(1 * time.Hour).Unix(),
-		"userId": userID,
-	})
-
-	return token.SignedString([]byte(h.jwtSecret))
-}
-
-func (h *AuthHandler) validateJWT(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return h.jwtSecret, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	} else {
-		return nil, fmt.Errorf("invalid token")
-	}
 }
 
 func toCreateUserCommand(gothUser goth.User) domain.CreateUserCommand {
