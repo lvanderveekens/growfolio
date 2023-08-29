@@ -2,9 +2,11 @@
 "use client"
 
 import { useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function AuthProviderCallbackPage({ params, }: { params: { provider: string } }) {
   const queryString = window.location.search;
+  const router = useRouter();
 
   useEffect(() => {
     const baseUrl = `/api/auth/${params.provider}/callback`; // Replace with your API endpoint
@@ -12,10 +14,14 @@ export default function AuthProviderCallbackPage({ params, }: { params: { provid
 
     fetch(urlWithQuery, {
       credentials: "include",
-    }).catch((error) => {
-      console.error(`Error performing callback: ${error}`);
-    });
+    })
+      .catch((error) => {
+        console.error(`Error performing callback: ${error}`);
+      })
+      .finally(() => {
+        router.push("/")
+      });
   }, []);
 
-  return <div>Callback page: {params.provider}</div>;
+  return <div>Processing callback</div>;
 }

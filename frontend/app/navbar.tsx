@@ -79,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
               {investments.length > 0 &&
                 investments.map((i) => {
                   return (
-                    <div className={`py-1`}>
+                    <div key={i.id} className={`py-1`}>
                       <Link
                         className={`hover:text-green-400`}
                         href={`/investments/${i.id}`}
