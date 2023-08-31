@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"growfolio/domain/services"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,25 +27,24 @@ func (s *TokenService) generateToken(userID string) (string, error) {
 	return token.SignedString([]byte(s.jwtSecret))
 }
 
-func (s *TokenService) validateToken(tokenString string) (jwt.MapClaims, error) {
+func (s *TokenService) validateToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return s.jwtSecret, nil
+		return []byte(s.jwtSecret), nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	} else {
+	if !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
+	return token, nil
 }
 
-func TokenMiddleware(userRepository services.UserRepository, tokenService TokenService) gin.HandlerFunc {
+func TokenMiddleware(tokenService TokenService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("token")
 		if err != nil {
@@ -56,7 +54,7 @@ func TokenMiddleware(userRepository services.UserRepository, tokenService TokenS
 			return
 		}
 
-		claims, err := tokenService.validateToken(tokenString)
+		token, err := tokenService.validateToken(tokenString)
 		if err != nil {
 			fmt.Printf("invalid token: %s\n", err.Error())
 			c.JSON(401, NewError(401, "Unauthorized"))
@@ -64,6 +62,6 @@ func TokenMiddleware(userRepository services.UserRepository, tokenService TokenS
 			return
 		}
 
-		fmt.Printf("token claims: %s\n", claims)
+		c.Set("token", token)
 	}
 }

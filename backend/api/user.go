@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserHandler struct {
@@ -18,8 +19,9 @@ func NewUserHandler(userRepository services.UserRepository) UserHandler {
 }
 
 func (h *UserHandler) GetCurrentUser(c *gin.Context) (response[userDto], error) {
-	// TODO: get user id from token
-	id := c.Param("id")
+	token := c.Value("token").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	id := claims["userId"].(string)
 
 	user, err := h.userRepository.FindByID(id)
 	if err != nil {

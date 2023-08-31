@@ -63,7 +63,7 @@ func main() {
 	userHandler := api.NewUserHandler(&userRepository)
 
 	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler, authHandler, userHandler)
-	middlewares := api.NewMiddlewares(api.TokenMiddleware(&userRepository, tokenService))
+	middlewares := api.NewMiddlewares(api.TokenMiddleware(tokenService))
 	server := api.NewServer(
 		os.Getenv("GOOGLE_CLIENT_ID"),
 		os.Getenv("GOOGLE_CLIENT_SECRET"),
