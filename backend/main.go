@@ -56,14 +56,14 @@ func main() {
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"))
 
-	investmentHandler := api.NewInvestmentHandler(investmentRepository)
-	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentRepository)
-	transactionHandler := api.NewTransactionHandler(transactionRepository, investmentRepository)
-	authHandler := api.NewAuthHandler(userRepository, tokenService)
-	userHandler := api.NewUserHandler(userRepository)
+	investmentHandler := api.NewInvestmentHandler(&investmentRepository)
+	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository)
+	transactionHandler := api.NewTransactionHandler(&transactionRepository, &investmentRepository)
+	authHandler := api.NewAuthHandler(&userRepository, tokenService)
+	userHandler := api.NewUserHandler(&userRepository)
 
 	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler, authHandler, userHandler)
-	middlewares := api.NewMiddlewares(api.TokenMiddleware(userRepository, tokenService))
+	middlewares := api.NewMiddlewares(api.TokenMiddleware(&userRepository, tokenService))
 	server := api.NewServer(
 		os.Getenv("GOOGLE_CLIENT_ID"),
 		os.Getenv("GOOGLE_CLIENT_SECRET"),

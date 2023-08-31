@@ -26,25 +26,24 @@ type UserRepository struct {
 	db *sqlx.DB
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return UserRepository{db: db}
 }
 
-func (r *UserRepository) FindByID(id string) (*domain.User, error) {
+func (r *UserRepository) FindByID(id string) (domain.User, error) {
 	entity := User{}
 	err := r.db.Get(&entity, `SELECT * FROM "user" WHERE id=$1`, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.ErrUserNotFound
+			return domain.User{}, domain.ErrUserNotFound
 		}
-		return nil, fmt.Errorf("failed to select user: %w", err)
+		return domain.User{}, fmt.Errorf("failed to select user: %w", err)
 	}
 
-	user := entity.toDomainUser()
-	return &user, nil
+	return entity.toDomainUser(), nil
 }
 
-func (r *UserRepository) Create(cmd domain.CreateUserCommand) (*domain.User, error) {
+func (r *UserRepository) Create(cmd domain.CreateUserCommand) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`
 		INSERT INTO "user" (id, email, provider) 
@@ -52,9 +51,8 @@ func (r *UserRepository) Create(cmd domain.CreateUserCommand) (*domain.User, err
 		RETURNING *
 	`, cmd.ID, cmd.Email, cmd.Provider).StructScan(&entity)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert user: %w", err)
+		return domain.User{}, fmt.Errorf("failed to insert user: %w", err)
 	}
 
-	user := entity.toDomainUser()
-	return &user, nil
+	return entity.toDomainUser(), nil
 }

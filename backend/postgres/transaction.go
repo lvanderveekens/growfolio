@@ -19,7 +19,7 @@ type Transaction struct {
 	Amount       int64
 }
 
-func (t *Transaction) toDomainTransaction() *domain.Transaction {
+func (t *Transaction) toDomainTransaction() domain.Transaction {
 	return domain.NewTransaction(t.ID.String(), t.Date, t.Type, t.InvestmentID, t.Amount)
 }
 
@@ -27,8 +27,8 @@ type TransactionRepository struct {
 	db *sqlx.DB
 }
 
-func NewTransactionRepository(db *sqlx.DB) *TransactionRepository {
-	return &TransactionRepository{db: db}
+func NewTransactionRepository(db *sqlx.DB) TransactionRepository {
+	return TransactionRepository{db: db}
 }
 
 func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
@@ -48,16 +48,16 @@ func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction
 
 	transactions := make([]domain.Transaction, 0)
 	for _, entity := range entities {
-		transactions = append(transactions, *entity.toDomainTransaction())
+		transactions = append(transactions, entity.toDomainTransaction())
 	}
 
 	return transactions, nil
 }
 
-func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (*domain.Transaction, error) {
+func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (domain.Transaction, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate new UUID: %w", err)
+		return domain.Transaction{}, fmt.Errorf("failed to generate new UUID: %w", err)
 	}
 
 	var entity Transaction
@@ -67,7 +67,7 @@ func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (*do
 		RETURNING *
 	`, id, cmd.Date, cmd.Type, cmd.Investment.ID, cmd.Amount).StructScan(&entity)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert transaction: %w", err)
+		return domain.Transaction{}, fmt.Errorf("failed to insert transaction: %w", err)
 	}
 
 	return entity.toDomainTransaction(), nil

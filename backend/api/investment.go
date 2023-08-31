@@ -14,14 +14,14 @@ type InvestmentHandler struct {
 	investmentRepository services.InvestmentRepository
 }
 
-func NewInvestmentHandler(investmentRepository services.InvestmentRepository) *InvestmentHandler {
-	return &InvestmentHandler{investmentRepository: investmentRepository}
+func NewInvestmentHandler(investmentRepository services.InvestmentRepository) InvestmentHandler {
+	return InvestmentHandler{investmentRepository: investmentRepository}
 }
 
-func (h *InvestmentHandler) GetInvestments(c *gin.Context) (*response[[]investmentDto], error) {
+func (h *InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmentDto], error) {
 	investments, err := h.investmentRepository.Find()
 	if err != nil {
-		return nil, fmt.Errorf("failed to find investments: %w", err)
+		return response[[]investmentDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
 
 	dtos := make([]investmentDto, 0)
@@ -32,37 +32,35 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) (*response[[]investme
 	return newResponse(http.StatusOK, dtos), nil
 }
 
-func (h *InvestmentHandler) GetInvestment(c *gin.Context) (*response[investmentDto], error) {
+func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDto], error) {
 	id := c.Param("id")
 	i, err := h.investmentRepository.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
-			return nil, NewError(http.StatusBadRequest, err.Error())
+			return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 		}
-		return nil, fmt.Errorf("failed to find investment by id %s: %w", id, err)
+		return response[investmentDto]{}, fmt.Errorf("failed to find investment by id %s: %w", id, err)
 	}
 
-	dto := toInvestmentDto(*i)
-	return newResponse(http.StatusOK, dto), nil
+	return newResponse(http.StatusOK, toInvestmentDto(i)), nil
 }
 
-func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (*response[investmentDto], error) {
+func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (response[investmentDto], error) {
 	var req CreateInvestmentRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode request body: %w", err)
+		return response[investmentDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
 	if err := req.validate(); err != nil {
-		return nil, NewError(http.StatusBadRequest, err.Error())
+		return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	created, err := h.investmentRepository.Create(req.toCommand())
 	if err != nil {
-		return nil, fmt.Errorf("failed to create investment: %w", err)
+		return response[investmentDto]{}, fmt.Errorf("failed to create investment: %w", err)
 	}
 
-	dto := toInvestmentDto(*created)
-	return newResponse(http.StatusCreated, dto), nil
+	return newResponse(http.StatusCreated, toInvestmentDto(created)), nil
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {

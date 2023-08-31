@@ -13,20 +13,20 @@ type UserHandler struct {
 	userRepository services.UserRepository
 }
 
-func NewUserHandler(userRepository services.UserRepository) *UserHandler {
-	return &UserHandler{userRepository: userRepository}
+func NewUserHandler(userRepository services.UserRepository) UserHandler {
+	return UserHandler{userRepository: userRepository}
 }
 
-func (h *UserHandler) GetCurrentUser(c *gin.Context) (*response[userDto], error) {
+func (h *UserHandler) GetCurrentUser(c *gin.Context) (response[userDto], error) {
 	// TODO: get user id from token
 	id := c.Param("id")
 
 	user, err := h.userRepository.FindByID(id)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
-			return nil, NewError(http.StatusNotFound, err.Error())
+			return response[userDto]{}, NewError(http.StatusNotFound, err.Error())
 		}
-		return nil, fmt.Errorf("failed to find user by id %s: %w", id, err)
+		return response[userDto]{}, fmt.Errorf("failed to find user by id %s: %w", id, err)
 	}
 
 	dto := newUserDto(user.ID, user.Email, user.Provider)

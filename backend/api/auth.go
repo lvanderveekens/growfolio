@@ -13,14 +13,14 @@ import (
 
 type AuthHandler struct {
 	userRepository services.UserRepository
-	tokenService   *TokenService
+	tokenService   TokenService
 }
 
-func NewAuthHandler(userRepository services.UserRepository, tokenService *TokenService) *AuthHandler {
-	return &AuthHandler{userRepository: userRepository, tokenService: tokenService}
+func NewAuthHandler(userRepository services.UserRepository, tokenService TokenService) AuthHandler {
+	return AuthHandler{userRepository: userRepository, tokenService: tokenService}
 }
 
-func (h *AuthHandler) Begin(c *gin.Context) (*response[empty], error) {
+func (h *AuthHandler) Begin(c *gin.Context) (response[empty], error) {
 	gothic.GetProviderName = getProviderName(c)
 	if user, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
 		fmt.Printf("Hi, %#v\n", user)
@@ -31,38 +31,38 @@ func (h *AuthHandler) Begin(c *gin.Context) (*response[empty], error) {
 	return newEmptyResponse(http.StatusOK), nil
 }
 
-func (h *AuthHandler) Callback(c *gin.Context) (*response[empty], error) {
+func (h *AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 	gothic.GetProviderName = getProviderName(c)
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		return nil, err
+		return response[empty]{}, err
 	}
 
 	user, err := h.findOrCreateUser(gothUser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find or create user: %w", err)
+		return response[empty]{}, fmt.Errorf("failed to find or create user: %w", err)
 	}
 
 	jwt, err := h.tokenService.generateToken(user.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate JWT: %w", err)
+		return response[empty]{}, fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
 	c.SetCookie("token", jwt, 3600, "/", "localhost", false, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
-func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (*domain.User, error) {
+func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) {
 	user, err := h.userRepository.FindByID(gothUser.UserID)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
 			created, err := h.userRepository.Create(toCreateUserCommand(gothUser))
 			if err != nil {
-				return nil, fmt.Errorf("failed to create user: %w", err)
+				return domain.User{}, fmt.Errorf("failed to create user: %w", err)
 			}
 			return created, nil
 		}
-		return nil, fmt.Errorf("failed to find user by id %s: %w", gothUser.UserID, err)
+		return domain.User{}, fmt.Errorf("failed to find user by id %s: %w", gothUser.UserID, err)
 	}
 
 	return user, nil

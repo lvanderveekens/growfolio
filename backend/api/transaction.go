@@ -19,19 +19,19 @@ type TransactionHandler struct {
 func NewTransactionHandler(
 	transactionRepository services.TransactionRepository,
 	investmentRepository services.InvestmentRepository,
-) *TransactionHandler {
-	return &TransactionHandler{
+) TransactionHandler {
+	return TransactionHandler{
 		transactionRepository: transactionRepository,
 		investmentRepository:  investmentRepository,
 	}
 }
 
-func (h *TransactionHandler) GetTransactions(c *gin.Context) (*response[[]transactionDto], error) {
+func (h *TransactionHandler) GetTransactions(c *gin.Context) (response[[]transactionDto], error) {
 	investmentId := stringOrNil(c.Query("investmentId"))
 
 	transactions, err := h.transactionRepository.Find(investmentId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find transactions: %w", err)
+		return response[[]transactionDto]{}, fmt.Errorf("failed to find transactions: %w", err)
 	}
 
 	dtos := make([]transactionDto, 0)
@@ -49,43 +49,43 @@ func stringOrNil(s string) *string {
 	return &s
 }
 
-func (h *TransactionHandler) CreateTransaction(c *gin.Context) (*response[transactionDto], error) {
+func (h *TransactionHandler) CreateTransaction(c *gin.Context) (response[transactionDto], error) {
 	var req createTransactionRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, err.Error())
+		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 	if err := req.validate(); err != nil {
-		return nil, NewError(http.StatusBadRequest, err.Error())
+		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	i, err := h.investmentRepository.FindByID(req.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
-			return nil, NewError(http.StatusBadRequest, err.Error())
+			return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 		}
-		return nil, fmt.Errorf("failed to find investment: %w", err)
+		return response[transactionDto]{}, fmt.Errorf("failed to find investment: %w", err)
 	}
 
-	cmd, err := req.toCommand(*i)
+	cmd, err := req.toCommand(i)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, err.Error())
+		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.transactionRepository.Create(*cmd)
+	created, err := h.transactionRepository.Create(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create transaction: %w", err)
+		return response[transactionDto]{}, fmt.Errorf("failed to create transaction: %w", err)
 	}
 
-	dto := toTransactionDto(*created)
+	dto := toTransactionDto(created)
 	return newResponse(http.StatusCreated, dto), nil
 }
 
-func (h *TransactionHandler) DeleteTransaction(c *gin.Context) (*response[empty], error) {
+func (h *TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], error) {
 	id := c.Param("id")
 	err := h.transactionRepository.DeleteByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to delete transaction: %w", err)
+		return response[empty]{}, fmt.Errorf("failed to delete transaction: %w", err)
 	}
 
 	return newEmptyResponse(http.StatusNoContent), nil
@@ -118,14 +118,13 @@ func (r *createTransactionRequest) validate() error {
 	return nil
 }
 
-func (r *createTransactionRequest) toCommand(i domain.Investment) (*domain.CreateTransactionCommand, error) {
+func (r *createTransactionRequest) toCommand(i domain.Investment) (domain.CreateTransactionCommand, error) {
 	date, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse date: %w", err)
+		return domain.CreateTransactionCommand{}, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	cmd := domain.NewCreateTransactionCommand(date, r.Type, i, r.Amount)
-	return &cmd, nil
+	return domain.NewCreateTransactionCommand(date, r.Type, i, r.Amount), nil
 }
 
 type transactionDto struct {

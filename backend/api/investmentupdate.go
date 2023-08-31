@@ -14,16 +14,16 @@ type InvestmentUpdateHandler struct {
 	investmentRepository services.InvestmentRepository
 }
 
-func NewInvestmentUpdateHandler(investmentRepository services.InvestmentRepository) *InvestmentUpdateHandler {
-	return &InvestmentUpdateHandler{investmentRepository: investmentRepository}
+func NewInvestmentUpdateHandler(investmentRepository services.InvestmentRepository) InvestmentUpdateHandler {
+	return InvestmentUpdateHandler{investmentRepository: investmentRepository}
 }
 
-func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (*response[[]investmentUpdateDto], error) {
+func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
 	investmentID := stringOrNil(c.Query("investmentId"))
 
 	updates, err := h.investmentRepository.FindUpdates(investmentID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find investment updates: %w", err)
+		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investment updates: %w", err)
 	}
 
 	dtos := make([]investmentUpdateDto, 0)
@@ -34,40 +34,40 @@ func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (*respons
 	return newResponse(http.StatusOK, dtos), nil
 }
 
-func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (*response[investmentUpdateDto], error) {
+func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (response[investmentUpdateDto], error) {
 	var r createInvestmentUpdateRequest
 	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode request body: %w", err)
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
 
 	i, err := h.investmentRepository.FindByID(r.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
-			return nil, NewError(http.StatusBadRequest, err.Error())
+			return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
 		}
-		return nil, fmt.Errorf("failed to find investment: %w", err)
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to find investment: %w", err)
 	}
 
-	cmd, err := r.toCommand(*i)
+	cmd, err := r.toCommand(i)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, err.Error())
+		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	u, err := h.investmentRepository.CreateUpdate(*cmd)
+	u, err := h.investmentRepository.CreateUpdate(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create investment update: %w", err)
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
 	}
 
-	dto := toInvestmentUpdateDto(*u)
+	dto := toInvestmentUpdateDto(u)
 	return newResponse(http.StatusCreated, dto), nil
 }
 
-func (h *InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (*response[empty], error) {
+func (h *InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (response[empty], error) {
 	id := c.Param("id")
 	err := h.investmentRepository.DeleteUpdateByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to delete investment update: %w", err)
+		return response[empty]{}, fmt.Errorf("failed to delete investment update: %w", err)
 	}
 
 	return newEmptyResponse(http.StatusNoContent), nil
@@ -83,14 +83,13 @@ type createInvestmentUpdateRequest struct {
 	Value        int64  `json:"value"`
 }
 
-func (r *createInvestmentUpdateRequest) toCommand(i domain.Investment) (*domain.CreateInvestmentUpdateCommand, error) {
+func (r *createInvestmentUpdateRequest) toCommand(i domain.Investment) (domain.CreateInvestmentUpdateCommand, error) {
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse date: %w", err)
+		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	c := domain.NewCreateInvestmentUpdateCommand(d, i, r.Value)
-	return &c, nil
+	return domain.NewCreateInvestmentUpdateCommand(d, i, r.Value), nil
 }
 
 type investmentUpdateDto struct {

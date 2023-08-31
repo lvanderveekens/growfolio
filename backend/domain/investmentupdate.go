@@ -19,8 +19,8 @@ type InvestmentUpdate struct {
 	Value        int64
 }
 
-func NewInvestmentUpdate(id string, date time.Time, investmentID string, value int64) *InvestmentUpdate {
-	return &InvestmentUpdate{
+func NewInvestmentUpdate(id string, date time.Time, investmentID string, value int64) InvestmentUpdate {
+	return InvestmentUpdate{
 		ID:           id,
 		Date:         date,
 		InvestmentID: investmentID,

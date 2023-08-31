@@ -30,8 +30,8 @@ type Investment struct {
 	Name string
 }
 
-func NewInvestment(id string, t InvestmentType, name string) *Investment {
-	return &Investment{
+func NewInvestment(id string, t InvestmentType, name string) Investment {
+	return Investment{
 		ID:   id,
 		Type: t,
 		Name: name,

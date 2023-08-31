@@ -13,8 +13,8 @@ type TokenService struct {
 	jwtSecret string
 }
 
-func NewTokenService(jwtSecret string) *TokenService {
-	return &TokenService{
+func NewTokenService(jwtSecret string) TokenService {
+	return TokenService{
 		jwtSecret: jwtSecret,
 	}
 }
@@ -46,7 +46,7 @@ func (s *TokenService) validateToken(tokenString string) (jwt.MapClaims, error) 
 	}
 }
 
-func TokenMiddleware(userRepository services.UserRepository, tokenService *TokenService) gin.HandlerFunc {
+func TokenMiddleware(userRepository services.UserRepository, tokenService TokenService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("token")
 		if err != nil {

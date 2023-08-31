@@ -56,8 +56,8 @@ type Transaction struct {
 	Amount       int64
 }
 
-func NewTransaction(id string, date time.Time, t TransactionType, investmentID string, amount int64) *Transaction {
-	return &Transaction{
+func NewTransaction(id string, date time.Time, t TransactionType, investmentID string, amount int64) Transaction {
+	return Transaction{
 		ID:           id,
 		Date:         date,
 		Type:         t,

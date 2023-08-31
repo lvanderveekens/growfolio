@@ -14,16 +14,16 @@ type Server struct {
 
 	gorillaSessionsSecret string
 
-	handlers    *Handlers
-	middlewares *Middlewares
+	handlers    Handlers
+	middlewares Middlewares
 }
 
 func NewServer(
 	googleClientId, googleClientSecret, gorillaSessionsSecret string,
-	handlers *Handlers,
-	middlewares *Middlewares,
-) *Server {
-	return &Server{
+	handlers Handlers,
+	middlewares Middlewares,
+) Server {
+	return Server{
 		googleClientId:        googleClientId,
 		googleClientSecret:    googleClientSecret,
 		gorillaSessionsSecret: gorillaSessionsSecret,
@@ -45,15 +45,15 @@ type response[T any] struct {
 
 type empty any
 
-func newResponse[T any](status int, body T) *response[T] {
-	return &response[T]{Status: status, Body: body}
+func newResponse[T any](status int, body T) response[T] {
+	return response[T]{Status: status, Body: body}
 }
 
-func newEmptyResponse(status int) *response[empty] {
-	return &response[empty]{Status: status, Body: nil}
+func newEmptyResponse(status int) response[empty] {
+	return response[empty]{Status: status, Body: nil}
 }
 
-func createHandlerFunc[T any](f func(c *gin.Context) (*response[T], error)) gin.HandlerFunc {
+func createHandlerFunc[T any](f func(c *gin.Context) (response[T], error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		response, err := f(c)
 		if err != nil {
@@ -72,21 +72,21 @@ func createHandlerFunc[T any](f func(c *gin.Context) (*response[T], error)) gin.
 }
 
 type Handlers struct {
-	investment       *InvestmentHandler
-	investmentUpdate *InvestmentUpdateHandler
-	transaction      *TransactionHandler
-	auth             *AuthHandler
-	user             *UserHandler
+	investment       InvestmentHandler
+	investmentUpdate InvestmentUpdateHandler
+	transaction      TransactionHandler
+	auth             AuthHandler
+	user             UserHandler
 }
 
 func NewHandlers(
-	investment *InvestmentHandler,
-	investmentUpdate *InvestmentUpdateHandler,
-	transaction *TransactionHandler,
-	auth *AuthHandler,
-	user *UserHandler,
-) *Handlers {
-	return &Handlers{
+	investment InvestmentHandler,
+	investmentUpdate InvestmentUpdateHandler,
+	transaction TransactionHandler,
+	auth AuthHandler,
+	user UserHandler,
+) Handlers {
+	return Handlers{
 		investment:       investment,
 		investmentUpdate: investmentUpdate,
 		transaction:      transaction,
@@ -99,8 +99,8 @@ type Middlewares struct {
 	token gin.HandlerFunc
 }
 
-func NewMiddlewares(token gin.HandlerFunc) *Middlewares {
-	return &Middlewares{
+func NewMiddlewares(token gin.HandlerFunc) Middlewares {
+	return Middlewares{
 		token: token,
 	}
 }
