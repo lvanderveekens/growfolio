@@ -21,6 +21,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 
 	r.GET("/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
 	r.GET("/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
+	r.POST("/auth/logout", createHandlerFunc(s.handlers.auth.LogOut))
 
 	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 	r.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))

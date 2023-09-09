@@ -26,6 +26,7 @@ import UpdateInvestmentForm from "../update-investment-form";
 import Modal from "@/app/modal";
 import { FaXmark } from "react-icons/fa6";
 import Link from "next/link";
+import { Navbar } from "@/app/navbar";
 
 ChartJS.register(
   ArcElement,
@@ -115,115 +116,123 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="">
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: ${error}</p>}
-      {investment && (
-        <>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">
-              Investment: {investment.name}
-            </h1>
-          </div>
-
-          {updateDataPoints.length > 0 && (
+    <>
+      <Navbar />
+      <div className="p-8">
+        {loading && <p>Loading...</p>}
+        {error && <p>Error: ${error}</p>}
+        {investment && (
+          <>
             <div className="mb-8">
-              <div className="mb-4">
-                Last update:{" "}
-                {updateDataPoints[updateDataPoints.length - 1].date}
-              </div>
-              <div className="flex gap-8 justify-between mb-4">
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Principal</div>
-                    <div className="text-3xl font-bold">
-                      {formatAsEuroAmount(
-                        updateDataPoints[updateDataPoints.length - 1].principal
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Value</div>
-                    <div className="text-3xl font-bold">
-                      {formatAsEuroAmount(
-                        updateDataPoints[updateDataPoints.length - 1].value
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Return</div>
-                    <div
-                      className={`text-3xl font-bold ${
-                        updateDataPoints[updateDataPoints.length - 1].return >=
-                        0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {formatAsEuroAmount(
-                        updateDataPoints[updateDataPoints.length - 1].return
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>ROI</div>
-                    <div
-                      className={`text-3xl font-bold ${
-                        updateDataPoints[updateDataPoints.length - 1].roi >= 0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {formatAsPercentage(
-                        updateDataPoints[updateDataPoints.length - 1].roi
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <button className="border px-3 py-2 mr-4">
-                  <Link href={`/investments/${params.id}/updates`}>View updates</Link>
-                </button>
-                <button className="border px-3 py-2">
-                  <Link href={`/investments/${params.id}/transactions`}>View transactions</Link>
-                </button>
-              </div>
+              <h1 className="text-3xl font-bold">
+                Investment: {investment.name}
+              </h1>
             </div>
-          )}
 
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
-            <Line
-              options={principalVsValueLineOptions}
-              data={buildPrincipalVsValueLineData(updateDataPoints)}
-            />
-          </div>
+            {updateDataPoints.length > 0 && (
+              <div className="mb-8">
+                <div className="mb-4">
+                  Last update:{" "}
+                  {updateDataPoints[updateDataPoints.length - 1].date}
+                </div>
+                <div className="flex gap-8 justify-between mb-4">
+                  <div className="border grow flex justify-center items-center">
+                    <div className="py-8">
+                      <div>Principal</div>
+                      <div className="text-3xl font-bold">
+                        {formatAsEuroAmount(
+                          updateDataPoints[updateDataPoints.length - 1]
+                            .principal
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border grow flex justify-center items-center">
+                    <div className="py-8">
+                      <div>Value</div>
+                      <div className="text-3xl font-bold">
+                        {formatAsEuroAmount(
+                          updateDataPoints[updateDataPoints.length - 1].value
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border grow flex justify-center items-center">
+                    <div className="py-8">
+                      <div>Return</div>
+                      <div
+                        className={`text-3xl font-bold ${
+                          updateDataPoints[updateDataPoints.length - 1]
+                            .return >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {formatAsEuroAmount(
+                          updateDataPoints[updateDataPoints.length - 1].return
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border grow flex justify-center items-center">
+                    <div className="py-8">
+                      <div>ROI</div>
+                      <div
+                        className={`text-3xl font-bold ${
+                          updateDataPoints[updateDataPoints.length - 1].roi >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {formatAsPercentage(
+                          updateDataPoints[updateDataPoints.length - 1].roi
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <button className="border px-3 py-2 mr-4">
+                    <Link href={`/investments/${params.id}/updates`}>
+                      View updates
+                    </Link>
+                  </button>
+                  <button className="border px-3 py-2">
+                    <Link href={`/investments/${params.id}/transactions`}>
+                      View transactions
+                    </Link>
+                  </button>
+                </div>
+              </div>
+            )}
 
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Return</h1>
-            <Line
-              options={returnLineOptions}
-              data={buildReturnLineData(updateDataPoints)}
-            />
-          </div>
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+              <Line
+                options={principalVsValueLineOptions}
+                data={buildPrincipalVsValueLineData(updateDataPoints)}
+              />
+            </div>
 
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">ROI</h1>
-            <Line
-              options={roiLineOptions}
-              data={buildROILineData(updateDataPoints)}
-            />
-          </div>
-        </>
-      )}
-    </div>
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">Return</h1>
+              <Line
+                options={returnLineOptions}
+                data={buildReturnLineData(updateDataPoints)}
+              />
+            </div>
+
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">ROI</h1>
+              <Line
+                options={roiLineOptions}
+                data={buildROILineData(updateDataPoints)}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -52,6 +52,11 @@ func (h *AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 	return newEmptyResponse(http.StatusOK), nil
 }
 
+func (h *AuthHandler) LogOut(c *gin.Context) (response[empty], error) {
+	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	return newEmptyResponse(http.StatusOK), nil
+}
+
 func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) {
 	user, err := h.userRepository.FindByID(gothUser.UserID)
 	if err != nil {

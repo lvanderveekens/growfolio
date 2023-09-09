@@ -9,6 +9,7 @@ import { FaXmark } from "react-icons/fa6";
 import UpdateInvestmentForm from "../../update-investment-form";
 import { Transaction } from "../../transaction";
 import AddTransactionForm from "../../add-transaction-form";
+import { Navbar } from "@/app/navbar";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -71,72 +72,77 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }
 
   return (
-    <div className="mb-8">
-      <h1 className="text-3xl font-bold mb-8">Transactions: {investment.name}</h1>
-      {transactions.length > 0 && (
-        <div className="overflow-x-auto mb-4">
-          <table className="whitespace-nowrap w-full">
-            <thead>
-              <tr className="border">
-                <th className="border px-3 text-left">Date</th>
-                <th className="border px-3 text-left">Type</th>
-                <th className="border px-3 text-left">Amount</th>
-                <th className="border px-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => {
-                return (
-                  <tr key={transaction.id} className="border">
-                    <td className="border px-3">{transaction.date}</td>
-                    <td className="border px-3">
-                      {capitalize(transaction.type)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(transaction.amount)}
-                    </td>
-                    <td className="border px-3">
-                      <FaXmark
-                        className="hover:cursor-pointer"
-                        size={24}
-                        color="red"
-                        onClick={async () => {
-                          await deleteTransaction(transaction.id);
-                          fetchTransactions();
-                        }}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div>
-        <button
-          className="border px-3 py-2"
-          type="submit"
-          onClick={() => setShowAddTransactionModal(true)}
-        >
-          Add transaction
-        </button>
-        {showAddTransactionModal && (
-          <Modal
-            title="Add transaction"
-            onClose={() => setShowAddTransactionModal(false)}
-          >
-            <AddTransactionForm
-              onAdd={() => {
-                setShowAddTransactionModal(false);
-                fetchTransactions();
-              }}
-              investmentId={params.id}
-            />
-          </Modal>
+    <>
+      <Navbar />
+      <div className="p-8 mb-8">
+        <h1 className="text-3xl font-bold mb-8">
+          Transactions: {investment.name}
+        </h1>
+        {transactions.length > 0 && (
+          <div className="overflow-x-auto mb-4">
+            <table className="whitespace-nowrap w-full">
+              <thead>
+                <tr className="border">
+                  <th className="border px-3 text-left">Date</th>
+                  <th className="border px-3 text-left">Type</th>
+                  <th className="border px-3 text-left">Amount</th>
+                  <th className="border px-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((transaction) => {
+                  return (
+                    <tr key={transaction.id} className="border">
+                      <td className="border px-3">{transaction.date}</td>
+                      <td className="border px-3">
+                        {capitalize(transaction.type)}
+                      </td>
+                      <td className="border px-3">
+                        {formatAsEuroAmount(transaction.amount)}
+                      </td>
+                      <td className="border px-3">
+                        <FaXmark
+                          className="hover:cursor-pointer"
+                          size={24}
+                          color="red"
+                          onClick={async () => {
+                            await deleteTransaction(transaction.id);
+                            fetchTransactions();
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
+
+        <div>
+          <button
+            className="border px-3 py-2"
+            type="submit"
+            onClick={() => setShowAddTransactionModal(true)}
+          >
+            Add transaction
+          </button>
+          {showAddTransactionModal && (
+            <Modal
+              title="Add transaction"
+              onClose={() => setShowAddTransactionModal(false)}
+            >
+              <AddTransactionForm
+                onAdd={() => {
+                  setShowAddTransactionModal(false);
+                  fetchTransactions();
+                }}
+                investmentId={params.id}
+              />
+            </Modal>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

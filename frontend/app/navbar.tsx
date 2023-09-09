@@ -5,16 +5,24 @@ import { useEffect, useRef, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { Investment, User } from "./page";
 import { AiOutlineStock } from "react-icons/ai";
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = () => {
-  const [user, setUser] = useState<User[]>([]);
+  const [user, setUser] = useState<User>();
+  const [isLoadingUser, setLoadingUser] = useState<boolean>(true);
+  const [isUserDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
+  const userDropdownRef = useRef(null);
+
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const dropdownRef = useRef(null);
+  const [isLoadingInvestments, setLoadingInvestments] = useState<boolean>(true);
+  const [isInvestmentsDropdownOpen, setInvestmentsDropdownOpen] = useState<boolean>(false);
+  const investmentsDropdownRef = useRef(null);
+
+  const router = useRouter();
+
 
   useEffect(() => {
     fetchCurrentUser();
@@ -22,37 +30,49 @@ export const Navbar: React.FC<NavbarProps> = () => {
   }, []);
 
   const fetchCurrentUser = async () => {
-    setLoading(true);
+    setLoadingUser(true);
     fetch(`/api/v1/users/current`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
+      .then(async (res) => {
+        if (res.ok) {
+          setUser(await res.json());
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoadingUser(false));
   };
 
   const fetchInvestments = async () => {
-    setLoading(true);
+    setLoadingInvestments(true);
     fetch(`/api/v1/investments`)
       .then((res) => res.json())
       .then((data) => {
         setInvestments(data);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoadingInvestments(false));
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!isDropdownOpen);
+  const toggleInvestmentsDropdown = () => {
+    setInvestmentsDropdownOpen(!isInvestmentsDropdownOpen);
   };
 
-  const closeDropdown = () => {
-    setDropdownOpen(false);
+  const toggleUserDropdown = () => {
+    setUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const closeInvestmentsDropdown = () => {
+    setInvestmentsDropdownOpen(false);
+  };
+
+  const closeUserDropdown = () => {
+    setUserDropdownOpen(false);
   };
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        closeDropdown();
+      if (investmentsDropdownRef.current && !investmentsDropdownRef.current.contains(event.target)) {
+        closeInvestmentsDropdown();
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        closeUserDropdown();
       }
     };
 
@@ -67,61 +87,95 @@ export const Navbar: React.FC<NavbarProps> = () => {
       <div className="px-8 py-4 w-full bg-gray-200 flex items-center gap-8 font-bold ">
         <div className="text-4xl text-green-400">
           <Link href="/">
-            <AiOutlineStock size={48} className="inline mr-1" />growfolio
+            <AiOutlineStock size={48} className="inline mr-1" />
+            growfolio
           </Link>
         </div>
-        <div className="flex gap-6 text-lg">
-          <Link className={`hover:text-green-400`} href="/">
-            Overview
-          </Link>
-          <div className="relative" ref={dropdownRef}>
-            <div
-              className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
-              onClick={toggleDropdown}
-            >
-              Investments
-              <FaCaretDown />
+        <div className="flex flex-1 items-center justify-between text-lg">
+          <div className="flex gap-6">
+            <Link className={`hover:text-green-400`} href="/">
+              Overview
+            </Link>
+            <div className="flex relative" ref={investmentsDropdownRef}>
+              <div
+                className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+                onClick={toggleInvestmentsDropdown}
+              >
+                Investments
+                <FaCaretDown />
+              </div>
+              <div
+                className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
+                  isInvestmentsDropdownOpen ? "block" : "hidden"
+                } whitespace-nowrap`}
+              >
+                {isLoadingInvestments && <p>Loading...</p>}
+                {investments.length > 0 &&
+                  investments.map((i) => {
+                    return (
+                      <div key={i.id} className={`py-1`}>
+                        <Link
+                          className={`hover:text-green-400`}
+                          href={`/investments/${i.id}`}
+                          onClick={closeInvestmentsDropdown}
+                        >
+                          <p className="overflow-hidden text-ellipsis">
+                            {i.name}
+                          </p>
+                        </Link>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
-            <div
-              className={`absolute left-0 bg-gray-300 px-4 py-2 ${
-                isDropdownOpen ? "block" : "hidden"
-              } whitespace-nowrap`}
-            >
-              {loading && <p>Loading...</p>}
-              {investments.length > 0 &&
-                investments.map((i) => {
-                  return (
-                    <div key={i.id} className={`py-1`}>
-                      <Link
-                        className={`hover:text-green-400`}
-                        href={`/investments/${i.id}`}
-                        onClick={closeDropdown}
-                      >
-                        <p className="overflow-hidden text-ellipsis">
-                          {i.name}
-                        </p>
-                      </Link>
-                    </div>
-                  );
-                })}
-            </div>
+          </div>
+          <div>
+            {isLoadingUser && <span>Loading...</span>}
+            {!isLoadingUser && !user && (
+              <button
+                className="border border-black px-3 py-2 rounded-md"
+                onClick={() => {
+                  router.push("/api/auth/google");
+                }}
+              >
+                Log in
+              </button>
+            )}
+            {!isLoadingUser && user && (
+              <div className="flex relative" ref={userDropdownRef}>
+                <div
+                  className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+                  onClick={toggleUserDropdown}
+                >
+                  {user.email}
+                  <FaCaretDown />
+                </div>
+                <div
+                  className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
+                    isUserDropdownOpen ? "block" : "hidden"
+                  } whitespace-nowrap`}
+                >
+                  <div className={`py-1`}>
+                    <button
+                      className={`hover:text-green-400`}
+                      onClick={() => {
+                        fetch(`/api/auth/logout`, { method: "POST" }).then((res) => {
+                          if (res.ok) {
+                            router.push("/");
+                            window.location.reload();
+                          }
+                        });
+                      }}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* <div className="flex">
-        <div className="flex-0">
-          <div className="w-[300px] min-h-screen h-full p-8 bg-gray-100 whitespace-nowrap">
-            
-            <div className="flex">
-              <div className="mr-4">
-                <FaSackDollar size={24} />
-              </div>
-              
-            </div>
-          </div>
-        </div>
-      </div> */}
     </nav>
   );
 };

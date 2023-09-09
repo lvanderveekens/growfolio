@@ -7,6 +7,7 @@ import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import UpdateInvestmentForm from "../../update-investment-form";
+import { Navbar } from "@/app/navbar";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -69,68 +70,71 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }
 
   return (
-    <div className="">
-      <h1 className="text-3xl font-bold mb-8">Updates: {investment.name}</h1>
-      {updates.length > 0 && (
-        <div className="overflow-x-auto mb-4">
-          <table className="whitespace-nowrap w-full">
-            <thead>
-              <tr className="border">
-                <th className="border px-3 text-left">Date</th>
-                <th className="border px-3 text-left">Value</th>
-                <th className="border px-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {updates.map((update) => {
-                return (
-                  <tr key={update.id} className="border">
-                    <td className="border px-3">{update.date}</td>
-                    <td className="border px-3">
-                      {formatAsEuroAmount(update.value)}
-                    </td>
-                    <td className="border px-3">
-                      <FaXmark
-                        className="hover:cursor-pointer"
-                        size={24}
-                        color="red"
-                        onClick={async () => {
-                          await deleteUpdate(update.id);
-                          fetchUpdates();
-                        }}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div>
-        <button
-          className="border px-3 py-2"
-          type="submit"
-          onClick={() => setShowUpdateInvestmentModal(true)}
-        >
-          Add update
-        </button>
-        {showUpdateInvestmentModal && (
-          <Modal
-            title="Update investment"
-            onClose={() => setShowUpdateInvestmentModal(false)}
-          >
-            <UpdateInvestmentForm
-              onAdd={() => {
-                setShowUpdateInvestmentModal(false);
-                fetchUpdates();
-              }}
-              investmentId={params.id}
-            />
-          </Modal>
+    <>
+      <Navbar />
+      <div className="p-8">
+        <h1 className="text-3xl font-bold mb-8">Updates: {investment.name}</h1>
+        {updates.length > 0 && (
+          <div className="overflow-x-auto mb-4">
+            <table className="whitespace-nowrap w-full">
+              <thead>
+                <tr className="border">
+                  <th className="border px-3 text-left">Date</th>
+                  <th className="border px-3 text-left">Value</th>
+                  <th className="border px-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {updates.map((update) => {
+                  return (
+                    <tr key={update.id} className="border">
+                      <td className="border px-3">{update.date}</td>
+                      <td className="border px-3">
+                        {formatAsEuroAmount(update.value)}
+                      </td>
+                      <td className="border px-3">
+                        <FaXmark
+                          className="hover:cursor-pointer"
+                          size={24}
+                          color="red"
+                          onClick={async () => {
+                            await deleteUpdate(update.id);
+                            fetchUpdates();
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
+
+        <div>
+          <button
+            className="border px-3 py-2"
+            type="submit"
+            onClick={() => setShowUpdateInvestmentModal(true)}
+          >
+            Add update
+          </button>
+          {showUpdateInvestmentModal && (
+            <Modal
+              title="Update investment"
+              onClose={() => setShowUpdateInvestmentModal(false)}
+            >
+              <UpdateInvestmentForm
+                onAdd={() => {
+                  setShowUpdateInvestmentModal(false);
+                  fetchUpdates();
+                }}
+                investmentId={params.id}
+              />
+            </Modal>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

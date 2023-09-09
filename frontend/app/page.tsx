@@ -24,6 +24,7 @@ import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./ca
 import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+import { Navbar } from "./navbar";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -372,136 +373,137 @@ export default function HomePage() {
 
   return (
     <main>
-      <div className="mb-8">
-        <a href="/api/auth/google" className="border">Sign in with Google</a>
+      <Navbar />
+      <div className="p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-8">Overview</h1>
+          {investmentRows.length > 0 && (
+            <div className="overflow-x-auto mb-4">
+              <table className="w-full whitespace-nowrap">
+                <thead>
+                  <tr className="border">
+                    <th className="border px-3 text-left">Name</th>
+                    <th className="border px-3 text-left">Principal</th>
+                    <th className="border px-3 text-left">Value</th>
+                    <th className="border px-3 text-left">Return</th>
+                    <th className="border px-3 text-left">ROI</th>
+                    <th className="border px-3 text-left">Last update</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {investmentRows.map((investmentRow) => {
+                    return (
+                      <tr key={investmentRow.id} className="border">
+                        <td className="border px-3">{investmentRow.name}</td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.principal)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.value)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsEuroAmount(investmentRow.return)}
+                        </td>
+                        <td className="border px-3">
+                          {formatAsPercentage(investmentRow.roi)}
+                        </td>
+                        <td className="border px-3">
+                          {investmentRow.lastUpdateDate}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot className="border-2 border-t-black">
+                  <tr className="border">
+                    <td className="border px-3">Total</td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalPrincipal)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalValue)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsEuroAmount(totalReturn)}
+                    </td>
+                    <td className="border px-3">
+                      {formatAsPercentage(totalRoi)}
+                    </td>
+                    <td className="border px-3"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
 
-        <h1 className="text-3xl font-bold mb-8">Overview</h1>
-        {investmentRows.length > 0 && (
-          <div className="overflow-x-auto mb-4">
-            <table className="w-full whitespace-nowrap">
-              <thead>
-                <tr className="border">
-                  <th className="border px-3 text-left">Name</th>
-                  <th className="border px-3 text-left">Principal</th>
-                  <th className="border px-3 text-left">Value</th>
-                  <th className="border px-3 text-left">Return</th>
-                  <th className="border px-3 text-left">ROI</th>
-                  <th className="border px-3 text-left">Last update</th>
-                </tr>
-              </thead>
-              <tbody>
-                {investmentRows.map((investmentRow) => {
-                  return (
-                    <tr key={investmentRow.id} className="border">
-                      <td className="border px-3">{investmentRow.name}</td>
-                      <td className="border px-3">
-                        {formatAsEuroAmount(investmentRow.principal)}
-                      </td>
-                      <td className="border px-3">
-                        {formatAsEuroAmount(investmentRow.value)}
-                      </td>
-                      <td className="border px-3">
-                        {formatAsEuroAmount(investmentRow.return)}
-                      </td>
-                      <td className="border px-3">
-                        {formatAsPercentage(investmentRow.roi)}
-                      </td>
-                      <td className="border px-3">
-                        {investmentRow.lastUpdateDate}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot className="border-2 border-t-black">
-                <tr className="border">
-                  <td className="border px-3">Total</td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(totalPrincipal)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(totalValue)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsEuroAmount(totalReturn)}
-                  </td>
-                  <td className="border px-3">
-                    {formatAsPercentage(totalRoi)}
-                  </td>
-                  <td className="border px-3"></td>
-                </tr>
-              </tfoot>
-            </table>
+          <button
+            className="border px-3 py-2"
+            type="submit"
+            onClick={() => setShowAddInvestmentModal(true)}
+          >
+            Add investment
+          </button>
+          {showAddInvestmentModal && (
+            <Modal
+              title="Add investment"
+              onClose={() => setShowAddInvestmentModal(false)}
+            >
+              <AddInvestmentForm
+                onAdd={() => {
+                  setShowAddInvestmentModal(false);
+                  window.location.reload();
+                }}
+              />
+            </Modal>
+          )}
+        </div>
+        <div className="mb-8 flex gap-8">
+          <div className="w-[50%] aspect-square">
+            <h1 className="text-xl font-bold mb-4">Allocation</h1>
+            <Pie
+              options={allocationPieOptions}
+              data={calculateAllocationPieData(investments)}
+            />
+          </div>
+          <div className="w-[50%] aspect-square">
+            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
+            <Pie
+              options={allocationPieOptions}
+              data={calculateAllocationByTypePieData(investments)}
+            />
+          </div>
+        </div>
+
+        {investmentUpdateRows.length > 0 && (
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+            <Line
+              options={principalVsValueLineOptions}
+              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+            />
           </div>
         )}
 
-        <button
-          className="border px-3 py-2"
-          type="submit"
-          onClick={() => setShowAddInvestmentModal(true)}
-        >
-          Add investment
-        </button>
-        {showAddInvestmentModal && (
-          <Modal
-            title="Add investment"
-            onClose={() => setShowAddInvestmentModal(false)}
-          >
-            <AddInvestmentForm
-              onAdd={() => {
-                setShowAddInvestmentModal(false);
-                window.location.reload();
-              }}
+        {dateWithPrincipalAndValues.length > 0 && (
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Return</h1>
+            <Line
+              options={returnLineOptions}
+              data={buildReturnLineData(dateWithPrincipalAndValues)}
             />
-          </Modal>
+          </div>
+        )}
+
+        {dateWithPrincipalAndValues.length > 0 && (
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">ROI</h1>
+            <Line
+              options={roiLineOptions}
+              data={buildROILineData(dateWithPrincipalAndValues)}
+            />
+          </div>
         )}
       </div>
-      <div className="mb-8 flex gap-8">
-        <div className="w-[50%] aspect-square">
-          <h1 className="text-xl font-bold mb-4">Allocation</h1>
-          <Pie
-            options={allocationPieOptions}
-            data={calculateAllocationPieData(investments)}
-          />
-        </div>
-        <div className="w-[50%] aspect-square">
-          <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-          <Pie
-            options={allocationPieOptions}
-            data={calculateAllocationByTypePieData(investments)}
-          />
-        </div>
-      </div>
-
-      {investmentUpdateRows.length > 0 && (
-        <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
-          <Line
-            options={principalVsValueLineOptions}
-            data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
-          />
-        </div>
-      )}
-
-      {dateWithPrincipalAndValues.length > 0 && (
-        <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">Return</h1>
-          <Line
-            options={returnLineOptions}
-            data={buildReturnLineData(dateWithPrincipalAndValues)}
-          />
-        </div>
-      )}
-
-      {dateWithPrincipalAndValues.length > 0 && (
-        <div className="mb-8">
-          <h1 className="text-xl font-bold mb-4">ROI</h1>
-          <Line
-            options={roiLineOptions}
-            data={buildROILineData(dateWithPrincipalAndValues)}
-          />
-        </div>
-      )}
     </main>
   );
 }
