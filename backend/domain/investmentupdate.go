@@ -27,3 +27,15 @@ func NewInvestmentUpdate(id string, date time.Time, investmentID string, value i
 		Value:        value,
 	}
 }
+
+type InvestmentUpdateWithInvestment struct {
+	Update     InvestmentUpdate
+	Investment Investment
+}
+
+func NewInvestmentUpdateWithInvestment(update InvestmentUpdate, investment Investment) InvestmentUpdateWithInvestment {
+	return InvestmentUpdateWithInvestment{
+		Update:     update,
+		Investment: investment,
+	}
+}

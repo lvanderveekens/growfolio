@@ -20,10 +20,10 @@ func NewInvestmentHandler(investmentRepository services.InvestmentRepository) In
 }
 
 func (h *InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmentDto], error) {
-	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
-	userID := claims["userId"].(string)
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
 
-	investments, err := h.investmentRepository.FindByUserID(userID)
+	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
 	if err != nil {
 		return response[[]investmentDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
@@ -37,8 +37,8 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmen
 }
 
 func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDto], error) {
-	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
-	userID := claims["userId"].(string)
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
 	investment, err := h.investmentRepository.FindByID(id)
@@ -49,7 +49,7 @@ func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDt
 		return response[investmentDto]{}, fmt.Errorf("failed to find investment by id %s: %w", id, err)
 	}
 
-	if investment.UserID != userID {
+	if investment.UserID != tokenUserID {
 		return response[investmentDto]{}, NewError(http.StatusForbidden, "not allowed to read investment")
 	}
 
@@ -57,8 +57,8 @@ func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDt
 }
 
 func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (response[investmentDto], error) {
-	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
-	userID := claims["userId"].(string)
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
 
 	var request CreateInvestmentRequest
 	err := c.ShouldBindJSON(&request)
@@ -69,7 +69,7 @@ func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (response[investmen
 		return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.investmentRepository.Create(request.toCommand(userID))
+	created, err := h.investmentRepository.Create(request.toCommand(tokenUserID))
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to create investment: %w", err)
 	}

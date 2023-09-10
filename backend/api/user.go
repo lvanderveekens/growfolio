@@ -19,16 +19,15 @@ func NewUserHandler(userRepository services.UserRepository) UserHandler {
 }
 
 func (h *UserHandler) GetCurrentUser(c *gin.Context) (response[userDto], error) {
-	token := c.Value("token").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	id := claims["userId"].(string)
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
 
-	user, err := h.userRepository.FindByID(id)
+	user, err := h.userRepository.FindByID(tokenUserID)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
 			return response[userDto]{}, NewError(http.StatusNotFound, err.Error())
 		}
-		return response[userDto]{}, fmt.Errorf("failed to find user by id %s: %w", id, err)
+		return response[userDto]{}, fmt.Errorf("failed to find user by id %s: %w", tokenUserID, err)
 	}
 
 	dto := newUserDto(user.ID, user.Email, user.Provider)

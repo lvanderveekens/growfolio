@@ -8,40 +8,59 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type InvestmentUpdateHandler struct {
-	investmentRepository services.InvestmentRepository
+	investmentRepository    services.InvestmentRepository
+	investmentUpdateService services.InvestmentUpdateService
 }
 
-func NewInvestmentUpdateHandler(investmentRepository services.InvestmentRepository) InvestmentUpdateHandler {
-	return InvestmentUpdateHandler{investmentRepository: investmentRepository}
+func NewInvestmentUpdateHandler(
+	investmentRepository services.InvestmentRepository,
+	investmentUpdateService services.InvestmentUpdateService,
+) InvestmentUpdateHandler {
+	return InvestmentUpdateHandler{
+		investmentRepository:    investmentRepository,
+		investmentUpdateService: investmentUpdateService,
+	}
 }
 
-func (h *InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
+func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
 	investmentID := stringOrNil(c.Query("investmentId"))
-
-	updates, err := h.investmentRepository.FindUpdates(investmentID)
+	updatesWithInvestment, err := h.investmentUpdateService.FindWithInvestment(investmentID)
 	if err != nil {
 		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investment updates: %w", err)
 	}
 
+	for _, updateWithInvestment := range updatesWithInvestment {
+		if updateWithInvestment.Investment.UserID != tokenUserID {
+			return response[[]investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to read investment update")
+		}
+	}
+
 	dtos := make([]investmentUpdateDto, 0)
-	for _, u := range updates {
-		dtos = append(dtos, toInvestmentUpdateDto(u))
+	for _, updateWithInvestment := range updatesWithInvestment {
+		dtos = append(dtos, toInvestmentUpdateDto(updateWithInvestment.Update))
 	}
 
 	return newResponse(http.StatusOK, dtos), nil
 }
 
-func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (response[investmentUpdateDto], error) {
-	var r createInvestmentUpdateRequest
-	err := c.ShouldBindJSON(&r)
+func (h InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (response[investmentUpdateDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	var request createInvestmentUpdateRequest
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
 
-	i, err := h.investmentRepository.FindByID(r.InvestmentID)
+	investment, err := h.investmentRepository.FindByID(request.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -49,23 +68,41 @@ func (h *InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (respon
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to find investment: %w", err)
 	}
 
-	cmd, err := r.toCommand(i)
+	if investment.UserID != tokenUserID {
+		return response[investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to create update for investment")
+	}
+
+	command, err := request.toCommand(investment)
 	if err != nil {
 		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	u, err := h.investmentRepository.CreateUpdate(cmd)
+	update, err := h.investmentRepository.CreateUpdate(command)
 	if err != nil {
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
 	}
 
-	dto := toInvestmentUpdateDto(u)
-	return newResponse(http.StatusCreated, dto), nil
+	return newResponse(http.StatusCreated, toInvestmentUpdateDto(update)), nil
 }
 
-func (h *InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (response[empty], error) {
+func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (response[empty], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
 	id := c.Param("id")
-	err := h.investmentRepository.DeleteUpdateByID(id)
+	investment, err := h.investmentRepository.FindByID(id)
+	if err != nil {
+		if err == domain.ErrInvestmentNotFound {
+			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
+		}
+		return response[empty]{}, fmt.Errorf("failed to find investment: %w", err)
+	}
+
+	if investment.UserID != tokenUserID {
+		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment update")
+	}
+
+	err = h.investmentRepository.DeleteUpdateByID(investment.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete investment update: %w", err)
 	}
@@ -83,7 +120,7 @@ type createInvestmentUpdateRequest struct {
 	Value        int64  `json:"value"`
 }
 
-func (r *createInvestmentUpdateRequest) toCommand(i domain.Investment) (domain.CreateInvestmentUpdateCommand, error) {
+func (r createInvestmentUpdateRequest) toCommand(i domain.Investment) (domain.CreateInvestmentUpdateCommand, error) {
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse date: %w", err)
