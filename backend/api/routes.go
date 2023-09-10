@@ -23,10 +23,6 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	r.GET("/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
 	r.POST("/auth/logout", createHandlerFunc(s.handlers.auth.LogOut))
 
-	r.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
-	r.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))
-	r.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
-
 	r.GET("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
 	r.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))
 	r.DELETE("/v1/investment-updates/:id", createHandlerFunc(s.handlers.investmentUpdate.DeleteInvestmentUpdate))
@@ -38,7 +34,10 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	private := r.Group("")
 	private.Use(s.middlewares.token)
 	{
+		private.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
+		private.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))
+		private.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
+
 		private.GET("/v1/users/current", createHandlerFunc(s.handlers.user.GetCurrentUser))
 	}
-
 }

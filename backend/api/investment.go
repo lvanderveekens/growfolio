@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type InvestmentHandler struct {
@@ -19,7 +20,10 @@ func NewInvestmentHandler(investmentRepository services.InvestmentRepository) In
 }
 
 func (h *InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmentDto], error) {
-	investments, err := h.investmentRepository.Find()
+	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID := claims["userId"].(string)
+
+	investments, err := h.investmentRepository.FindByUserID(userID)
 	if err != nil {
 		return response[[]investmentDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
@@ -33,8 +37,11 @@ func (h *InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmen
 }
 
 func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDto], error) {
+	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID := claims["userId"].(string)
+
 	id := c.Param("id")
-	i, err := h.investmentRepository.FindByID(id)
+	investment, err := h.investmentRepository.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -42,20 +49,27 @@ func (h *InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDt
 		return response[investmentDto]{}, fmt.Errorf("failed to find investment by id %s: %w", id, err)
 	}
 
-	return newResponse(http.StatusOK, toInvestmentDto(i)), nil
+	if investment.UserID != userID {
+		return response[investmentDto]{}, NewError(http.StatusForbidden, "not allowed to read investment")
+	}
+
+	return newResponse(http.StatusOK, toInvestmentDto(investment)), nil
 }
 
 func (h *InvestmentHandler) CreateInvestment(c *gin.Context) (response[investmentDto], error) {
-	var req CreateInvestmentRequest
-	err := c.ShouldBindJSON(&req)
+	claims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID := claims["userId"].(string)
+
+	var request CreateInvestmentRequest
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
-	if err := req.validate(); err != nil {
+	if err := request.validate(); err != nil {
 		return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.investmentRepository.Create(req.toCommand())
+	created, err := h.investmentRepository.Create(request.toCommand(userID))
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to create investment: %w", err)
 	}
@@ -82,8 +96,8 @@ func (r *CreateInvestmentRequest) validate() error {
 	return nil
 }
 
-func (r *CreateInvestmentRequest) toCommand() domain.CreateInvestmentCommand {
-	return domain.NewCreateInvestmentCommand(r.Type, r.Name)
+func (r *CreateInvestmentRequest) toCommand(userID string) domain.CreateInvestmentCommand {
+	return domain.NewCreateInvestmentCommand(r.Type, r.Name, userID)
 }
 
 type investmentDto struct {

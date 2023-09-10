@@ -64,7 +64,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (investmentUpdates.length > 0) {
+    if (investments.length > 0 && investmentUpdates.length > 0) {
       const investmentUpdateRows = investmentUpdates.map((u) => {
         const investment = findInvestmentById(u.investmentId);
         const principal = calculateTotalPrincipalForDate(u.date, transactons);
@@ -457,22 +457,25 @@ export default function HomePage() {
             </Modal>
           )}
         </div>
-        <div className="mb-8 flex gap-8">
-          <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation</h1>
-            <Pie
-              options={allocationPieOptions}
-              data={calculateAllocationPieData(investments)}
-            />
+
+        {investments.length > 0 && (
+          <div className="mb-8 flex gap-8">
+            <div className="w-[50%] aspect-square">
+              <h1 className="text-xl font-bold mb-4">Allocation</h1>
+              <Pie
+                options={allocationPieOptions}
+                data={calculateAllocationPieData(investments)}
+              />
+            </div>
+            <div className="w-[50%] aspect-square">
+              <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
+              <Pie
+                options={allocationPieOptions}
+                data={calculateAllocationByTypePieData(investments)}
+              />
+            </div>
           </div>
-          <div className="w-[50%] aspect-square">
-            <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-            <Pie
-              options={allocationPieOptions}
-              data={calculateAllocationByTypePieData(investments)}
-            />
-          </div>
-        </div>
+        )}
 
         {investmentUpdateRows.length > 0 && (
           <div className="mb-8">

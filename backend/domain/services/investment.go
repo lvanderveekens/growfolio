@@ -3,7 +3,7 @@ package services
 import "growfolio/domain"
 
 type InvestmentRepository interface {
-	Find() ([]domain.Investment, error)
+	FindByUserID(userID string) ([]domain.Investment, error)
 	FindByID(id string) (domain.Investment, error)
 	Create(c domain.CreateInvestmentCommand) (domain.Investment, error)
 

@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE investment
+ALTER COLUMN user_id SET NOT NULL;
+
+COMMIT;

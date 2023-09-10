@@ -12,15 +12,16 @@ import (
 )
 
 type Investment struct {
-	ID        uuid.UUID
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Type      domain.InvestmentType
-	Name      string
+	ID        uuid.UUID             `db:"id"`
+	CreatedAt time.Time             `db:"created_at"`
+	UpdatedAt time.Time             `db:"updated_at"`
+	Type      domain.InvestmentType `db:"type"`
+	Name      string                `db:"name"`
+	UserID    string                `db:"user_id"`
 }
 
 func (i *Investment) toDomainInvestment() domain.Investment {
-	return domain.NewInvestment(i.ID.String(), i.Type, i.Name)
+	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID)
 }
 
 type InvestmentRepository struct {
@@ -31,9 +32,9 @@ func NewInvestmentRepository(db *sqlx.DB) InvestmentRepository {
 	return InvestmentRepository{db: db}
 }
 
-func (r *InvestmentRepository) Find() ([]domain.Investment, error) {
+func (r *InvestmentRepository) FindByUserID(userID string) ([]domain.Investment, error) {
 	entities := []Investment{}
-	err := r.db.Select(&entities, "SELECT * FROM investment ORDER BY created_at ASC")
+	err := r.db.Select(&entities, "SELECT * FROM investment WHERE user_id=$1 ORDER BY created_at ASC", userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select investments: %w", err)
 	}

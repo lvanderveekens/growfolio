@@ -12,28 +12,32 @@ const (
 )
 
 type CreateInvestmentCommand struct {
-	Type InvestmentType
-	Name string
+	Type   InvestmentType
+	Name   string
+	UserID string
 }
 
-func NewCreateInvestmentCommand(t InvestmentType, name string) CreateInvestmentCommand {
+func NewCreateInvestmentCommand(t InvestmentType, name, userID string) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
-		Type: t,
-		Name: name,
+		Type:   t,
+		Name:   name,
+		UserID: userID,
 	}
 
 }
 
 type Investment struct {
-	ID   string
-	Type InvestmentType
-	Name string
+	ID     string
+	Type   InvestmentType
+	Name   string
+	UserID string
 }
 
-func NewInvestment(id string, t InvestmentType, name string) Investment {
+func NewInvestment(id string, t InvestmentType, name, userID string) Investment {
 	return Investment{
-		ID:   id,
-		Type: t,
-		Name: name,
+		ID:     id,
+		Type:   t,
+		Name:   name,
+		UserID: userID,
 	}
 }
