@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"growfolio/domain"
+	"growfolio/slices"
 	"log/slog"
 )
 
@@ -34,12 +35,12 @@ func (s TransactionService) FindWithInvestment(investmentID *string) ([]domain.T
 		return []domain.TransactionWithInvestment{}, fmt.Errorf("failed to find transactions: %w", err)
 	}
 
-	investmentIDs := deduplicate(mapSlice(transactions, func(transaction domain.Transaction) string {
-		return transaction.InvestmentID
+	investmentIDs := slices.Deduplicate(slices.Map(transactions, func(t domain.Transaction) string {
+		return t.InvestmentID
 	}))
 
 	// TODO: use FindByIDs
-	investments := mapSliceNotNull(investmentIDs, func(id string) *domain.Investment {
+	investments := slices.MapNotNull(investmentIDs, func(id string) *domain.Investment {
 		investment, err := s.investmentRepository.FindByID(id)
 		if err != nil {
 			slog.Error("failed to find investment", "id", id, "err", err.Error())
@@ -48,10 +49,12 @@ func (s TransactionService) FindWithInvestment(investmentID *string) ([]domain.T
 		return &investment
 	})
 
-	investmentsByID := associateSliceBy(investments, func(i domain.Investment) string { return i.ID })
+	investmentsByID := slices.AssociateBy(investments, func(i domain.Investment) string {
+		return i.ID
+	})
 
-	return mapSlice(transactions, func(transaction domain.Transaction) domain.TransactionWithInvestment {
-		investment := investmentsByID[transaction.InvestmentID]
-		return domain.NewTransactionWithInvestment(transaction, investment)
+	return slices.Map(transactions, func(t domain.Transaction) domain.TransactionWithInvestment {
+		investment := investmentsByID[t.InvestmentID]
+		return domain.NewTransactionWithInvestment(t, investment)
 	}), nil
 }
