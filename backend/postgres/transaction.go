@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"growfolio/domain"
 	"time"
@@ -31,7 +33,26 @@ func NewTransactionRepository(db *sqlx.DB) TransactionRepository {
 	return TransactionRepository{db: db}
 }
 
-func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
+func (r TransactionRepository) FindByID(id string) (domain.Transaction, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		fmt.Println("error: id is not a uuid: " + err.Error())
+		return domain.Transaction{}, domain.ErrTransactionNotFound
+	}
+
+	entity := Transaction{}
+	err = r.db.Get(&entity, "SELECT * FROM transaction WHERE id=$1", id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Transaction{}, domain.ErrTransactionNotFound
+		}
+		return domain.Transaction{}, fmt.Errorf("failed to select transaction: %w", err)
+	}
+
+	return entity.toDomainTransaction(), nil
+}
+
+func (r TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
 	query := "SELECT * FROM transaction"
 	args := make([]any, 0)
 	if investmentID != nil {
@@ -54,7 +75,7 @@ func (r *TransactionRepository) Find(investmentID *string) ([]domain.Transaction
 	return transactions, nil
 }
 
-func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (domain.Transaction, error) {
+func (r TransactionRepository) Create(cmd domain.CreateTransactionCommand) (domain.Transaction, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return domain.Transaction{}, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -73,7 +94,7 @@ func (r *TransactionRepository) Create(cmd domain.CreateTransactionCommand) (dom
 	return entity.toDomainTransaction(), nil
 }
 
-func (r *TransactionRepository) DeleteByID(id string) error {
+func (r TransactionRepository) DeleteByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		return nil

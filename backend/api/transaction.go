@@ -9,34 +9,47 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type TransactionHandler struct {
 	transactionRepository services.TransactionRepository
+	transactionService    services.TransactionService
 	investmentRepository  services.InvestmentRepository
 }
 
 func NewTransactionHandler(
 	transactionRepository services.TransactionRepository,
+	transactionService services.TransactionService,
 	investmentRepository services.InvestmentRepository,
 ) TransactionHandler {
 	return TransactionHandler{
 		transactionRepository: transactionRepository,
+		transactionService:    transactionService,
 		investmentRepository:  investmentRepository,
 	}
 }
 
-func (h *TransactionHandler) GetTransactions(c *gin.Context) (response[[]transactionDto], error) {
+func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transactionDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
 	investmentId := stringOrNil(c.Query("investmentId"))
 
-	transactions, err := h.transactionRepository.Find(investmentId)
+	transactionsWithInvestment, err := h.transactionService.FindWithInvestment(investmentId)
 	if err != nil {
 		return response[[]transactionDto]{}, fmt.Errorf("failed to find transactions: %w", err)
 	}
 
+	for _, transactionWithInvestment := range transactionsWithInvestment {
+		if transactionWithInvestment.Investment.UserID != tokenUserID {
+			return response[[]transactionDto]{}, NewError(http.StatusForbidden, "not allowed to read transaction")
+		}
+	}
+
 	dtos := make([]transactionDto, 0)
-	for _, transaction := range transactions {
-		dtos = append(dtos, toTransactionDto(transaction))
+	for _, transactionWithInvestment := range transactionsWithInvestment {
+		dtos = append(dtos, toTransactionDto(transactionWithInvestment.Transaction))
 	}
 
 	return newResponse(http.StatusOK, dtos), nil
@@ -49,17 +62,20 @@ func stringOrNil(s string) *string {
 	return &s
 }
 
-func (h *TransactionHandler) CreateTransaction(c *gin.Context) (response[transactionDto], error) {
-	var req createTransactionRequest
-	err := c.ShouldBindJSON(&req)
+func (h TransactionHandler) CreateTransaction(c *gin.Context) (response[transactionDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	var request createTransactionRequest
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
-	if err := req.validate(); err != nil {
+	if err := request.validate(); err != nil {
 		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	i, err := h.investmentRepository.FindByID(req.InvestmentID)
+	investment, err := h.investmentRepository.FindByID(request.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -67,23 +83,46 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) (response[transac
 		return response[transactionDto]{}, fmt.Errorf("failed to find investment: %w", err)
 	}
 
-	cmd, err := req.toCommand(i)
+	if investment.UserID != tokenUserID {
+		return response[transactionDto]{}, NewError(http.StatusForbidden, "not allowed to create transaction for investment")
+	}
+
+	command, err := request.toCommand(investment)
 	if err != nil {
 		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.transactionRepository.Create(cmd)
+	transaction, err := h.transactionRepository.Create(command)
 	if err != nil {
 		return response[transactionDto]{}, fmt.Errorf("failed to create transaction: %w", err)
 	}
 
-	dto := toTransactionDto(created)
-	return newResponse(http.StatusCreated, dto), nil
+	return newResponse(http.StatusCreated, toTransactionDto(transaction)), nil
 }
 
-func (h *TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], error) {
+func (h TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
 	id := c.Param("id")
-	err := h.transactionRepository.DeleteByID(id)
+	transaction, err := h.transactionRepository.FindByID(id)
+	if err != nil {
+		if err == domain.ErrTransactionNotFound {
+			return newEmptyResponse(http.StatusNoContent), nil
+		}
+		return response[empty]{}, fmt.Errorf("failed to find transaction: %w", err)
+	}
+
+	investment, err := h.investmentRepository.FindByID(transaction.InvestmentID)
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to find investment: %w", err)
+	}
+	if investment.UserID != tokenUserID {
+		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete transaction")
+
+	}
+
+	err = h.transactionRepository.DeleteByID(transaction.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete transaction: %w", err)
 	}
@@ -102,7 +141,7 @@ type createTransactionRequest struct {
 	Amount       int64                  `json:"amount"`
 }
 
-func (r *createTransactionRequest) validate() error {
+func (r createTransactionRequest) validate() error {
 	if r.Date == "" {
 		return errors.New("field 'date' is missing")
 	}
@@ -118,13 +157,13 @@ func (r *createTransactionRequest) validate() error {
 	return nil
 }
 
-func (r *createTransactionRequest) toCommand(i domain.Investment) (domain.CreateTransactionCommand, error) {
+func (r createTransactionRequest) toCommand(investment domain.Investment) (domain.CreateTransactionCommand, error) {
 	date, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		return domain.CreateTransactionCommand{}, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	return domain.NewCreateTransactionCommand(date, r.Type, i, r.Amount), nil
+	return domain.NewCreateTransactionCommand(date, r.Type, investment, r.Amount), nil
 }
 
 type transactionDto struct {

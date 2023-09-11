@@ -45,7 +45,6 @@ func NewCreateTransactionCommand(date time.Time, t TransactionType, investment I
 		Investment: investment,
 		Amount:     amount,
 	}
-
 }
 
 type Transaction struct {
@@ -63,5 +62,17 @@ func NewTransaction(id string, date time.Time, t TransactionType, investmentID s
 		Type:         t,
 		InvestmentID: investmentID,
 		Amount:       amount,
+	}
+}
+
+type TransactionWithInvestment struct {
+	Transaction Transaction
+	Investment  Investment
+}
+
+func NewTransactionWithInvestment(transaction Transaction, investment Investment) TransactionWithInvestment {
+	return TransactionWithInvestment{
+		Transaction: transaction,
+		Investment:  investment,
 	}
 }
