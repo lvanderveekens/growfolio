@@ -9,7 +9,7 @@ export default function AuthProviderCallbackPage({ params, }: { params: { provid
   const router = useRouter();
 
   useEffect(() => {
-    const baseUrl = `/api/auth/${params.provider}/callback`; // Replace with your API endpoint
+    const baseUrl = `/api/v1/auth/${params.provider}/callback`; // Replace with your API endpoint
     const urlWithQuery = `${baseUrl}${queryString}`;
 
     fetch(urlWithQuery, {

@@ -19,17 +19,18 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		google.New(s.googleClientId, s.googleClientSecret, "http://localhost:8080/auth/google/callback"),
 	)
 
-	r.GET("/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
-	r.GET("/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
+	r.GET("/v1/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
+	r.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
 
 	private := r.Group("")
 	private.Use(s.middlewares.token)
 	{
-		private.POST("/auth/logout", createHandlerFunc(s.handlers.auth.LogOut))
+		private.POST("/v1/auth/logout", createHandlerFunc(s.handlers.auth.LogOut))
 
 		private.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 		private.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))
 		private.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
+		private.POST("/v1/investments/:id/updates", createHandlerFunc(s.handlers.investment.CreateUpdates))
 
 		private.GET("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
 		private.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))

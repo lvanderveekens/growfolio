@@ -90,7 +90,15 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	investment, err := h.investmentRepository.FindByID(id)
+	update, err := h.investmentRepository.FindUpdateByID(id)
+	if err != nil {
+		if err == domain.ErrInvestmentUpdateNotFound {
+			return response[empty]{}, NewError(http.StatusNotFound, err.Error())
+		}
+		return response[empty]{}, fmt.Errorf("failed to find investment update: %w", err)
+	}
+
+	investment, err := h.investmentRepository.FindByID(update.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
@@ -102,7 +110,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment update")
 	}
 
-	err = h.investmentRepository.DeleteUpdateByID(investment.ID)
+	err = h.investmentRepository.DeleteUpdateByID(id)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete investment update: %w", err)
 	}

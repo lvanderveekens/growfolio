@@ -66,6 +66,25 @@ func (r *InvestmentRepository) FindByID(id string) (domain.Investment, error) {
 	return entity.toDomainInvestment(), nil
 }
 
+func (r *InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdate, error) {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		fmt.Println("error: id is not a uuid: " + err.Error())
+		return domain.InvestmentUpdate{}, domain.ErrInvestmentUpdateNotFound
+	}
+
+	entity := InvestmentUpdate{}
+	err = r.db.Get(&entity, "SELECT * FROM investment_update WHERE id=$1", id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.InvestmentUpdate{}, domain.ErrInvestmentUpdateNotFound
+		}
+		return domain.InvestmentUpdate{}, fmt.Errorf("failed to select investment update: %w", err)
+	}
+
+	return entity.toDomainInvestmentUpdate(), nil
+}
+
 func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {

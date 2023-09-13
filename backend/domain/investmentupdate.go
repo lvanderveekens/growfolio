@@ -8,8 +8,8 @@ type CreateInvestmentUpdateCommand struct {
 	Value      int64
 }
 
-func NewCreateInvestmentUpdateCommand(date time.Time, i Investment, value int64) CreateInvestmentUpdateCommand {
-	return CreateInvestmentUpdateCommand{Date: date, Investment: i, Value: value}
+func NewCreateInvestmentUpdateCommand(date time.Time, investment Investment, value int64) CreateInvestmentUpdateCommand {
+	return CreateInvestmentUpdateCommand{Date: date, Investment: investment, Value: value}
 }
 
 type InvestmentUpdate struct {

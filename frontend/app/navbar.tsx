@@ -135,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <button
                 className="border border-black px-3 py-2 rounded-md"
                 onClick={() => {
-                  router.push("/api/auth/google");
+                  router.push("/api/v1/auth/google");
                 }}
               >
                 Log in
@@ -159,7 +159,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
                     <button
                       className={`hover:text-green-400`}
                       onClick={() => {
-                        fetch(`/api/auth/logout`, { method: "POST" }).then((res) => {
+                        fetch(`/api/v1/auth/logout`, { method: "POST" }).then((res) => {
                           if (res.ok) {
                             router.push("/");
                             window.location.reload();
