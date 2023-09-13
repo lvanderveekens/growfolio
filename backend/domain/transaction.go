@@ -38,10 +38,10 @@ type CreateTransactionCommand struct {
 	Amount     int64
 }
 
-func NewCreateTransactionCommand(date time.Time, t TransactionType, investment Investment, amount int64) CreateTransactionCommand {
+func NewCreateTransactionCommand(date time.Time, _type TransactionType, investment Investment, amount int64) CreateTransactionCommand {
 	return CreateTransactionCommand{
 		Date:       date,
-		Type:       t,
+		Type:       _type,
 		Investment: investment,
 		Amount:     amount,
 	}

@@ -16,11 +16,15 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentRepository services.InvestmentRepository
+	investmentRepository  services.InvestmentRepository
+	transactionRepository services.TransactionRepository
 }
 
-func NewInvestmentHandler(investmentRepository services.InvestmentRepository) InvestmentHandler {
-	return InvestmentHandler{investmentRepository: investmentRepository}
+func NewInvestmentHandler(
+	investmentRepository services.InvestmentRepository,
+	transactionRepository services.TransactionRepository,
+) InvestmentHandler {
+	return InvestmentHandler{investmentRepository: investmentRepository, transactionRepository: transactionRepository}
 }
 
 func (h InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmentDto], error) {
@@ -139,6 +143,71 @@ func (h InvestmentHandler) CreateUpdates(c *gin.Context) (response[empty], error
 		_, err := h.investmentRepository.CreateUpdate(command)
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to create update: %w", err)
+		}
+	}
+
+	return newEmptyResponse(200), nil
+}
+
+func (h InvestmentHandler) CreateTransactions(c *gin.Context) (response[empty], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	id := c.Param("id")
+	investment, err := h.investmentRepository.FindByID(id)
+	if err != nil {
+		if err == domain.ErrInvestmentNotFound {
+			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
+		}
+		return response[empty]{}, fmt.Errorf("failed to find investment by id %s: %w", id, err)
+	}
+
+	if investment.UserID != tokenUserID {
+		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to read investment")
+	}
+
+	csvFormFile, err := c.FormFile("csvFile")
+	if err != nil {
+		return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
+	}
+
+	slog.Info("Received file: " + csvFormFile.Filename)
+
+	csvFile, err := csvFormFile.Open()
+	defer csvFile.Close()
+
+	csvReader := csv.NewReader(csvFile)
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to read CSV records: %w", err)
+	}
+
+	commands := make([]domain.CreateTransactionCommand, 0)
+
+	for i := 1; i < len(records); i++ { // skipping the header row
+		record := records[i]
+		dateString := record[0]
+		_type := domain.TransactionType(record[1])
+		amountString := record[2]
+
+		date, err := time.Parse("2006-01-02", dateString)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to parse date: %w", err)
+		}
+
+		amount, err := strconv.ParseInt(amountString, 10, 64)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to parse amount: %w", err)
+		}
+
+		commands = append(commands, domain.NewCreateTransactionCommand(date, _type, investment, amount))
+	}
+
+	for _, command := range commands {
+		slog.Info("Received transaction: " + fmt.Sprintf("%+v", command))
+		_, err := h.transactionRepository.Create(command)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to create transaction: %w", err)
 		}
 	}
 

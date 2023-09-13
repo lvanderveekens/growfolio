@@ -19,8 +19,9 @@ func NewTokenService(jwtSecret string) TokenService {
 }
 
 func (s *TokenService) generateToken(userID string) (string, error) {
+	// TODO: move exp to .env
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":    time.Now().Add(1 * time.Hour).Unix(),
+		"exp":    time.Now().Add(2 * time.Hour).Unix(),
 		"userId": userID,
 	})
 

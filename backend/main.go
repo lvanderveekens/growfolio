@@ -60,7 +60,7 @@ func main() {
 
 	transactionService := services.NewTransactionService(transactionRepository, &investmentRepository)
 
-	investmentHandler := api.NewInvestmentHandler(&investmentRepository)
+	investmentHandler := api.NewInvestmentHandler(&investmentRepository, transactionRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(&transactionRepository, transactionService, &investmentRepository)
 	authHandler := api.NewAuthHandler(&userRepository, tokenService)
