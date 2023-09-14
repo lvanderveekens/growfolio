@@ -1,11 +1,13 @@
 "use client"
 
-import { Investment, InvestmentUpdate } from "@/app/page";
+import { calculatePrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
-import { useEffect, useState } from "react";
-import { capitalize, formatAsEuroAmount, formatAsPercentage } from "@/app/string";
+import { Navbar } from "@/app/navbar";
+import { Investment, InvestmentUpdate } from "@/app/page";
+import { formatAsEuroAmount, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
+  BarElement,
   ChartData,
   Chart as ChartJS,
   ChartOptions,
@@ -15,18 +17,13 @@ import {
   PointElement,
   TimeScale,
   Title,
-  Tooltip,
-  TooltipItem,
+  Tooltip
 } from "chart.js";
 import "chartjs-adapter-moment";
-import { Line, Pie } from "react-chartjs-2";
-import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "@/app/calculator";
-import AddTransactionForm from "../add-transaction-form";
-import UpdateInvestmentForm from "../update-investment-form";
-import Modal from "@/app/modal";
-import { FaXmark } from "react-icons/fa6";
+import moment from "moment";
 import Link from "next/link";
-import { Navbar } from "@/app/navbar";
+import { useEffect, useState } from "react";
+import { Bar, Line } from "react-chartjs-2";
 
 ChartJS.register(
   ArcElement,
@@ -36,6 +33,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -51,8 +49,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
 
-  const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
-  const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
+  const [timeRangeDays, setTimeRangeDays] = useState<number>(6 * 30)
 
   useEffect(() => {
     fetchInvestment()
@@ -63,10 +60,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (transactions.length > 0 && updates.length > 0) {
       setUpdateDataPoints(updates.map((update) => {
-        const principal = calculateTotalPrincipalForDate(update.date, transactions)
-        const value = calculateTotalValueForDate(update.date, updates)
+        const principal = calculatePrincipalForDate(update.date, transactions)
+        const value = update.value
         const returnValue = value - principal
-        const roi = returnValue / principal;
+        const roi = returnValue / principal
 
         return {
           id: update.id,
@@ -98,9 +95,20 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }
 
   const fetchUpdates = () => {
+    // TODO: server side time range filter
     fetch(`/api/v1/investment-updates?investmentId=${params.id}`)
       .then((res) => res.json())
-      .then((data) => setUpdates(data));
+      .then((updates: InvestmentUpdate[]) => {
+        // const currentDate = new Date();
+        // const dateThreshold = new Date(currentDate);
+        // dateThreshold.setDate(currentDate.getDate() - timeRangeDays);
+
+        // const filteredUpdates = updates.filter((update) =>
+        //   moment(update.date).isAfter(dateThreshold)
+        // );
+
+        setUpdates(updates);
+      });
   }
 
   const deleteUpdate = async (id: string) => {
@@ -219,6 +227,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <Line
                 options={returnLineOptions}
                 data={buildReturnLineData(updateDataPoints)}
+              />
+            </div>
+
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">Periodic return</h1>
+              <Bar
+                options={periodicReturnBarOptions}
+                data={buildPeriodicReturnBarData(updateDataPoints)}
               />
             </div>
 
@@ -346,6 +362,49 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     },
   };
 
+  const periodicReturnBarOptions: ChartOptions<"bar"> = {
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += "€ " + context.parsed.y;
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "day",
+          tooltipFormat: "YYYY-MM-DD",
+        },
+      },
+      y: {
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return "€ " + value;
+          },
+        },
+      },
+    },
+  };
+
   const roiLineOptions: ChartOptions<"line"> = {
     interaction: {
       mode: "index",
@@ -398,8 +457,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     roi: number;
   }
 
+  interface MonthlyReturnDataPoint {
+    yearAndMonth: string;
+    return: number;
+  }
+
   const buildReturnLineData = (
-    updateRows: UpdateDataPoint[]
+    updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -407,7 +471,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "Return",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: updateRows.map((x) => ({
+          data: updateDataPoints.map((x) => ({
             x: x.date,
             y: (x.value - x.principal) / 100,
           })),
@@ -416,8 +480,39 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     };
   };
 
+  const buildPeriodicReturnBarData = (
+    updateDataPoints: UpdateDataPoint[]
+  ): ChartData<"bar"> => {
+
+    const data = []
+
+    for (let i = 0; i < updateDataPoints.length; i++) {
+      if (i == 0) {
+        data.push({ x: updateDataPoints[i].date, y: 0 });
+        continue
+      }
+      const previousUpdate = updateDataPoints[i - 1];
+      const currentUpdate = updateDataPoints[i];
+      data.push({
+        x: currentUpdate.date,
+        y: (currentUpdate.value - previousUpdate.value) / 100,
+      });
+    }
+
+    return {
+      datasets: [
+        {
+          label: "Periodic return",
+          borderColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(255, 99, 132)",
+          data: data,
+        },
+      ],
+    };
+  };
+
   const buildROILineData = (
-    updateRows: UpdateDataPoint[]
+    updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -425,7 +520,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           label: "ROI",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: updateRows.map((x) => ({
+          data: updateDataPoints.map((x) => ({
             x: x.date,
             y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
           })),

@@ -1,7 +1,7 @@
 import { Transaction, TransactionType } from "./investments/transaction";
 import { InvestmentUpdate } from "./page";
 
-export const calculateTotalPrincipalForDate = (
+export const calculatePrincipalForDate = (
   date: string,
   transactions: Transaction[]
 ) => {

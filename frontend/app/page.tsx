@@ -20,7 +20,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-moment";
 import { Line, Pie } from "react-chartjs-2";
-import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
+import { calculatePrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
@@ -67,7 +67,7 @@ export default function HomePage() {
     if (investments.length > 0 && investmentUpdates.length > 0) {
       const investmentUpdateRows = investmentUpdates.map((u) => {
         const investment = findInvestmentById(u.investmentId);
-        const principal = calculateTotalPrincipalForDate(u.date, transactons);
+        const principal = calculatePrincipalForDate(u.date, transactons);
         const returnValue = u.value - principal;
         const roi = returnValue / principal;
 
@@ -96,7 +96,7 @@ export default function HomePage() {
       const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
         return {
           date: date,
-          principal: calculateTotalPrincipalForDate(date, transactons),
+          principal: calculatePrincipalForDate(date, transactons),
           value: calculateTotalValueForDate(date, investmentUpdates),
         };
       });
