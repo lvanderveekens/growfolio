@@ -231,10 +231,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             </div>
 
             <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Periodic return</h1>
+              <h1 className="text-xl font-bold mb-4">Monthly return</h1>
               <Bar
-                options={periodicReturnBarOptions}
-                data={buildPeriodicReturnBarData(updateDataPoints)}
+                options={monthlyReturnBarOptions}
+                data={buildMonthlyReturnBarData(updateDataPoints)}
               />
             </div>
 
@@ -362,11 +362,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     },
   };
 
-  const periodicReturnBarOptions: ChartOptions<"bar"> = {
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
+  const monthlyReturnBarOptions: ChartOptions<"bar"> = {
+    // interaction: {
+    //   mode: "index",
+    //   intersect: false,
+    // },
     plugins: {
       legend: {
         display: false,
@@ -391,8 +391,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       x: {
         type: "time",
         time: {
-          unit: "day",
-          tooltipFormat: "YYYY-MM-DD",
+          unit: "month",
+          tooltipFormat: "YYYY-MM",
         },
       },
       y: {
@@ -480,29 +480,35 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     };
   };
 
-  const buildPeriodicReturnBarData = (
+  const buildMonthlyReturnBarData = (
     updateDataPoints: UpdateDataPoint[]
   ): ChartData<"bar"> => {
 
+    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
+      const yearMonthKey = obj.date.substr(0, 7);
+      acc.set(yearMonthKey, obj);
+      return acc;
+    }, new Map<string, UpdateDataPoint>());
+    console.log(lastUpdateByMonth)
+
     const data = []
 
-    for (let i = 0; i < updateDataPoints.length; i++) {
-      if (i == 0) {
-        data.push({ x: updateDataPoints[i].date, y: 0 });
-        continue
-      }
-      const previousUpdate = updateDataPoints[i - 1];
-      const currentUpdate = updateDataPoints[i];
+    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
+
+    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
+      const previousUpdate = lastUpdateByMonthEntries[i - 1];
+      const currentUpdate = lastUpdateByMonthEntries[i];
+
       data.push({
-        x: currentUpdate.date,
-        y: (currentUpdate.value - previousUpdate.value) / 100,
+        x: currentUpdate[0],
+        y: (currentUpdate[1].return - previousUpdate[1].return) / 100,
       });
     }
 
     return {
       datasets: [
         {
-          label: "Periodic return",
+          label: "Monthly return",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
           data: data,
