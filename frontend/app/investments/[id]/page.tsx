@@ -48,6 +48,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
+  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
 
   const [timeRangeDays, setTimeRangeDays] = useState<number>(6 * 30)
 
@@ -59,7 +60,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (transactions.length > 0 && updates.length > 0) {
-      setUpdateDataPoints(updates.map((update) => {
+      const updateDataPoints = updates.map((update) => {
         const principal = calculatePrincipalForDate(update.date, transactions)
         const value = update.value
         const returnValue = value - principal
@@ -73,9 +74,39 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           return: returnValue,
           roi: roi
         };
-      }));
+      })
+
+      setUpdateDataPoints(updateDataPoints);
+      setMonthlyChangeDataPoints(calculateMonthlyChangeDataPoints(updateDataPoints))
     }
   }, [transactions, updates]);
+
+  const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
+    console.log("calculating monthly change data points...")
+
+    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
+      const yearMonthKey = obj.date.substr(0, 7);
+      acc.set(yearMonthKey, obj);
+      return acc;
+    }, new Map<string, UpdateDataPoint>());
+    console.log(lastUpdateByMonth)
+
+    const dataPoints = []
+    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
+
+    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
+      const previousUpdate = lastUpdateByMonthEntries[i - 1];
+      const currentUpdate = lastUpdateByMonthEntries[i];
+
+      dataPoints.push({
+        yearAndMonth: currentUpdate[0],
+        value: (currentUpdate[1].value - previousUpdate[1].value),
+        principal: (currentUpdate[1].principal - previousUpdate[1].principal),
+        return: (currentUpdate[1].return - previousUpdate[1].return),
+      });
+    }
+    return dataPoints
+  } 
 
   const fetchInvestment = () => {
     fetch(`/api/v1/investments/${params.id}`)
@@ -215,10 +246,18 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             )}
 
             <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+              <h1 className="text-xl font-bold mb-4">Principal and value</h1>
               <Line
-                options={principalVsValueLineOptions}
-                data={buildPrincipalVsValueLineData(updateDataPoints)}
+                options={principalAndValueLineOptions}
+                data={buildPrincipalAndValueLineData(updateDataPoints)}
+              />
+            </div>
+
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+              <Bar
+                options={monthlyGrowthBarOptions}
+                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
               />
             </div>
 
@@ -227,14 +266,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <Line
                 options={returnLineOptions}
                 data={buildReturnLineData(updateDataPoints)}
-              />
-            </div>
-
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Monthly return</h1>
-              <Bar
-                options={monthlyReturnBarOptions}
-                data={buildMonthlyReturnBarData(updateDataPoints)}
               />
             </div>
 
@@ -252,7 +283,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   );
 }
 
-  const buildPrincipalVsValueLineData = (
+  const buildPrincipalAndValueLineData = (
     updateRows: UpdateDataPoint[]
   ) => {
     return {
@@ -279,7 +310,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     };
   };
 
-  const principalVsValueLineOptions: any = {
+  const principalAndValueLineOptions: any = {
     interaction: {
       mode: "index",
       intersect: false,
@@ -363,10 +394,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const monthlyReturnBarOptions: ChartOptions<"bar"> = {
-    // interaction: {
-    //   mode: "index",
-    //   intersect: false,
-    // },
     plugins: {
       legend: {
         display: false,
@@ -396,6 +423,44 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
         },
       },
       y: {
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return "€ " + value;
+          },
+        },
+      },
+    },
+  };
+
+  const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += "€ " + context.parsed.y;
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        type: "time",
+        time: {
+          unit: "month",
+          tooltipFormat: "YYYY-MM",
+        },
+      },
+      y: {
+        stacked: true,
         ticks: {
           callback: function (value: any, index: any, ticks: any) {
             return "€ " + value;
@@ -457,8 +522,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     roi: number;
   }
 
-  interface MonthlyReturnDataPoint {
+  interface MonthlyChangeDataPoint {
     yearAndMonth: string;
+    value: number;
+    principal: number;
     return: number;
   }
 
@@ -481,37 +548,45 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const buildMonthlyReturnBarData = (
-    updateDataPoints: UpdateDataPoint[]
+    monthlyChangeDataPoints: MonthlyChangeDataPoint[]
   ): ChartData<"bar"> => {
-
-    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
-      const yearMonthKey = obj.date.substr(0, 7);
-      acc.set(yearMonthKey, obj);
-      return acc;
-    }, new Map<string, UpdateDataPoint>());
-    console.log(lastUpdateByMonth)
-
-    const data = []
-
-    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
-
-    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
-      const previousUpdate = lastUpdateByMonthEntries[i - 1];
-      const currentUpdate = lastUpdateByMonthEntries[i];
-
-      data.push({
-        x: currentUpdate[0],
-        y: (currentUpdate[1].return - previousUpdate[1].return) / 100,
-      });
-    }
-
     return {
       datasets: [
         {
           label: "Monthly return",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: data,
+          data: monthlyChangeDataPoints.map((dataPoint) => ({
+            x: dataPoint.yearAndMonth,
+            y: (dataPoint.return / 100),
+          })),
+        },
+      ],
+    };
+  };
+
+  const buildMonthlyGrowthBarData = (
+    monthlyChangeDataPoints: MonthlyChangeDataPoint[]
+  ): ChartData<"bar"> => {
+    return {
+      datasets: [
+        {
+          label: "Principal",
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgb(54, 162, 235)",
+          data: monthlyChangeDataPoints.map((dataPoint) => ({
+            x: dataPoint.yearAndMonth,
+            y: (dataPoint.principal / 100),
+          })),
+        },
+        {
+          label: "Return",
+          borderColor: "rgb(255, 130, 32)",
+          backgroundColor: "rgb(255, 130, 32)",
+          data: monthlyChangeDataPoints.map((dataPoint) => ({
+            x: dataPoint.yearAndMonth,
+            y: (dataPoint.return / 100),
+          })),
         },
       ],
     };
