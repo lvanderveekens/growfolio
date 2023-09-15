@@ -1,6 +1,6 @@
 "use client"
 
-import { calculatePrincipalForDate } from "@/app/calculator";
+import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import { Navbar } from "@/app/navbar";
 import { Investment, InvestmentUpdate } from "@/app/page";
@@ -61,7 +61,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (transactions.length > 0 && updates.length > 0) {
       const updateDataPoints = updates.map((update) => {
-        const principal = calculatePrincipalForDate(update.date, transactions)
+        const principal = calculateTotalPrincipalForDate(update.date, transactions)
         const value = update.value
         const returnValue = value - principal
         const roi = returnValue / principal
@@ -432,7 +432,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     },
   };
 
-  const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
+export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
     plugins: {
       tooltip: {
         callbacks: {
@@ -565,7 +565,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     };
   };
 
-  const buildMonthlyGrowthBarData = (
+export const buildMonthlyGrowthBarData = (
     monthlyChangeDataPoints: MonthlyChangeDataPoint[]
   ): ChartData<"bar"> => {
     return {

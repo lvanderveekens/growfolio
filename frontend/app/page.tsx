@@ -19,12 +19,13 @@ import {
   TooltipItem,
 } from "chart.js";
 import "chartjs-adapter-moment";
-import { Line, Pie } from "react-chartjs-2";
-import { calculatePrincipalForDate, calculateTotalValueForDate } from "./calculator";
+import { Bar, Line, Pie } from "react-chartjs-2";
+import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
-import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
 import { Navbar } from "./navbar";
+import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+import { buildMonthlyGrowthBarData, monthlyGrowthBarOptions } from "./investments/[id]/page";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -43,19 +44,15 @@ ChartJS.register(
 
 export default function HomePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [investmentUpdates, setInvestmentUpdates] = useState<
+  const [updates, setUpdates] = useState<
     InvestmentUpdate[]
   >([]);
   const [transactons, setTransactions] = useState<Transaction[]>([]);
 
-  const [investmentUpdateRows, setInvestmentUpdateRows] = useState<
-    InvestmentUpdateRow[]
-  >([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
 
-  const [dateWithPrincipalAndValues, setDateWithPrincipalAndValues] = useState<
-    DateWithPrincipalAndValue[]
-  >([]);
+  const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
+  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
 
   useEffect(() => {
     fetchInvestments();
@@ -64,49 +61,33 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (investments.length > 0 && investmentUpdates.length > 0) {
-      const investmentUpdateRows = investmentUpdates.map((u) => {
-        const investment = findInvestmentById(u.investmentId);
-        const principal = calculatePrincipalForDate(u.date, transactons);
-        const returnValue = u.value - principal;
+    if (transactons.length > 0 && updates.length > 0) {
+      const uniqueUpdateDates = Array.from(
+        new Set(updates.map((update) => update.date))
+      );
+
+      const updateDataPoints = uniqueUpdateDates.map((date) => {
+        const value = calculateTotalValueForDate(date, updates)
+        const principal = calculateTotalPrincipalForDate(date, transactons);
+        const returnValue = value - principal;
         const roi = returnValue / principal;
 
         return {
-          id: u.id,
-          date: u.date,
-          name: investment?.name ?? "-- whut --",
+          date: date,
+          value: value,
           principal: principal,
-          value: u.value,
           return: returnValue,
           roi: roi,
         };
       });
 
-      setInvestmentUpdateRows(
-        investmentUpdateRows.sort(compareInvestmentUpdateRowByDate)
-      );
-    }
-
-    if (investmentUpdates.length > 0) {
-      const uniqueUpdateDates = Array.from(
-        new Set(investmentUpdates.map((update) => update.date))
-      );
-      uniqueUpdateDates.sort();
-
-      const dateWithPrincipalAndValues = uniqueUpdateDates.map((date) => {
-        return {
-          date: date,
-          principal: calculatePrincipalForDate(date, transactons),
-          value: calculateTotalValueForDate(date, investmentUpdates),
-        };
-      });
-
-      setDateWithPrincipalAndValues(dateWithPrincipalAndValues);
+      setUpdateDataPoints(updateDataPoints);
+      setMonthlyChangeDataPoints(calculateMonthlyChangeDataPoints(updateDataPoints))
     }
 
     if (investments.length > 0) {
       const investmentRows = investments.map((i) => {
-        const lastUpdate = investmentUpdates.findLast(
+        const lastUpdate = updates.findLast(
           (u) => u.investmentId == i.id
         )!;
 
@@ -128,7 +109,7 @@ export default function HomePage() {
 
       setInvestmentRows(investmentRows);
     }
-  }, [investments, transactons, investmentUpdates]);
+  }, [investments, transactons, updates]);
 
   const fetchInvestments = async () => {
     fetch(`/api/v1/investments`)
@@ -141,11 +122,38 @@ export default function HomePage() {
   const fetchInvestmentUpdates = async () => {
     fetch(`/api/v1/investment-updates`)
       .then((res) => res.json())
-      .then((investmentUpdates: InvestmentUpdate[]) => {
-        investmentUpdates.sort(compareInvestmentUpdateByDateAsc);
-        setInvestmentUpdates(investmentUpdates);
+      .then((updates: InvestmentUpdate[]) => {
+        updates.sort(compareInvestmentUpdateByDateAsc);
+        setUpdates(updates);
       });
   };
+
+  const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
+    console.log("calculating monthly change data points...")
+
+    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
+      const yearMonthKey = obj.date.substr(0, 7);
+      acc.set(yearMonthKey, obj);
+      return acc;
+    }, new Map<string, UpdateDataPoint>());
+    console.log(lastUpdateByMonth)
+
+    const dataPoints = []
+    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
+
+    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
+      const previousUpdate = lastUpdateByMonthEntries[i - 1];
+      const currentUpdate = lastUpdateByMonthEntries[i];
+
+      dataPoints.push({
+        yearAndMonth: currentUpdate[0],
+        value: (currentUpdate[1].value - previousUpdate[1].value),
+        principal: (currentUpdate[1].principal - previousUpdate[1].principal),
+        return: (currentUpdate[1].return - previousUpdate[1].return),
+      });
+    }
+    return dataPoints
+  } 
 
   const fetchTransactions = async () => {
     fetch(`/api/v1/transactions`)
@@ -161,8 +169,8 @@ export default function HomePage() {
   };
 
   function compareInvestmentUpdateRowByDate(
-    a: InvestmentUpdateRow,
-    b: InvestmentUpdateRow
+    a: UpdateDataPoint,
+    b: UpdateDataPoint
   ): number {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
@@ -184,8 +192,8 @@ export default function HomePage() {
     return dateA.getTime() - dateB.getTime();
   }
 
-  const buildPrincipalVsValueLineData = (
-    dateAndPrincipalAndValue: DateWithPrincipalAndValue[]
+  const buildPrincipalAndValueLineData = (
+    updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -193,7 +201,7 @@ export default function HomePage() {
           label: "Principal",
           borderColor: "rgb(255, 99, 132)",
           backgroundColor: "rgb(255, 99, 132)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.principal / 100,
           })),
@@ -202,7 +210,7 @@ export default function HomePage() {
           label: "Value",
           borderColor: "rgb(54, 162, 235)",
           backgroundColor: "rgb(54, 162, 235)",
-          data: dateAndPrincipalAndValue.map((x) => ({
+          data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.value / 100,
           })),
@@ -212,7 +220,7 @@ export default function HomePage() {
   };
 
   const buildReturnLineData = (
-    dateWithPrincipalAndValue: DateWithPrincipalAndValue[]
+    dateWithPrincipalAndValue: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -230,7 +238,7 @@ export default function HomePage() {
   };
 
   const buildROILineData = (
-    dateWithPrincipalAndValue: DateWithPrincipalAndValue[]
+    dateWithPrincipalAndValue: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -256,7 +264,7 @@ export default function HomePage() {
 
   const getLatestInvestmentValue = (investment: Investment) => {
     return (
-      investmentUpdates.findLast(
+      updates.findLast(
         (update) => update.investmentId == investment.id
       )?.value ?? 0
     );
@@ -477,32 +485,42 @@ export default function HomePage() {
           </div>
         )}
 
-        {investmentUpdateRows.length > 0 && (
+        {updateDataPoints.length > 0 && (
           <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Principal vs. Value</h1>
+            <h1 className="text-xl font-bold mb-4">Principal and value</h1>
             <Line
-              options={principalVsValueLineOptions}
-              data={buildPrincipalVsValueLineData(dateWithPrincipalAndValues)}
+              options={principalAndValueLineOptions}
+              data={buildPrincipalAndValueLineData(updateDataPoints)}
             />
           </div>
         )}
 
-        {dateWithPrincipalAndValues.length > 0 && (
+        {updateDataPoints.length > 0 && (
+            <div className="mb-8">
+              <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+              <Bar
+                options={monthlyGrowthBarOptions}
+                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+              />
+            </div>
+        )}
+
+        {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Return</h1>
             <Line
               options={returnLineOptions}
-              data={buildReturnLineData(dateWithPrincipalAndValues)}
+              data={buildReturnLineData(updateDataPoints)}
             />
           </div>
         )}
 
-        {dateWithPrincipalAndValues.length > 0 && (
+        {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">ROI</h1>
             <Line
               options={roiLineOptions}
-              data={buildROILineData(dateWithPrincipalAndValues)}
+              data={buildROILineData(updateDataPoints)}
             />
           </div>
         )}
@@ -535,7 +553,7 @@ export const gainOrLossOptions: any = {
   },
 };
 
-export const principalVsValueLineOptions: any = {
+export const principalAndValueLineOptions: any = {
   interaction: {
     mode: "index",
     intersect: false,
@@ -714,18 +732,17 @@ export interface InvestmentRow {
   roi: number;
 }
 
-export interface DateWithPrincipalAndValue {
+export interface UpdateDataPoint {
   date: string;
-  principal: number;
-  value: number;
-}
-
-export interface InvestmentUpdateRow {
-  id: string;
-  date: string;
-  name: string;
   principal: number;
   value: number;
   return: number;
   roi: number;
+}
+
+export interface MonthlyChangeDataPoint {
+  yearAndMonth: string;
+  value: number;
+  principal: number;
+  return: number;
 }
