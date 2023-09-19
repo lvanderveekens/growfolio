@@ -26,6 +26,7 @@ import Modal from "./modal";
 import { Navbar } from "./navbar";
 import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
 import { buildMonthlyGrowthBarData, monthlyGrowthBarOptions } from "./investments/[id]/page";
+import { api } from "./axios"
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -112,17 +113,16 @@ export default function HomePage() {
   }, [investments, transactons, updates]);
 
   const fetchInvestments = async () => {
-    fetch(`/api/v1/investments`)
-      .then((res) => res.json())
-      .then((data) => {
-        setInvestments(data);
+    api.get(`/v1/investments`)
+      .then((res) => {
+        setInvestments(res.data);
       });
   };
 
   const fetchInvestmentUpdates = async () => {
-    fetch(`/api/v1/investment-updates`)
-      .then((res) => res.json())
-      .then((updates: InvestmentUpdate[]) => {
+    api.get(`/v1/investment-updates`)
+      .then((res) => {
+        const updates = res.data
         updates.sort(compareInvestmentUpdateByDateAsc);
         setUpdates(updates);
       });
@@ -156,9 +156,9 @@ export default function HomePage() {
   } 
 
   const fetchTransactions = async () => {
-    fetch(`/api/v1/transactions`)
-      .then((res) => res.json())
-      .then((transactions) => {
+    api.get(`/v1/transactions`)
+      .then((res) => {
+        const transactions = res.data
         transactions.sort(compareTransactionByDateAsc);
         setTransactions(transactions);
       });

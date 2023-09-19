@@ -6,6 +6,7 @@ import { FaCaretDown } from "react-icons/fa6";
 import { Investment, User } from "./page";
 import { AiOutlineStock } from "react-icons/ai";
 import { useRouter } from "next/navigation";
+import { api } from "./axios"
 
 interface NavbarProps {
 }
@@ -31,10 +32,11 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const fetchCurrentUser = async () => {
     setLoadingUser(true);
-    fetch(`/api/v1/users/current`, { credentials: "include" })
-      .then(async (res) => {
-        if (res.ok) {
-          setUser(await res.json());
+    console.log("fetching current user")
+    api.get("/v1/users/current")
+      .then((res) => {
+        if (res.status === 200) {
+          setUser(res.data);
         }
       })
       .finally(() => setLoadingUser(false));
@@ -42,10 +44,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const fetchInvestments = async () => {
     setLoadingInvestments(true);
-    fetch(`/api/v1/investments`)
-      .then((res) => res.json())
-      .then((data) => {
-        setInvestments(data);
+    api.get(`/v1/investments`)
+      .then((res) => {
+        setInvestments(res.data);
       })
       .finally(() => setLoadingInvestments(false));
   };
@@ -159,10 +160,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
                     <button
                       className={`hover:text-green-400`}
                       onClick={() => {
-                        fetch(`/api/v1/auth/logout`, { method: "POST" }).then((res) => {
-                          if (res.ok) {
-                            router.push("/");
-                            window.location.reload();
+                        api.post(`/v1/auth/logout`).then((res) => {
+                          if (res.status === 200) {
+                            router.push("/login");
                           }
                         });
                       }}

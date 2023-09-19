@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import UpdateInvestmentForm from "../../update-investment-form";
 import { Navbar } from "@/app/navbar";
+import { api } from "@/app/axios";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -28,9 +29,8 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }, []);
 
   const fetchInvestment = () => {
-    fetch(`/api/v1/investments/${params.id}`)
-      .then((res) => res.json())
-      .then((data) => setInvestment(data))
+    api.get(`/v1/investments/${params.id}`)
+      .then((res) => setInvestment(res.data))
       .catch((error) => {
         console.error(`Error fetching investment: ${error}`);
         setLoadingInvestmentError(error)
@@ -39,11 +39,8 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
     }
 
   const fetchUpdates = () => {
-    fetch(
-      `/api/v1/investment-updates?investmentId=${params.id}`
-    )
-      .then((res) => res.json())
-      .then((data) => setUpdates(data))
+    api.get(`/v1/investment-updates?investmentId=${params.id}`)
+      .then((res) => setUpdates(res.data))
       .catch((error) => {
         console.error(`Error fetching updates: ${error}`);
         setLoadingUpdatesError(error)
@@ -52,9 +49,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }
 
   const deleteUpdate = async (id: string) => {
-    await fetch(`/api/v1/investment-updates/${id}`, {
-      method: "DELETE",
-    });
+    await api.delete(`/v1/investment-updates/${id}`);
   }
 
   if (loadingInvestment || loadingUpdates) {

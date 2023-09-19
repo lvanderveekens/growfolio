@@ -5,6 +5,7 @@ import moment from 'moment';
 import "react-datepicker/dist/react-datepicker.css";
 import { Investment } from '../page';
 import { TransactionType } from './transaction';
+import { api } from '../axios';
 
 
 export interface CreateTransactionRequest {
@@ -37,10 +38,10 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       amount: Math.round(parseFloat(amount!) * 100),
     };
 
-    await fetch(`/api/v1/transactions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req),
+    await api.post("/v1/transactions", req, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     setDate(undefined)

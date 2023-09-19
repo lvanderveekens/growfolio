@@ -10,6 +10,7 @@ import UpdateInvestmentForm from "../../update-investment-form";
 import { Transaction } from "../../transaction";
 import AddTransactionForm from "../../add-transaction-form";
 import { Navbar } from "@/app/navbar";
+import { api } from "@/app/axios";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -30,9 +31,8 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }, []);
 
   const fetchInvestment = () => {
-    fetch(`/api/v1/investments/${params.id}`)
-      .then((res) => res.json())
-      .then((data) => setInvestment(data))
+    api.get(`/v1/investments/${params.id}`)
+      .then((res) => setInvestment(res.data))
       .catch((error) => {
         console.error(`Error fetching investment: ${error}`);
         setLoadingInvestmentError(error)
@@ -41,22 +41,17 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
     }
 
   const fetchTransactions = () => {
-    fetch(
-      `/api/v1/transactions?investmentId=${params.id}`
-    )
-      .then((res) => res.json())
-      .then((data) => setTransactions(data))
+    api.get(`/v1/transactions?investmentId=${params.id}`)
+      .then((res) => setTransactions(res.data))
       .catch((error) => {
         console.error(`Error fetching transactions: ${error}`);
-        setLoadingTransactionsError(error)
+        setLoadingTransactionsError(error);
       })
       .finally(() => setLoadingTransactions(false));
   }
 
   const deleteTransaction = async (id: string) => {
-    await fetch(`/api/v1/transactions/${id}`, {
-      method: "DELETE",
-    });
+    await api.delete(`/v1/transactions/${id}`);
   }
 
   if (loadingInvestment || loadingTransactions) {

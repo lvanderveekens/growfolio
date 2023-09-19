@@ -1,5 +1,6 @@
 "use client"
 
+import { api } from "@/app/axios";
 import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import { Navbar } from "@/app/navbar";
@@ -109,9 +110,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   } 
 
   const fetchInvestment = () => {
-    fetch(`/api/v1/investments/${params.id}`)
-      .then((res) => res.json())
-      .then((data) => setInvestment(data))
+    api.get(`/v1/investments/${params.id}`)
+      .then((res) => setInvestment(res.data))
       .catch((error) => {
         console.error(`Error fetching investment: ${error}`);
         setError(error)
@@ -120,16 +120,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     }
 
   const fetchTransactions = () => {
-    fetch(`/api/v1/transactions?investmentId=${params.id}`)
-      .then((res) => res.json())
-      .then((data) => setTransactions(data));
+    api.get(`/v1/transactions?investmentId=${params.id}`)
+      .then((res) => setTransactions(res.data));
   }
 
   const fetchUpdates = () => {
     // TODO: server side time range filter
-    fetch(`/api/v1/investment-updates?investmentId=${params.id}`)
-      .then((res) => res.json())
-      .then((updates: InvestmentUpdate[]) => {
+    api.get(`/v1/investment-updates?investmentId=${params.id}`)
+      .then((res) => {
         // const currentDate = new Date();
         // const dateThreshold = new Date(currentDate);
         // dateThreshold.setDate(currentDate.getDate() - timeRangeDays);
@@ -138,20 +136,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
         //   moment(update.date).isAfter(dateThreshold)
         // );
 
-        setUpdates(updates);
+        setUpdates(res.data);
       });
-  }
-
-  const deleteUpdate = async (id: string) => {
-    await fetch(`/api/v1/investment-updates/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  const deleteTransaction = async (id: string) => {
-    await fetch(`/api/v1/transactions/${id}`, {
-      method: "DELETE",
-    });
   }
 
   return (

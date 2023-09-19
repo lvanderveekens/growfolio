@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
+import { api } from '../axios';
 
 export interface CreateInvestmentUpdateRequest {
   date: string
@@ -32,10 +33,10 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
       value: Math.round(parseFloat(value!) * 100),
     };
 
-    const res = await fetch(`/api/v1/investment-updates`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req),
+    await api.post("/v1/investment-updates", req, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     setDate(undefined);

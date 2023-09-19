@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { InvestmentType } from '../investment-type';
+import { api } from '../axios';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
@@ -22,10 +23,10 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
       name: name!,
     };
 
-    const res = await fetch(`/api/v1/investments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req),
+    await api.post("/v1/investments", req, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     setType(undefined);
