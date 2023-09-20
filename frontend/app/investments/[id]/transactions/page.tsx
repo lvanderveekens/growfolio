@@ -6,11 +6,11 @@ import { capitalize, formatAsEuroAmount } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
-import UpdateInvestmentForm from "../../update-investment-form";
 import { Transaction } from "../../transaction";
 import AddTransactionForm from "../../add-transaction-form";
 import { Navbar } from "@/app/navbar";
 import { api } from "@/app/axios";
+import ImportTransactionsForm from "../../import-transactions-form";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -24,6 +24,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
   const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
+  const [showImportTransactionsModal, setShowImportTransactionsModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchInvestment()
@@ -116,7 +117,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
 
         <div>
           <button
-            className="border px-3 py-2"
+            className="border px-3 py-2 mr-4"
             type="submit"
             onClick={() => setShowAddTransactionModal(true)}
           >
@@ -130,6 +131,27 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
               <AddTransactionForm
                 onAdd={() => {
                   setShowAddTransactionModal(false);
+                  fetchTransactions();
+                }}
+                investmentId={params.id}
+              />
+            </Modal>
+          )}
+          <button
+            className="border px-3 py-2"
+            type="submit"
+            onClick={() => setShowImportTransactionsModal(true)}
+          >
+            Import transactions
+          </button>
+          {showImportTransactionsModal && (
+            <Modal
+              title="Import transactions"
+              onClose={() => setShowImportTransactionsModal(false)}
+            >
+              <ImportTransactionsForm
+                onImport={() => {
+                  setShowImportTransactionsModal(false);
                   fetchTransactions();
                 }}
                 investmentId={params.id}

@@ -30,8 +30,8 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		private.GET("/v1/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
 		private.GET("/v1/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))
 		private.POST("/v1/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
-		private.POST("/v1/investments/:id/updates", createHandlerFunc(s.handlers.investment.CreateUpdates))
-		private.POST("/v1/investments/:id/transactions", createHandlerFunc(s.handlers.investment.CreateTransactions))
+		private.POST("/v1/investments/:id/updates", createHandlerFunc(s.handlers.investment.ImportUpdates))
+		private.POST("/v1/investments/:id/transactions", createHandlerFunc(s.handlers.investment.ImportTransactions))
 
 		private.GET("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
 		private.POST("/v1/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))

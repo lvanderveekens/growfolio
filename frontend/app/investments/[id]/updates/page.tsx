@@ -6,9 +6,10 @@ import { formatAsEuroAmount } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
-import UpdateInvestmentForm from "../../update-investment-form";
+import AddUpdateForm from "../../add-update-form";
 import { Navbar } from "@/app/navbar";
 import { api } from "@/app/axios";
+import ImportUpdatesForm from "../../import-updates-form";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -22,6 +23,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
   const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
+  const [showImportUpdatesModal, setShowImportUpdatesModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchInvestment()
@@ -108,7 +110,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         <div>
           <button
-            className="border px-3 py-2"
+            className="border px-3 py-2 mr-4"
             type="submit"
             onClick={() => setShowUpdateInvestmentModal(true)}
           >
@@ -116,12 +118,33 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
           </button>
           {showUpdateInvestmentModal && (
             <Modal
-              title="Update investment"
+              title="Add update"
               onClose={() => setShowUpdateInvestmentModal(false)}
             >
-              <UpdateInvestmentForm
+              <AddUpdateForm
                 onAdd={() => {
                   setShowUpdateInvestmentModal(false);
+                  fetchUpdates();
+                }}
+                investmentId={params.id}
+              />
+            </Modal>
+          )}
+          <button
+            className="border px-3 py-2"
+            type="submit"
+            onClick={() => setShowImportUpdatesModal(true)}
+          >
+            Import updates
+          </button>
+          {showImportUpdatesModal && (
+            <Modal
+              title="Import updates"
+              onClose={() => setShowImportUpdatesModal(false)}
+            >
+              <ImportUpdatesForm
+                onImport={() => {
+                  setShowImportUpdatesModal(false);
                   fetchUpdates();
                 }}
                 investmentId={params.id}

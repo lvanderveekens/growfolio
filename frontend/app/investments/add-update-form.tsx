@@ -12,12 +12,12 @@ export interface CreateInvestmentUpdateRequest {
   value: number
 }
 
-type UpdateInvestmentFormProps = {
+type AddUpdateFormProps = {
   onAdd: () => void
   investmentId: string
 };
 
-const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
+const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   onAdd,
   investmentId,
 }) => {
@@ -81,4 +81,4 @@ const UpdateInvestmentForm: React.FC<UpdateInvestmentFormProps> = ({
   );
 };
 
-export default UpdateInvestmentForm;
+export default AddUpdateForm;

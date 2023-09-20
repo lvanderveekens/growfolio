@@ -85,7 +85,7 @@ func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investment
 	return newResponse(http.StatusCreated, toInvestmentDto(created)), nil
 }
 
-func (h InvestmentHandler) CreateUpdates(c *gin.Context) (response[empty], error) {
+func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
@@ -149,7 +149,7 @@ func (h InvestmentHandler) CreateUpdates(c *gin.Context) (response[empty], error
 	return newEmptyResponse(200), nil
 }
 
-func (h InvestmentHandler) CreateTransactions(c *gin.Context) (response[empty], error) {
+func (h InvestmentHandler) ImportTransactions(c *gin.Context) (response[empty], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 

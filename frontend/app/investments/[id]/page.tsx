@@ -60,26 +60,29 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, []);
 
   useEffect(() => {
-    if (transactions.length > 0 && updates.length > 0) {
-      const updateDataPoints = updates.map((update) => {
-        const principal = calculateTotalPrincipalForDate(update.date, transactions)
-        const value = update.value
-        const returnValue = value - principal
-        const roi = returnValue / principal
+    const updateDataPoints = updates.map((update) => {
+      const principal = calculateTotalPrincipalForDate(
+        update.date,
+        transactions
+      );
+      const value = update.value;
+      const returnValue = value - principal;
+      const roi = returnValue / principal;
 
-        return {
-          id: update.id,
-          date: update.date,
-          principal: principal,
-          value: value,
-          return: returnValue,
-          roi: roi
-        };
-      })
+      return {
+        id: update.id,
+        date: update.date,
+        principal: principal,
+        value: value,
+        return: returnValue,
+        roi: roi,
+      };
+    });
 
-      setUpdateDataPoints(updateDataPoints);
-      setMonthlyChangeDataPoints(calculateMonthlyChangeDataPoints(updateDataPoints))
-    }
+    setUpdateDataPoints(updateDataPoints);
+    setMonthlyChangeDataPoints(
+      calculateMonthlyChangeDataPoints(updateDataPoints)
+    );
   }, [transactions, updates]);
 
   const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
