@@ -52,6 +52,16 @@ func (r TransactionRepository) FindByID(id string) (domain.Transaction, error) {
 	return entity.toDomainTransaction(), nil
 }
 
+func (r TransactionRepository) DeleteByInvestmentID(investmentID string) error {
+	_, err := uuid.Parse(investmentID)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.db.Exec("DELETE FROM transaction WHERE investment_id=$1", investmentID)
+	return err
+}
+
 func (r TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
 	query := "SELECT * FROM transaction"
 	args := make([]any, 0)
@@ -101,9 +111,5 @@ func (r TransactionRepository) DeleteByID(id string) error {
 	}
 
 	_, err = r.db.Exec("DELETE FROM transaction WHERE id=$1", id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

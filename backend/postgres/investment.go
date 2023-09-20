@@ -20,7 +20,7 @@ type Investment struct {
 	UserID    string                `db:"user_id"`
 }
 
-func (i *Investment) toDomainInvestment() domain.Investment {
+func (i Investment) toDomainInvestment() domain.Investment {
 	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID)
 }
 
@@ -32,7 +32,7 @@ func NewInvestmentRepository(db *sqlx.DB) InvestmentRepository {
 	return InvestmentRepository{db: db}
 }
 
-func (r *InvestmentRepository) FindByUserID(userID string) ([]domain.Investment, error) {
+func (r InvestmentRepository) FindByUserID(userID string) ([]domain.Investment, error) {
 	entities := []Investment{}
 	err := r.db.Select(&entities, "SELECT * FROM investment WHERE user_id=$1 ORDER BY created_at ASC", userID)
 	if err != nil {
@@ -47,7 +47,27 @@ func (r *InvestmentRepository) FindByUserID(userID string) ([]domain.Investment,
 	return investments, nil
 }
 
-func (r *InvestmentRepository) FindByID(id string) (domain.Investment, error) {
+func (r InvestmentRepository) DeleteUpdatesByInvestmentID(investmentID string) error {
+	_, err := uuid.Parse(investmentID)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.db.Exec("DELETE FROM investment_update WHERE investment_id=$1", investmentID)
+	return err
+}
+
+func (r InvestmentRepository) DeleteByID(id string) error {
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.db.Exec("DELETE FROM investment WHERE id=$1", id)
+	return err
+}
+
+func (r InvestmentRepository) FindByID(id string) (domain.Investment, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		fmt.Println("error: id is not a uuid: " + err.Error())
@@ -66,7 +86,7 @@ func (r *InvestmentRepository) FindByID(id string) (domain.Investment, error) {
 	return entity.toDomainInvestment(), nil
 }
 
-func (r *InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdate, error) {
+func (r InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdate, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		fmt.Println("error: id is not a uuid: " + err.Error())
@@ -85,7 +105,7 @@ func (r *InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdat
 	return entity.toDomainInvestmentUpdate(), nil
 }
 
-func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
+func (r InvestmentRepository) DeleteUpdateByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		return nil
@@ -99,7 +119,7 @@ func (r *InvestmentRepository) DeleteUpdateByID(id string) error {
 	return nil
 }
 
-func (r *InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.Investment, error) {
+func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.Investment, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return domain.Investment{}, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -127,11 +147,11 @@ type InvestmentUpdate struct {
 	Value        int64
 }
 
-func (i *InvestmentUpdate) toDomainInvestmentUpdate() domain.InvestmentUpdate {
+func (i InvestmentUpdate) toDomainInvestmentUpdate() domain.InvestmentUpdate {
 	return domain.NewInvestmentUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
 }
 
-func (r *InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateCommand) (domain.InvestmentUpdate, error) {
+func (r InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateCommand) (domain.InvestmentUpdate, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return domain.InvestmentUpdate{}, fmt.Errorf("failed to generate new UUID: %w", err)
@@ -150,7 +170,7 @@ func (r *InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateComma
 	return entity.toDomainInvestmentUpdate(), nil
 }
 
-func (r *InvestmentRepository) FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error) {
+func (r InvestmentRepository) FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error) {
 	query := "SELECT * FROM investment_update"
 	args := make([]any, 0)
 	if investmentID != nil {

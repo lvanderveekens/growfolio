@@ -12,6 +12,7 @@ type TransactionRepository interface {
 	Find(investmentID *string) ([]domain.Transaction, error)
 	Create(command domain.CreateTransactionCommand) (domain.Transaction, error)
 	DeleteByID(id string) error
+	DeleteByInvestmentID(investmentID string) error
 }
 
 type TransactionService struct {

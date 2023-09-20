@@ -64,6 +64,39 @@ func (h InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDto
 	return newResponse(http.StatusOK, toInvestmentDto(investment)), nil
 }
 
+func (h InvestmentHandler) DeleteInvestment(c *gin.Context) (response[empty], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	investment, err := h.investmentRepository.FindByID(c.Param("id"))
+	if err != nil {
+		if err == domain.ErrInvestmentNotFound {
+			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
+		}
+		return response[empty]{}, fmt.Errorf("failed to find investment: %w", err)
+	}
+	if investment.UserID != tokenUserID {
+		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment")
+	}
+
+	err = h.investmentRepository.DeleteUpdatesByInvestmentID(investment.ID)
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to delete updates: %w", err)
+	}
+
+	err = h.transactionRepository.DeleteByInvestmentID(investment.ID)
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to delete transactions: %w", err)
+	}
+
+	err = h.investmentRepository.DeleteByID(investment.ID)
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to delete investment: %w", err)
+	}
+
+	return newEmptyResponse(http.StatusNoContent), nil
+}
+
 func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investmentDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)

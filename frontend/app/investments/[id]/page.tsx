@@ -225,10 +225,16 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       View updates
                     </Link>
                   </button>
-                  <button className="border px-3 py-2">
+                  <button className="border px-3 py-2 mr-4">
                     <Link href={`/investments/${params.id}/transactions`}>
                       View transactions
                     </Link>
+                  </button>
+                  <button
+                    className="border px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
+                    onClick={() => console.log("delete!")}
+                  >
+                    Delete investment
                   </button>
                 </div>
               </div>
