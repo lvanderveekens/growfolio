@@ -24,9 +24,11 @@ import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./ca
 import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
 import { Navbar } from "./navbar";
-import { capitalize, formatAsEuroAmount, formatAsPercentage } from "./string";
+import { capitalize, formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "./string";
 import { buildMonthlyGrowthBarData, monthlyGrowthBarOptions } from "./investments/[id]/page";
 import { api } from "./axios"
+import { useRouter } from "next/navigation";
+import ClipLoader from "react-spinners/ClipLoader";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -55,10 +57,16 @@ export default function HomePage() {
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
 
+  const router = useRouter()
+
+  const [loading, setLoading] = useState(true); 
+
   useEffect(() => {
-    fetchInvestments();
-    fetchInvestmentUpdates();
-    fetchTransactions();
+    Promise.all([
+      fetchInvestments(),
+      fetchInvestmentUpdates(),
+      fetchTransactions(),
+    ]).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -282,7 +290,7 @@ export default function HomePage() {
             console.log(totalVisibleValue)
 
             if (context.parsed !== null) {
-              const valueString = formatAsEuroAmount(context.parsed);
+              const valueString = formatAmountInCentsAsEuroString(context.parsed);
               const totalValuePercentage = formatAsPercentage(
                 context.parsed / totalVisibleValue
               );
@@ -372,10 +380,19 @@ export default function HomePage() {
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-8">Overview</h1>
-          {investmentRows.length === 0 && (
+          {loading && (
+            <div className="mb-4">
+              <ClipLoader
+                size={28}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+              />
+            </div>
+          )}
+          {!loading && investmentRows.length === 0 && (
             <div className="mb-4">There are no investments yet.</div>
           )}
-          {investmentRows.length > 0 && (
+          {!loading && investmentRows.length > 0 && (
             <div className="overflow-x-auto mb-4">
               <table className="w-full whitespace-nowrap">
                 <thead>
@@ -394,13 +411,13 @@ export default function HomePage() {
                       <tr key={investmentRow.id} className="border">
                         <td className="border px-3">{investmentRow.name}</td>
                         <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.principal)}
+                          {formatAmountInCentsAsEuroString(investmentRow.principal)}
                         </td>
                         <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.value)}
+                          {formatAmountInCentsAsEuroString(investmentRow.value)}
                         </td>
                         <td className="border px-3">
-                          {formatAsEuroAmount(investmentRow.return)}
+                          {formatAmountInCentsAsEuroString(investmentRow.return)}
                         </td>
                         <td className="border px-3">
                           {formatAsPercentage(investmentRow.roi)}
@@ -416,18 +433,18 @@ export default function HomePage() {
                   <tr className="border">
                     <td className="border px-3">Total</td>
                     <td className="border px-3">
-                      {formatAsEuroAmount(totalPrincipal)}
+                      {formatAmountInCentsAsEuroString(totalPrincipal)}
                     </td>
                     <td className="border px-3">
-                      {formatAsEuroAmount(totalValue)}
+                      {formatAmountInCentsAsEuroString(totalValue)}
                     </td>
                     <td className="border px-3">
-                      {formatAsEuroAmount(totalReturn)}
+                      {formatAmountInCentsAsEuroString(totalReturn)}
                     </td>
                     <td className="border px-3">
                       {formatAsPercentage(totalRoi)}
                     </td>
-                    <td className="border px-3"></td>
+                    <td className="border px-3">-</td>
                   </tr>
                 </tfoot>
               </table>
@@ -447,16 +464,15 @@ export default function HomePage() {
               onClose={() => setShowAddInvestmentModal(false)}
             >
               <AddInvestmentForm
-                onAdd={() => {
-                  setShowAddInvestmentModal(false);
-                  window.location.reload();
+                onAdd={(investmentId) => {
+                  router.push(`/investments/${investmentId}`);
                 }}
               />
             </Modal>
           )}
         </div>
 
-        {investments.length > 0 && (
+        {updateDataPoints.length > 0 && (
           <div className="mb-8 flex gap-8">
             <div className="w-[50%] aspect-square">
               <h1 className="text-xl font-bold mb-4">Allocation</h1>
@@ -519,30 +535,6 @@ export default function HomePage() {
   );
 }
 
-export const gainOrLossOptions: any = {
-  plugins: {
-    title: {
-      text: "Gain/loss",
-      display: true,
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
-        },
-      },
-    },
-  },
-};
-
 export const principalAndValueLineOptions: any = {
   interaction: {
     mode: "index",
@@ -557,7 +549,7 @@ export const principalAndValueLineOptions: any = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += "€ " + context.parsed.y;
+            label += formatAmountAsEuroString(context.parsed.y);
           }
 
           return label;
@@ -576,7 +568,7 @@ export const principalAndValueLineOptions: any = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
+          return formatAmountAsEuroString(value);
         },
       },
     },
@@ -600,7 +592,7 @@ export const returnLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += "€ " + context.parsed.y;
+            label += formatAmountAsEuroString(context.parsed.y);
           }
 
           return label;
@@ -619,7 +611,7 @@ export const returnLineOptions: ChartOptions = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return "€ " + value;
+          return formatAmountAsEuroString(value);
         },
       },
     },

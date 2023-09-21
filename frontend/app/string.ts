@@ -1,7 +1,15 @@
 
-export const formatAsEuroAmount = (amount: number) => {
-  const euroAmount = amount / 100;
-  return "€ " + euroAmount.toFixed(2);
+export const formatAmountInCentsAsEuroString = (amountInCents: number) => {
+  return formatAmountAsEuroString(amountInCents / 100)
+}
+
+export const formatAmountAsEuroString = (amount: number) => {
+  return amount.toLocaleString("nl-NL", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 export function formatAsPercentage(number: number) {

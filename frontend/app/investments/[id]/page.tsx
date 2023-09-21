@@ -6,7 +6,7 @@ import { Transaction } from "@/app/investments/transaction";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
 import { Investment, InvestmentUpdate } from "@/app/page";
-import { formatAsEuroAmount, formatAsPercentage } from "@/app/string";
+import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
   BarElement,
@@ -159,6 +159,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     .catch((err) => console.log(err))
   };
 
+  const findLastUpdate = () => {
+    if (updateDataPoints.length > 0) {
+      return updateDataPoints[updateDataPoints.length - 1]
+    }
+    return undefined
+  }
+
   return (
     <>
       <Navbar />
@@ -173,142 +180,150 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </h1>
             </div>
 
-            {updateDataPoints.length > 0 && (
-              <div className="mb-8">
-                <div className="mb-4">
-                  Last update:{" "}
-                  {updateDataPoints[updateDataPoints.length - 1].date}
-                </div>
-                <div className="flex gap-8 justify-between mb-4">
-                  <div className="border grow flex justify-center items-center">
-                    <div className="py-8">
-                      <div>Principal</div>
-                      <div className="text-3xl font-bold">
-                        {formatAsEuroAmount(
-                          updateDataPoints[updateDataPoints.length - 1]
-                            .principal
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border grow flex justify-center items-center">
-                    <div className="py-8">
-                      <div>Value</div>
-                      <div className="text-3xl font-bold">
-                        {formatAsEuroAmount(
-                          updateDataPoints[updateDataPoints.length - 1].value
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border grow flex justify-center items-center">
-                    <div className="py-8">
-                      <div>Return</div>
-                      <div
-                        className={`text-3xl font-bold ${
-                          updateDataPoints[updateDataPoints.length - 1]
-                            .return >= 0
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {formatAsEuroAmount(
-                          updateDataPoints[updateDataPoints.length - 1].return
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border grow flex justify-center items-center">
-                    <div className="py-8">
-                      <div>ROI</div>
-                      <div
-                        className={`text-3xl font-bold ${
-                          updateDataPoints[updateDataPoints.length - 1].roi >= 0
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {formatAsPercentage(
-                          updateDataPoints[updateDataPoints.length - 1].roi
-                        )}
-                      </div>
+            <div className="mb-8">
+              <div className="mb-4">
+                Last update: {findLastUpdate()?.date ?? "-"}
+              </div>
+              <div className="flex gap-8 justify-between mb-4">
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Principal</div>
+                    <div className="text-3xl font-bold">
+                      {updateDataPoints.length > 0
+                        ? formatAmountInCentsAsEuroString(
+                            updateDataPoints[updateDataPoints.length - 1]
+                              .principal
+                          )
+                        : "-"}
                     </div>
                   </div>
                 </div>
-                <div>
-                  <button className="border px-3 py-2 mr-4">
-                    <Link href={`/investments/${params.id}/updates`}>
-                      View updates
-                    </Link>
-                  </button>
-                  <button className="border px-3 py-2 mr-4">
-                    <Link href={`/investments/${params.id}/transactions`}>
-                      View transactions
-                    </Link>
-                  </button>
-                  <button
-                    className="border px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
-                    onClick={() => setShowDeleteInvestmentModal(true)}
-                  >
-                    Delete investment
-                  </button>
-                  {showDeleteInvestmentModal && (
-                    <Modal
-                      title="Delete investment"
-                      onClose={() => setShowDeleteInvestmentModal(false)}
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Value</div>
+                    <div className="text-3xl font-bold">
+                      {updateDataPoints.length > 0
+                        ? formatAmountInCentsAsEuroString(
+                            updateDataPoints[updateDataPoints.length - 1].value
+                          )
+                        : "-"}
+                    </div>
+                  </div>
+                </div>
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>Return</div>
+                    <div
+                      className={`text-3xl font-bold 
+                        ${(findLastUpdate()?.return ?? 0) > 0 ? "text-green-400" : ""}
+                        ${(findLastUpdate()?.return ?? 0) < 0 ? "text-red-400" : ""}
+                      }`}
                     >
-                      Are you sure?
-                      <div className="flex justify-end">
-                        <button
-                          className="border px-3 py-2 mr-4"
-                          onClick={() => setShowDeleteInvestmentModal(false)}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="border px-3 py-2 text-white bg-red-500 border-red-500"
-                          onClick={deleteInvestment}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </Modal>
-                  )}
+                      {updateDataPoints.length > 0
+                        ? formatAmountInCentsAsEuroString(
+                            updateDataPoints[updateDataPoints.length - 1].return
+                          )
+                        : "-"}
+                    </div>
+                  </div>
+                </div>
+                <div className="border grow flex justify-center items-center">
+                  <div className="py-8">
+                    <div>ROI</div>
+                    <div
+                      className={`text-3xl font-bold 
+                        ${(findLastUpdate()?.roi ?? 0) > 0 ? "text-green-400" : ""}
+                        ${(findLastUpdate()?.roi ?? 0) < 0 ? "text-red-400" : ""}
+                      }`}
+                    >
+                      {updateDataPoints.length > 0
+                        ? formatAsPercentage(
+                            updateDataPoints[updateDataPoints.length - 1].roi
+                          )
+                        : "-"}
+                    </div>
+                  </div>
                 </div>
               </div>
+              <div>
+                <button className="border px-3 py-2 mr-4">
+                  <Link href={`/investments/${params.id}/updates`}>
+                    View updates
+                  </Link>
+                </button>
+                <button className="border px-3 py-2 mr-4">
+                  <Link href={`/investments/${params.id}/transactions`}>
+                    View transactions
+                  </Link>
+                </button>
+                <button
+                  className="border px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
+                  onClick={() => setShowDeleteInvestmentModal(true)}
+                >
+                  Delete investment
+                </button>
+                {showDeleteInvestmentModal && (
+                  <Modal
+                    title="Delete investment"
+                    onClose={() => setShowDeleteInvestmentModal(false)}
+                  >
+                    Are you sure?
+                    <div className="flex justify-end">
+                      <button
+                        className="border px-3 py-2 mr-4"
+                        onClick={() => setShowDeleteInvestmentModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="border px-3 py-2 text-white bg-red-500 border-red-500"
+                        onClick={deleteInvestment}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </Modal>
+                )}
+              </div>
+            </div>
+
+            {updateDataPoints.length > 0 && (
+              <>
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">
+                    Principal and value
+                  </h1>
+                  <Line
+                    options={principalAndValueLineOptions}
+                    data={buildPrincipalAndValueLineData(updateDataPoints)}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+                  <Bar
+                    options={monthlyGrowthBarOptions}
+                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">Return</h1>
+                  <Line
+                    options={returnLineOptions}
+                    data={buildReturnLineData(updateDataPoints)}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">ROI</h1>
+                  <Line
+                    options={roiLineOptions}
+                    data={buildROILineData(updateDataPoints)}
+                  />
+                </div>
+              </>
             )}
-
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Principal and value</h1>
-              <Line
-                options={principalAndValueLineOptions}
-                data={buildPrincipalAndValueLineData(updateDataPoints)}
-              />
-            </div>
-
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-              <Bar
-                options={monthlyGrowthBarOptions}
-                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-              />
-            </div>
-
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Return</h1>
-              <Line
-                options={returnLineOptions}
-                data={buildReturnLineData(updateDataPoints)}
-              />
-            </div>
-
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">ROI</h1>
-              <Line
-                options={roiLineOptions}
-                data={buildROILineData(updateDataPoints)}
-              />
-            </div>
           </>
         )}
       </div>
@@ -357,7 +372,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += "€ " + context.parsed.y;
+              label += formatAmountAsEuroString(context.parsed.y);
             }
 
             return label;
@@ -376,7 +391,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       y: {
         ticks: {
           callback: function (value: any, index: any, ticks: any) {
-            return "€ " + value;
+            return formatAmountAsEuroString(value);
           },
         },
       },
@@ -400,7 +415,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += "€ " + context.parsed.y;
+              label += formatAmountAsEuroString(context.parsed.y);
             }
 
             return label;
@@ -419,46 +434,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       y: {
         ticks: {
           callback: function (value: any, index: any, ticks: any) {
-            return "€ " + value;
-          },
-        },
-      },
-    },
-  };
-
-  const monthlyReturnBarOptions: ChartOptions<"bar"> = {
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += "€ " + context.parsed.y;
-            }
-
-            return label;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "month",
-          tooltipFormat: "YYYY-MM",
-        },
-      },
-      y: {
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return "€ " + value;
+            return formatAmountAsEuroString(value);
           },
         },
       },
@@ -475,7 +451,7 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
               label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += "€ " + context.parsed.y;
+              label += formatAmountAsEuroString(context.parsed.y);
             }
 
             return label;
@@ -496,7 +472,7 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
         stacked: true,
         ticks: {
           callback: function (value: any, index: any, ticks: any) {
-            return "€ " + value;
+            return formatAmountAsEuroString(value);
           },
         },
       },

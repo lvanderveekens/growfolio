@@ -8,7 +8,7 @@ export interface CreateInvestmentRequest {
 }
 
 type AddInvestmentFormProps = {
-  onAdd: () => void
+  onAdd: (investmentId: string) => void
 };
 
 const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
@@ -23,16 +23,22 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
       name: name!,
     };
 
-    await api.post("/v1/investments", req, {
+    api.post("/v1/investments", req, {
       headers: {
         'Content-Type': 'application/json',
       },
-    });
-
-    setType(undefined);
-    setName(undefined);
-
-    onAdd()
+    }).then((res) => {
+      if (res.status !== 201) {
+        console.error(`unexpected response ${res.status}`)
+        return
+      }
+      onAdd(res.data.id);
+    })
+    .catch((err) => console.error(err))
+    .finally(() => {
+      setType(undefined);
+      setName(undefined);
+    })
   };
 
   return (
