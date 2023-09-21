@@ -3,6 +3,7 @@
 import { api } from "@/app/axios";
 import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
+import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
 import { Investment, InvestmentUpdate } from "@/app/page";
 import { formatAsEuroAmount, formatAsPercentage } from "@/app/string";
@@ -23,6 +24,7 @@ import {
 import "chartjs-adapter-moment";
 import moment from "moment";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 
@@ -52,6 +54,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
 
   const [timeRangeDays, setTimeRangeDays] = useState<number>(6 * 30)
+
+  const [showDeleteInvestmentModal, setShowDeleteInvestmentModal] = useState<boolean>(false);
+
+  const router = useRouter()
 
   useEffect(() => {
     fetchInvestment()
@@ -143,6 +149,16 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       });
   }
 
+  const deleteInvestment = () => {
+    api.delete(`/v1/investments/${params.id}`)
+    .then((res) => {
+      if (res.status == 204) {
+        router.push("/")
+      }
+    })
+    .catch((err) => console.log(err))
+  };
+
   return (
     <>
       <Navbar />
@@ -232,10 +248,32 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </button>
                   <button
                     className="border px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
-                    onClick={() => console.log("delete!")}
+                    onClick={() => setShowDeleteInvestmentModal(true)}
                   >
                     Delete investment
                   </button>
+                  {showDeleteInvestmentModal && (
+                    <Modal
+                      title="Delete investment"
+                      onClose={() => setShowDeleteInvestmentModal(false)}
+                    >
+                      Are you sure?
+                      <div className="flex justify-end">
+                        <button
+                          className="border px-3 py-2 mr-4"
+                          onClick={() => setShowDeleteInvestmentModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="border px-3 py-2 text-white bg-red-500 border-red-500"
+                          onClick={deleteInvestment}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </Modal>
+                  )}
                 </div>
               </div>
             )}

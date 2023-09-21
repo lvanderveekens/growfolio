@@ -164,19 +164,6 @@ export default function HomePage() {
       });
   };
 
-  const findInvestmentById = (id: string) => {
-    return investments.find((i) => i.id == id);
-  };
-
-  function compareInvestmentUpdateRowByDate(
-    a: UpdateDataPoint,
-    b: UpdateDataPoint
-  ): number {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateA.getTime() - dateB.getTime();
-  }
-
   function compareInvestmentUpdateByDateAsc(
     a: InvestmentUpdate,
     b: InvestmentUpdate
@@ -385,6 +372,9 @@ export default function HomePage() {
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-8">Overview</h1>
+          {investmentRows.length === 0 && (
+            <div className="mb-4">There are no investments yet.</div>
+          )}
           {investmentRows.length > 0 && (
             <div className="overflow-x-auto mb-4">
               <table className="w-full whitespace-nowrap">
@@ -496,13 +486,13 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-            <div className="mb-8">
-              <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-              <Bar
-                options={monthlyGrowthBarOptions}
-                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-              />
-            </div>
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+            <Bar
+              options={monthlyGrowthBarOptions}
+              data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+            />
+          </div>
         )}
 
         {updateDataPoints.length > 0 && (

@@ -7,6 +7,7 @@ import { Investment, User } from "./page";
 import { AiOutlineStock } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 import { api } from "./axios"
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface NavbarProps {
 }
@@ -23,7 +24,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const investmentsDropdownRef = useRef(null);
 
   const router = useRouter();
-
 
   useEffect(() => {
     fetchCurrentUser();
@@ -97,22 +97,22 @@ export const Navbar: React.FC<NavbarProps> = () => {
             <Link className={`hover:text-green-400`} href="/">
               Overview
             </Link>
-            <div className="flex relative" ref={investmentsDropdownRef}>
-              <div
-                className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
-                onClick={toggleInvestmentsDropdown}
-              >
-                Investments
-                <FaCaretDown />
-              </div>
-              <div
-                className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
-                  isInvestmentsDropdownOpen ? "block" : "hidden"
-                } whitespace-nowrap`}
-              >
-                {isLoadingInvestments && <p>Loading...</p>}
-                {investments.length > 0 &&
-                  investments.map((i) => {
+            {investments.length > 0 && (
+              <div className="flex relative" ref={investmentsDropdownRef}>
+                <div
+                  className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+                  onClick={toggleInvestmentsDropdown}
+                >
+                  Investments
+                  <FaCaretDown />
+                </div>
+                <div
+                  className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
+                    isInvestmentsDropdownOpen ? "block" : "hidden"
+                  } whitespace-nowrap`}
+                >
+                  {isLoadingInvestments && <p>Loading...</p>}
+                  {investments.map((i) => {
                     return (
                       <div key={i.id} className={`py-1`}>
                         <Link
@@ -127,11 +127,18 @@ export const Navbar: React.FC<NavbarProps> = () => {
                       </div>
                     );
                   })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div>
-            {isLoadingUser && <span>Loading...</span>}
+            {isLoadingUser && (
+              <ClipLoader
+                size={28}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+              />
+            )}
             {!isLoadingUser && !user && (
               <button
                 className="border border-black px-3 py-2 rounded-md"
