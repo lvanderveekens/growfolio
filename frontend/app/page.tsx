@@ -194,8 +194,8 @@ export default function HomePage() {
       datasets: [
         {
           label: "Principal",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.principal / 100,
@@ -203,8 +203,8 @@ export default function HomePage() {
         },
         {
           label: "Value",
-          borderColor: "rgb(54, 162, 235)",
-          backgroundColor: "rgb(54, 162, 235)",
+          borderColor: chartBackgroundColors[1],
+          backgroundColor: chartBackgroundColors[1],
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.value / 100,
@@ -221,8 +221,8 @@ export default function HomePage() {
       datasets: [
         {
           label: "Return",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: dateWithPrincipalAndValue.map((x) => ({
             x: x.date,
             y: (x.value - x.principal) / 100,
@@ -233,18 +233,21 @@ export default function HomePage() {
   };
 
   const buildROILineData = (
-    dateWithPrincipalAndValue: UpdateDataPoint[]
+    updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
         {
           label: "ROI",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
-          data: dateWithPrincipalAndValue.map((x) => ({
-            x: x.date,
-            y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
-          })),
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
+          data: updateDataPoints.map((x) => {
+            return {
+              x: x.date,
+              y: x.roi,
+              // y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
+            }
+          }),
         },
       ],
     };
@@ -309,13 +312,7 @@ export default function HomePage() {
       datasets: [
         {
           label: "Value",
-          backgroundColor: [
-            "rgb(255, 99, 132)",
-            "rgb(54, 162, 235)",
-            "rgb(255, 205, 86)",
-            "rgb(255, 86, 205)",
-            "rgb(87, 255, 205)",
-          ],
+          backgroundColor: chartBackgroundColors,
           data: investments.map((i) => {
             return getLatestInvestmentValue(i)
           }) ,
@@ -349,12 +346,7 @@ export default function HomePage() {
       datasets: [
         {
           label: "Value",
-          backgroundColor: [
-            "rgb(255, 99, 132)",
-            "rgb(54, 162, 235)",
-            "rgb(255, 205, 86)",
-            "rgb(255, 86, 205)",
-          ],
+          backgroundColor: chartBackgroundColors,
           data: investmentTypeWithValues.map((i) => {
             return i.value;
           }) 
@@ -561,7 +553,7 @@ export const principalAndValueLineOptions: any = {
     x: {
       type: "time",
       time: {
-        unit: "day",
+        unit: "month",
         tooltipFormat: 'YYYY-MM-DD' 
       },
     },
@@ -604,7 +596,7 @@ export const returnLineOptions: ChartOptions = {
     x: {
       type: "time",
       time: {
-        unit: "day",
+        unit: "month",
         tooltipFormat: 'YYYY-MM-DD' 
       },
     },
@@ -635,7 +627,7 @@ export const roiLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += context.parsed.y + "%";
+            label += formatAsPercentage(context.parsed.y);
           }
 
           return label;
@@ -647,38 +639,14 @@ export const roiLineOptions: ChartOptions = {
     x: {
       type: "time",
       time: {
-        unit: "day",
+        unit: "month",
         tooltipFormat: 'YYYY-MM-DD' 
       },
     },
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return value + "%";
-        },
-      },
-    },
-  },
-};
-
-export const roiOptions: any = {
-  plugins: {
-    title: {
-      text: "ROI",
-      display: true,
-    },
-  },
-  scales: {
-    x: {
-      type: "time",
-      time: {
-        unit: "day",
-      },
-    },
-    y: {
-      ticks: {
-        callback: function (value: any, index: any, ticks: any) {
-          return value + " %";
+          return formatAsPercentage(value);
         },
       },
     },
@@ -728,3 +696,11 @@ export interface MonthlyChangeDataPoint {
   principal: number;
   return: number;
 }
+
+export const chartBackgroundColors = [
+  "rgb(255, 99, 132)",
+  "rgb(54, 162, 235)",
+  "rgb(255, 205, 86)",
+  "rgb(255, 86, 205)",
+  "rgb(87, 255, 205)",
+];

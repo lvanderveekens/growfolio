@@ -13,7 +13,11 @@ export const formatAmountAsEuroString = (amount: number) => {
 };
 
 export function formatAsPercentage(number: number) {
-  return (number * 100).toFixed(2) + "%";
+  return number.toLocaleString("nl-NL", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
 }
 
 export function capitalize(input: string): string {

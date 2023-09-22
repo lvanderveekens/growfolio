@@ -5,7 +5,7 @@ import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
-import { Investment, InvestmentUpdate } from "@/app/page";
+import { Investment, InvestmentUpdate, chartBackgroundColors } from "@/app/page";
 import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
@@ -338,8 +338,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       datasets: [
         {
           label: "Principal",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: updateRows.map((x) => ({
             x: x.date,
             y: x.principal / 100,
@@ -347,8 +347,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
         },
         {
           label: "Value",
-          borderColor: "rgb(54, 162, 235)",
-          backgroundColor: "rgb(54, 162, 235)",
+          borderColor: chartBackgroundColors[1],
+          backgroundColor: chartBackgroundColors[1],
           data: updateRows.map((x) => ({
             x: x.date,
             y: x.value / 100,
@@ -384,7 +384,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       x: {
         type: "time",
         time: {
-          unit: "day",
+          unit: "month",
           tooltipFormat: "YYYY-MM-DD",
         },
       },
@@ -427,7 +427,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       x: {
         type: "time",
         time: {
-          unit: "day",
+          unit: "month",
           tooltipFormat: "YYYY-MM-DD",
         },
       },
@@ -508,7 +508,7 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
       x: {
         type: "time",
         time: {
-          unit: "day",
+          unit: "month",
           tooltipFormat: "YYYY-MM-DD",
         },
       },
@@ -545,8 +545,8 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
       datasets: [
         {
           label: "Return",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: (x.value - x.principal) / 100,
@@ -556,33 +556,16 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
     };
   };
 
-  const buildMonthlyReturnBarData = (
-    monthlyChangeDataPoints: MonthlyChangeDataPoint[]
-  ): ChartData<"bar"> => {
-    return {
-      datasets: [
-        {
-          label: "Monthly return",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
-          data: monthlyChangeDataPoints.map((dataPoint) => ({
-            x: dataPoint.yearAndMonth,
-            y: (dataPoint.return / 100),
-          })),
-        },
-      ],
-    };
-  };
-
 export const buildMonthlyGrowthBarData = (
     monthlyChangeDataPoints: MonthlyChangeDataPoint[]
   ): ChartData<"bar"> => {
+    console.log(monthlyChangeDataPoints)
     return {
       datasets: [
         {
           label: "Principal",
-          borderColor: "rgb(54, 162, 235)",
-          backgroundColor: "rgb(54, 162, 235)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: monthlyChangeDataPoints.map((dataPoint) => ({
             x: dataPoint.yearAndMonth,
             y: (dataPoint.principal / 100),
@@ -590,8 +573,8 @@ export const buildMonthlyGrowthBarData = (
         },
         {
           label: "Return",
-          borderColor: "rgb(255, 130, 32)",
-          backgroundColor: "rgb(255, 130, 32)",
+          borderColor: chartBackgroundColors[1],
+          backgroundColor: chartBackgroundColors[1],
           data: monthlyChangeDataPoints.map((dataPoint) => ({
             x: dataPoint.yearAndMonth,
             y: (dataPoint.return / 100),
@@ -608,8 +591,8 @@ export const buildMonthlyGrowthBarData = (
       datasets: [
         {
           label: "ROI",
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: "rgb(255, 99, 132)",
+          borderColor: chartBackgroundColors[0],
+          backgroundColor: chartBackgroundColors[0],
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
