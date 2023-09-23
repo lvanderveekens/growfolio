@@ -10,6 +10,7 @@ import (
 type TransactionRepository interface {
 	FindByID(id string) (domain.Transaction, error)
 	Find(investmentID *string) ([]domain.Transaction, error)
+	FindByInvestmentIDs(investmentIDs []string) ([]domain.Transaction, error)
 	Create(command domain.CreateTransactionCommand) (domain.Transaction, error)
 	DeleteByID(id string) error
 	DeleteByInvestmentID(investmentID string) error
@@ -41,7 +42,7 @@ func (s TransactionService) FindWithInvestment(investmentID *string) ([]domain.T
 	}))
 
 	// TODO: use FindByIDs
-	investments := slices.MapNotNull(investmentIDs, func(id string) *domain.Investment {
+	investments := slices.MapNotNil(investmentIDs, func(id string) *domain.Investment {
 		investment, err := s.investmentRepository.FindByID(id)
 		if err != nil {
 			slog.Error("failed to find investment", "id", id, "err", err.Error())

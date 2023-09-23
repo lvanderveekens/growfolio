@@ -8,7 +8,7 @@ func Map[T any, M any](a []T, f func(T) M) []M {
 	return n
 }
 
-func MapNotNull[T any, M any](a []T, f func(T) *M) []M {
+func MapNotNil[T any, M any](a []T, f func(T) *M) []M {
 	n := make([]M, len(a))
 	for i, e := range a {
 		nullable := f(e)
@@ -18,7 +18,6 @@ func MapNotNull[T any, M any](a []T, f func(T) *M) []M {
 	}
 	return n
 }
-
 
 func AssociateBy[T any, V comparable](src []T, key func(T) V) map[V]T {
 	var result = make(map[V]T)

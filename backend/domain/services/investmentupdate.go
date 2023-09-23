@@ -28,7 +28,7 @@ func (s InvestmentUpdateService) FindWithInvestment(investmentID *string) ([]dom
 	}))
 
 	// TODO: use FindByIDs
-	investments := slices.MapNotNull(investmentIDs, func(id string) *domain.Investment {
+	investments := slices.MapNotNil(investmentIDs, func(id string) *domain.Investment {
 		investment, err := s.investmentRepository.FindByID(id)
 		if err != nil {
 			slog.Error("failed to find investment", "id", id, "err", err.Error())

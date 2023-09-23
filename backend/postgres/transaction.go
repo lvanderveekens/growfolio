@@ -85,6 +85,36 @@ func (r TransactionRepository) Find(investmentID *string) ([]domain.Transaction,
 	return transactions, nil
 }
 
+func (r TransactionRepository) FindByInvestmentIDs(investmentIDs []string) ([]domain.Transaction, error) {
+	if len(investmentIDs) == 0 {
+		return []domain.Transaction{}, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT * 
+		FROM transaction 
+		WHERE investment_id IN (?) 
+		ORDER BY date ASC
+	`, investmentIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+	query = r.db.Rebind(query)
+
+	entities := []Transaction{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select transactions: %w", err)
+	}
+
+	transactions := make([]domain.Transaction, 0)
+	for _, entity := range entities {
+		transactions = append(transactions, entity.toDomainTransaction())
+	}
+
+	return transactions, nil
+}
+
 func (r TransactionRepository) Create(cmd domain.CreateTransactionCommand) (domain.Transaction, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {

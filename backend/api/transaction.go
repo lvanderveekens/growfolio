@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"growfolio/domain"
 	"growfolio/domain/services"
+	xslices "growfolio/slices"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,23 +35,32 @@ func NewTransactionHandler(
 func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transactionDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
+	investmentIDFilter := c.Query("investmentId")
 
-	investmentId := stringOrNil(c.Query("investmentId"))
+	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
+	if err != nil {
+		return response[[]transactionDto]{}, fmt.Errorf("failed to find investments: %w", err)
+	}
+	if len(investments) == 0 {
+		return response[[]transactionDto]{}, nil
+	}
 
-	transactionsWithInvestment, err := h.transactionService.FindWithInvestment(investmentId)
+	investmentIDs := xslices.Map(investments, func(i domain.Investment) string { return i.ID })
+	if investmentIDFilter != "" {
+		if !slices.Contains(investmentIDs, investmentIDFilter) {
+			return response[[]transactionDto]{}, NewError(http.StatusForbidden, "not allowed to read transaction")
+		}
+		investmentIDs = []string{investmentIDFilter}
+	}
+
+	transactions, err := h.transactionRepository.FindByInvestmentIDs(investmentIDs)
 	if err != nil {
 		return response[[]transactionDto]{}, fmt.Errorf("failed to find transactions: %w", err)
 	}
 
-	for _, transactionWithInvestment := range transactionsWithInvestment {
-		if transactionWithInvestment.Investment.UserID != tokenUserID {
-			return response[[]transactionDto]{}, NewError(http.StatusForbidden, "not allowed to read transaction")
-		}
-	}
-
 	dtos := make([]transactionDto, 0)
-	for _, transactionWithInvestment := range transactionsWithInvestment {
-		dtos = append(dtos, toTransactionDto(transactionWithInvestment.Transaction))
+	for _, transaction := range transactions {
+		dtos = append(dtos, toTransactionDto(transaction))
 	}
 
 	return newResponse(http.StatusOK, dtos), nil
