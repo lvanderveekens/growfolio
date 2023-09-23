@@ -105,6 +105,36 @@ func (r InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdate
 	return entity.toDomainInvestmentUpdate(), nil
 }
 
+func (r InvestmentRepository) FindUpdatesByInvestmentIDs(investmentIDs []string) ([]domain.InvestmentUpdate, error) {
+	if len(investmentIDs) == 0 {
+		return []domain.InvestmentUpdate{}, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT * 
+		FROM investment_update 
+		WHERE investment_id IN (?) 
+		ORDER BY date ASC
+	`, investmentIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+	query = r.db.Rebind(query)
+
+	entities := []InvestmentUpdate{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select investment updates: %w", err)
+	}
+
+	updates := make([]domain.InvestmentUpdate, 0)
+	for _, entity := range entities {
+		updates = append(updates, entity.toDomainInvestmentUpdate())
+	}
+
+	return updates, nil
+}
+
 func (r InvestmentRepository) DeleteUpdateByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {

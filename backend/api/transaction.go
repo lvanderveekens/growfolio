@@ -42,7 +42,7 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transact
 		return response[[]transactionDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
 	if len(investments) == 0 {
-		return response[[]transactionDto]{}, nil
+		return newResponse(http.StatusOK, []transactionDto{}), nil
 	}
 
 	investmentIDs := xslices.Map(investments, func(i domain.Investment) string { return i.ID })

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"growfolio/domain"
 	"growfolio/domain/services"
+	xslices "growfolio/slices"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,22 +31,32 @@ func NewInvestmentUpdateHandler(
 func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
+	investmentIDFilter := c.Query("investmentId")
 
-	investmentID := stringOrNil(c.Query("investmentId"))
-	updatesWithInvestment, err := h.investmentUpdateService.FindWithInvestment(investmentID)
+	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
+	if err != nil {
+		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investments: %w", err)
+	}
+	if len(investments) == 0 {
+		return newResponse(http.StatusOK, []investmentUpdateDto{}), nil
+	}
+
+	investmentIDs := xslices.Map(investments, func(i domain.Investment) string { return i.ID })
+	if investmentIDFilter != "" {
+		if !slices.Contains(investmentIDs, investmentIDFilter) {
+			return response[[]investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to read investment update")
+		}
+		investmentIDs = []string{investmentIDFilter}
+	}
+
+	updates, err := h.investmentRepository.FindUpdatesByInvestmentIDs(investmentIDs)
 	if err != nil {
 		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investment updates: %w", err)
 	}
 
-	for _, updateWithInvestment := range updatesWithInvestment {
-		if updateWithInvestment.Investment.UserID != tokenUserID {
-			return response[[]investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to read investment update")
-		}
-	}
-
 	dtos := make([]investmentUpdateDto, 0)
-	for _, updateWithInvestment := range updatesWithInvestment {
-		dtos = append(dtos, toInvestmentUpdateDto(updateWithInvestment.Update))
+	for _, update := range updates {
+		dtos = append(dtos, toInvestmentUpdateDto(update))
 	}
 
 	return newResponse(http.StatusOK, dtos), nil

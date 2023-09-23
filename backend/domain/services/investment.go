@@ -10,6 +10,7 @@ type InvestmentRepository interface {
 
 	FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error)
 	FindUpdateByID(id string) (domain.InvestmentUpdate, error)
+	FindUpdatesByInvestmentIDs(investmentIDs []string) ([]domain.InvestmentUpdate, error)
 	CreateUpdate(command domain.CreateInvestmentUpdateCommand) (domain.InvestmentUpdate, error)
 	DeleteUpdatesByInvestmentID(investmentID string) error
 	DeleteUpdateByID(id string) error
