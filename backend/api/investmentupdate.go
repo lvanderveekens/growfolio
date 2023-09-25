@@ -31,7 +31,8 @@ func NewInvestmentUpdateHandler(
 func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
-	investmentIDFilter := c.Query("investmentId")
+	investmentIDFilter := stringOrNil(c.Query("investmentId"))
+	beforeDateFilter := stringOrNil(c.Query("beforeDate"))
 
 	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
 	if err != nil {
@@ -42,14 +43,17 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 	}
 
 	investmentIDs := xslices.Map(investments, func(i domain.Investment) string { return i.ID })
-	if investmentIDFilter != "" {
-		if !slices.Contains(investmentIDs, investmentIDFilter) {
+	if investmentIDFilter != nil {
+		if !slices.Contains(investmentIDs, *investmentIDFilter) {
 			return response[[]investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to read investment update")
 		}
-		investmentIDs = []string{investmentIDFilter}
+		investmentIDs = []string{*investmentIDFilter}
 	}
 
-	updates, err := h.investmentRepository.FindUpdatesByInvestmentIDs(investmentIDs)
+	updates, err := h.investmentRepository.FindUpdates(domain.FindInvestmentUpdateQuery{
+		InvestmentIDs: &investmentIDs,
+		BeforeDate:    beforeDateFilter,
+	})
 	if err != nil {
 		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investment updates: %w", err)
 	}

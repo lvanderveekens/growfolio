@@ -18,7 +18,7 @@ func NewInvestmentUpdateService(investmentRepository InvestmentRepository) Inves
 }
 
 func (s InvestmentUpdateService) FindWithInvestment(investmentID *string) ([]domain.InvestmentUpdateWithInvestment, error) {
-	updates, err := s.investmentRepository.FindUpdates(investmentID)
+	updates, err := s.investmentRepository.FindUpdatesByInvestmentID(investmentID)
 	if err != nil {
 		return []domain.InvestmentUpdateWithInvestment{}, fmt.Errorf("failed to find updates: %w", err)
 	}

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"growfolio/domain"
+	"log/slog"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -135,6 +137,38 @@ func (r InvestmentRepository) FindUpdatesByInvestmentIDs(investmentIDs []string)
 	return updates, nil
 }
 
+func (r InvestmentRepository) FindUpdates(findQuery domain.FindInvestmentUpdateQuery) ([]domain.InvestmentUpdate, error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	queryBuilder := psql.Select("*").From("investment_update")
+
+	if findQuery.InvestmentIDs != nil {
+		queryBuilder = queryBuilder.Where(sq.Eq{"investment_id": *findQuery.InvestmentIDs})
+	}
+	if findQuery.BeforeDate != nil {
+		queryBuilder = queryBuilder.Where(sq.Expr("date >= ?", *findQuery.BeforeDate))
+	}
+
+	queryBuilder = queryBuilder.OrderBy("date ASC")
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+	slog.Info("query: " + query)
+
+	entities := []InvestmentUpdate{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select investment updates: %w", err)
+	}
+
+	updates := make([]domain.InvestmentUpdate, 0)
+	for _, entity := range entities {
+		updates = append(updates, entity.toDomainInvestmentUpdate())
+	}
+
+	return updates, nil
+}
+
 func (r InvestmentRepository) DeleteUpdateByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {
@@ -200,7 +234,7 @@ func (r InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateComman
 	return entity.toDomainInvestmentUpdate(), nil
 }
 
-func (r InvestmentRepository) FindUpdates(investmentID *string) ([]domain.InvestmentUpdate, error) {
+func (r InvestmentRepository) FindUpdatesByInvestmentID(investmentID *string) ([]domain.InvestmentUpdate, error) {
 	query := "SELECT * FROM investment_update"
 	args := make([]any, 0)
 	if investmentID != nil {

@@ -39,3 +39,8 @@ func NewInvestmentUpdateWithInvestment(update InvestmentUpdate, investment Inves
 		Investment: investment,
 	}
 }
+
+type FindInvestmentUpdateQuery struct {
+	InvestmentIDs *[]string
+	BeforeDate    *string
+}
