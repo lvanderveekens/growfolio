@@ -54,8 +54,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
 
-  const [timeRangeDays, setTimeRangeDays] = useState<number>(6 * 30)
-
   const [showDeleteInvestmentModal, setShowDeleteInvestmentModal] = useState<boolean>(false);
 
   const router = useRouter()
@@ -96,8 +94,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, [transactions, updates]);
 
   const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
-    console.log("calculating monthly change data points...")
-
     const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
       const yearMonthKey = obj.date.substr(0, 7);
       acc.set(yearMonthKey, obj);

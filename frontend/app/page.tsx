@@ -58,6 +58,8 @@ export default function HomePage() {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
 
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.ALL)
+
   const router = useRouter()
 
   const [loading, setLoading] = useState(true); 
@@ -68,7 +70,7 @@ export default function HomePage() {
       fetchInvestmentUpdates(),
       fetchTransactions(),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [selectedDateRange]);
 
   useEffect(() => {
     if (transactons.length > 0 && updates.length > 0) {
@@ -123,24 +125,29 @@ export default function HomePage() {
   }, [investments, transactons, updates]);
 
   const fetchInvestments = async () => {
-    api.get(`/v1/investments`)
+    api
+      .get(`/v1/investments`)
       .then((res) => {
         setInvestments(res.data);
       });
   };
 
   const fetchInvestmentUpdates = async () => {
-    api.get(`/v1/investment-updates`)
-      .then((res) => {
-        const updates = res.data
-        updates.sort(compareInvestmentUpdateByDateAsc);
-        setUpdates(updates);
-      });
+    const beforeDate = convertToDate(selectedDateRange)
+      ?.toISOString()
+      ?.split("T")
+      ?.[0]
+
+    api.get(`/v1/investment-updates`, {
+        params: {
+          ...(beforeDate && { beforeDate: beforeDate }), 
+        },
+      }
+    )
+    .then((res) => setUpdates(res.data));
   };
 
   const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
-    console.log("calculating monthly change data points...")
-
     const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
       const yearMonthKey = obj.date.substr(0, 7);
       acc.set(yearMonthKey, obj);
@@ -166,12 +173,18 @@ export default function HomePage() {
   } 
 
   const fetchTransactions = async () => {
-    api.get(`/v1/transactions`)
-      .then((res) => {
-        const transactions = res.data
-        transactions.sort(compareTransactionByDateAsc);
-        setTransactions(transactions);
-      });
+    const beforeDate = convertToDate(selectedDateRange)
+      ?.toISOString()
+      ?.split("T")
+      ?.[0]
+
+    api
+      .get(`/v1/transactions`, {
+        params: {
+          ...(beforeDate && { beforeDate: beforeDate }),
+        },
+      })
+      .then((res) => setTransactions(res.data));
   };
 
   function compareInvestmentUpdateByDateAsc(
@@ -374,6 +387,22 @@ export default function HomePage() {
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-8">Overview</h1>
+
+          <div className="mb-4">
+            <label className="font-bold">Date range:</label>
+            <select
+              value={selectedDateRange}
+              onChange={(e) => setSelectedDateRange(e.target.value)}
+              className="border border-1 block"
+            >
+              {Object.values(DateRange).map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {loading && (
             <div className="mb-4">
               <ClipLoader
@@ -405,13 +434,17 @@ export default function HomePage() {
                       <tr key={investmentRow.id} className="border">
                         <td className="border px-3">{investmentRow.name}</td>
                         <td className="border px-3">
-                          {formatAmountInCentsAsEuroString(investmentRow.principal)}
+                          {formatAmountInCentsAsEuroString(
+                            investmentRow.principal
+                          )}
                         </td>
                         <td className="border px-3">
                           {formatAmountInCentsAsEuroString(investmentRow.value)}
                         </td>
                         <td className="border px-3">
-                          {formatAmountInCentsAsEuroString(investmentRow.return)}
+                          {formatAmountInCentsAsEuroString(
+                            investmentRow.return
+                          )}
                         </td>
                         <td className="border px-3">
                           {formatAsPercentage(investmentRow.roi)}
@@ -446,7 +479,7 @@ export default function HomePage() {
           )}
 
           <button
-            className="border px-3 py-2"
+            className="border px-3 py-2 mb-4"
             type="submit"
             onClick={() => setShowAddInvestmentModal(true)}
           >
@@ -464,6 +497,7 @@ export default function HomePage() {
               />
             </Modal>
           )}
+
         </div>
 
         {updateDataPoints.length > 0 && (
@@ -501,7 +535,7 @@ export default function HomePage() {
             <Line
               options={returnLineOptions}
               data={buildReturnLineData(updateDataPoints)}
-              />
+            />
           </div>
         )}
 
@@ -511,7 +545,7 @@ export default function HomePage() {
             <Line
               options={roiLineOptions}
               data={buildROILineData(updateDataPoints)}
-              />
+            />
           </div>
         )}
 
@@ -534,7 +568,6 @@ export default function HomePage() {
             />
           </div>
         )}
-
       </div>
     </main>
   );
@@ -728,8 +761,6 @@ export const chartBackgroundColors = [
 export const calculateYearlyChangeDataPoints = (
   updateDataPoints: UpdateDataPoint[]
 ) => {
-  console.log("calculating yearly change data points...");
-
   const firstAndLastUpdatesByYear = new Map<
     string,
     [UpdateDataPoint, UpdateDataPoint]
@@ -750,9 +781,6 @@ export const calculateYearlyChangeDataPoints = (
       ]);
     }
   }
-
-  console.log("ja ja");
-  console.log(firstAndLastUpdatesByYear);
 
   const dataPoints: YearlyChangeDataPoint[] = [];
   const firstAndLastUpdatesByYearEntries = Array.from(
@@ -783,3 +811,51 @@ export const calculateYearlyChangeDataPoints = (
   }
   return dataPoints;
 }; 
+
+export enum DateRange {
+  LAST_MONTH = "Last month",
+  LAST_3_MONTHS = "Last 3 months",
+  LAST_6_MONTHS = "Last 6 months",
+  LAST_YEAR = "Last year",
+  LAST_2_YEARS = "Last 2 years",
+  LAST_5_YEARS = "Last 5 years",
+  LAST_10_YEARS = "Last 10 years",
+  ALL = "All",
+}
+
+function convertToDate(range: DateRange): Date | null {
+  const today = new Date();
+  var minusDays: number | null = null
+
+  switch (range) {
+    case DateRange.LAST_MONTH:
+      minusDays = 30
+      break;
+    case DateRange.LAST_3_MONTHS:
+      minusDays = 3 * 30
+      break;
+    case DateRange.LAST_6_MONTHS:
+      minusDays = 6 * 30
+      break;
+    case DateRange.LAST_YEAR:
+      minusDays = 365
+      break;
+    case DateRange.LAST_2_YEARS:
+      minusDays = 2 * 365
+      break;
+    case DateRange.LAST_5_YEARS:
+      minusDays = 5 * 365
+      break;
+    case DateRange.LAST_10_YEARS:
+      minusDays = 10 * 365
+      break;
+  }
+
+  if (!minusDays) {
+    return null
+  }
+
+  const date = new Date(today);
+  date.setDate(today.getDate() - minusDays!!);
+  return date
+}
