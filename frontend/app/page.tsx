@@ -25,7 +25,7 @@ import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
 import { Navbar } from "./navbar";
 import { capitalize, formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "./string";
-import { buildMonthlyGrowthBarData, monthlyGrowthBarOptions } from "./investments/[id]/page";
+import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
 import { api } from "./axios"
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -56,6 +56,7 @@ export default function HomePage() {
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
+  const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
 
   const router = useRouter()
 
@@ -92,6 +93,7 @@ export default function HomePage() {
 
       setUpdateDataPoints(updateDataPoints);
       setMonthlyChangeDataPoints(calculateMonthlyChangeDataPoints(updateDataPoints))
+      setYearlyChangeDataPoints(calculateYearlyChangeDataPoints(updateDataPoints))
     }
 
     if (investments.length > 0) {
@@ -495,6 +497,26 @@ export default function HomePage() {
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">Return</h1>
+            <Line
+              options={returnLineOptions}
+              data={buildReturnLineData(updateDataPoints)}
+              />
+          </div>
+        )}
+
+        {updateDataPoints.length > 0 && (
+          <div className="mb-8">
+            <h1 className="text-xl font-bold mb-4">ROI</h1>
+            <Line
+              options={roiLineOptions}
+              data={buildROILineData(updateDataPoints)}
+              />
+          </div>
+        )}
+
+        {updateDataPoints.length > 0 && (
+          <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
             <Bar
               options={monthlyGrowthBarOptions}
@@ -505,23 +527,14 @@ export default function HomePage() {
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">Return</h1>
-            <Line
-              options={returnLineOptions}
-              data={buildReturnLineData(updateDataPoints)}
+            <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
+            <Bar
+              options={yearlyGrowthBarOptions}
+              data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
             />
           </div>
         )}
 
-        {updateDataPoints.length > 0 && (
-          <div className="mb-8">
-            <h1 className="text-xl font-bold mb-4">ROI</h1>
-            <Line
-              options={roiLineOptions}
-              data={buildROILineData(updateDataPoints)}
-            />
-          </div>
-        )}
       </div>
     </main>
   );
@@ -697,6 +710,13 @@ export interface MonthlyChangeDataPoint {
   return: number;
 }
 
+export interface YearlyChangeDataPoint {
+  year: string;
+  value: number;
+  principal: number;
+  return: number;
+}
+
 export const chartBackgroundColors = [
   "rgb(255, 99, 132)",
   "rgb(54, 162, 235)",
@@ -704,3 +724,62 @@ export const chartBackgroundColors = [
   "rgb(255, 86, 205)",
   "rgb(87, 255, 205)",
 ];
+
+export const calculateYearlyChangeDataPoints = (
+  updateDataPoints: UpdateDataPoint[]
+) => {
+  console.log("calculating yearly change data points...");
+
+  const firstAndLastUpdatesByYear = new Map<
+    string,
+    [UpdateDataPoint, UpdateDataPoint]
+  >();
+
+  let currentYear: string | null = null;
+  let firstUpdateOfYear: UpdateDataPoint | null = null;
+
+  for (const updateDataPoint of updateDataPoints) {
+    const year = updateDataPoint.date.substr(0, 4);
+    if (year !== currentYear) {
+      currentYear = year;
+      firstUpdateOfYear = updateDataPoint;
+    } else {
+      firstAndLastUpdatesByYear.set(year, [
+        firstUpdateOfYear!!,
+        updateDataPoint,
+      ]);
+    }
+  }
+
+  console.log("ja ja");
+  console.log(firstAndLastUpdatesByYear);
+
+  const dataPoints: YearlyChangeDataPoint[] = [];
+  const firstAndLastUpdatesByYearEntries = Array.from(
+    firstAndLastUpdatesByYear.entries()
+  );
+
+  for (let i = 0; i < firstAndLastUpdatesByYearEntries.length; i++) {
+    const currentYear = firstAndLastUpdatesByYearEntries[i];
+
+    if (i === firstAndLastUpdatesByYearEntries.length - 1) {
+      dataPoints.push({
+        year: currentYear[0],
+        value: currentYear[1][1].value - currentYear[1][0].value,
+        principal: currentYear[1][1].principal - currentYear[1][0].principal,
+        return: currentYear[1][1].return - currentYear[1][0].return,
+      });
+      break;
+    }
+
+    const nextYear = firstAndLastUpdatesByYearEntries[i + 1];
+
+    dataPoints.push({
+      year: currentYear[0],
+      value: nextYear[1][0].value - currentYear[1][0].value,
+      principal: nextYear[1][0].principal - currentYear[1][0].principal,
+      return: nextYear[1][0].return - currentYear[1][0].return,
+    });
+  }
+  return dataPoints;
+}; 

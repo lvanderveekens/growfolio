@@ -5,7 +5,7 @@ import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
-import { Investment, InvestmentUpdate, chartBackgroundColors } from "@/app/page";
+import { Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateYearlyChangeDataPoints, chartBackgroundColors } from "@/app/page";
 import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
@@ -52,6 +52,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
+  const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
 
   const [timeRangeDays, setTimeRangeDays] = useState<number>(6 * 30)
 
@@ -88,6 +89,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     setUpdateDataPoints(updateDataPoints);
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
+    );
+    setYearlyChangeDataPoints(
+      calculateYearlyChangeDataPoints(updateDataPoints)
     );
   }, [transactions, updates]);
 
@@ -215,8 +219,16 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     <div>Return</div>
                     <div
                       className={`text-3xl font-bold 
-                        ${(findLastUpdate()?.return ?? 0) > 0 ? "text-green-400" : ""}
-                        ${(findLastUpdate()?.return ?? 0) < 0 ? "text-red-400" : ""}
+                        ${
+                          (findLastUpdate()?.return ?? 0) > 0
+                            ? "text-green-400"
+                            : ""
+                        }
+                        ${
+                          (findLastUpdate()?.return ?? 0) < 0
+                            ? "text-red-400"
+                            : ""
+                        }
                       }`}
                     >
                       {updateDataPoints.length > 0
@@ -232,8 +244,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     <div>ROI</div>
                     <div
                       className={`text-3xl font-bold 
-                        ${(findLastUpdate()?.roi ?? 0) > 0 ? "text-green-400" : ""}
-                        ${(findLastUpdate()?.roi ?? 0) < 0 ? "text-red-400" : ""}
+                        ${
+                          (findLastUpdate()?.roi ?? 0) > 0
+                            ? "text-green-400"
+                            : ""
+                        }
+                        ${
+                          (findLastUpdate()?.roi ?? 0) < 0 ? "text-red-400" : ""
+                        }
                       }`}
                     >
                       {updateDataPoints.length > 0
@@ -300,14 +318,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <div className="mb-8">
-                  <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-                  <Bar
-                    options={monthlyGrowthBarOptions}
-                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-                  />
-                </div>
-
-                <div className="mb-8">
                   <h1 className="text-xl font-bold mb-4">Return</h1>
                   <Line
                     options={returnLineOptions}
@@ -320,6 +330,22 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   <Line
                     options={roiLineOptions}
                     data={buildROILineData(updateDataPoints)}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+                  <Bar
+                    options={monthlyGrowthBarOptions}
+                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
+                  <Bar
+                    options={yearlyGrowthBarOptions}
+                    data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
                   />
                 </div>
               </>
@@ -479,6 +505,44 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
     },
   };
 
+export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += formatAmountAsEuroString(context.parsed.y);
+            }
+
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        type: "time",
+        time: {
+          unit: "year",
+          tooltipFormat: "YYYY",
+        },
+      },
+      y: {
+        stacked: true,
+        ticks: {
+          callback: function (value: any, index: any, ticks: any) {
+            return formatAmountAsEuroString(value);
+          },
+        },
+      },
+    },
+  };
+
   const roiLineOptions: ChartOptions<"line"> = {
     interaction: {
       mode: "index",
@@ -557,47 +621,72 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
   };
 
 export const buildMonthlyGrowthBarData = (
-    monthlyChangeDataPoints: MonthlyChangeDataPoint[]
-  ): ChartData<"bar"> => {
-    console.log(monthlyChangeDataPoints)
-    return {
-      datasets: [
-        {
-          label: "Principal",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
-          data: monthlyChangeDataPoints.map((dataPoint) => ({
-            x: dataPoint.yearAndMonth,
-            y: (dataPoint.principal / 100),
-          })),
-        },
-        {
-          label: "Return",
-          borderColor: chartBackgroundColors[1],
-          backgroundColor: chartBackgroundColors[1],
-          data: monthlyChangeDataPoints.map((dataPoint) => ({
-            x: dataPoint.yearAndMonth,
-            y: (dataPoint.return / 100),
-          })),
-        },
-      ],
-    };
+  monthlyChangeDataPoints: MonthlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  console.log(monthlyChangeDataPoints);
+  return {
+    datasets: [
+      {
+        label: "Principal",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: monthlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.yearAndMonth,
+          y: dataPoint.principal / 100,
+        })),
+      },
+      {
+        label: "Return",
+        borderColor: chartBackgroundColors[1],
+        backgroundColor: chartBackgroundColors[1],
+        data: monthlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.yearAndMonth,
+          y: dataPoint.return / 100,
+        })),
+      },
+    ],
   };
+};
 
-  const buildROILineData = (
-    updateDataPoints: UpdateDataPoint[]
-  ) => {
-    return {
-      datasets: [
-        {
-          label: "ROI",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
-          data: updateDataPoints.map((x) => ({
-            x: x.date,
-            y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
-          })),
-        },
-      ],
-    };
+export const buildYearlyGrowthBarData = (
+  yearlyChangeDataPoints: YearlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  console.log(yearlyChangeDataPoints);
+  return {
+    datasets: [
+      {
+        label: "Principal",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: yearlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.year,
+          y: dataPoint.principal / 100,
+        })),
+      },
+      {
+        label: "Return",
+        borderColor: chartBackgroundColors[1],
+        backgroundColor: chartBackgroundColors[1],
+        data: yearlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.year,
+          y: dataPoint.return / 100,
+        })),
+      },
+    ],
   };
+};
+const buildROILineData = (updateDataPoints: UpdateDataPoint[]) => {
+  return {
+    datasets: [
+      {
+        label: "ROI",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: updateDataPoints.map((x) => ({
+          x: x.date,
+          y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
+        })),
+      },
+    ],
+  };
+};
