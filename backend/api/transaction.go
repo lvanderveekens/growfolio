@@ -16,18 +16,15 @@ import (
 
 type TransactionHandler struct {
 	transactionRepository services.TransactionRepository
-	transactionService    services.TransactionService
 	investmentRepository  services.InvestmentRepository
 }
 
 func NewTransactionHandler(
 	transactionRepository services.TransactionRepository,
-	transactionService services.TransactionService,
 	investmentRepository services.InvestmentRepository,
 ) TransactionHandler {
 	return TransactionHandler{
 		transactionRepository: transactionRepository,
-		transactionService:    transactionService,
 		investmentRepository:  investmentRepository,
 	}
 }
@@ -36,6 +33,7 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transact
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 	investmentIDFilter := c.Query("investmentId")
+	dateFromFilter := stringOrNil(c.Query("dateFrom"))
 
 	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
 	if err != nil {
@@ -53,7 +51,10 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transact
 		investmentIDs = []string{investmentIDFilter}
 	}
 
-	transactions, err := h.transactionRepository.FindByInvestmentIDs(investmentIDs)
+	transactions, err := h.transactionRepository.Find(domain.FindTransactionQuery{
+		InvestmentIDs: &investmentIDs,
+		DateFrom:      dateFromFilter,
+	})
 	if err != nil {
 		return response[[]transactionDto]{}, fmt.Errorf("failed to find transactions: %w", err)
 	}

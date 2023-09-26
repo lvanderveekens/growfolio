@@ -8,8 +8,6 @@ type InvestmentRepository interface {
 	Create(command domain.CreateInvestmentCommand) (domain.Investment, error)
 	DeleteByID(id string) error
 
-	FindUpdatesByInvestmentID(investmentID *string) ([]domain.InvestmentUpdate, error)
-	FindUpdatesByInvestmentIDs(investmentIDs []string) ([]domain.InvestmentUpdate, error)
 	FindUpdateByID(id string) (domain.InvestmentUpdate, error)
 	FindUpdates(query domain.FindInvestmentUpdateQuery) ([]domain.InvestmentUpdate, error)
 

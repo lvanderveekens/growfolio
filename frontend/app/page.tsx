@@ -29,6 +29,7 @@ import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOp
 import { api } from "./axios"
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useLocalStorage } from "./localstorage";
 // import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -58,7 +59,7 @@ export default function HomePage() {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
 
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.ALL)
+  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
 
   const router = useRouter()
 
@@ -133,14 +134,14 @@ export default function HomePage() {
   };
 
   const fetchInvestmentUpdates = async () => {
-    const beforeDate = convertToDate(selectedDateRange)
+    const dateFrom = convertToDate(selectedDateRange)
       ?.toISOString()
       ?.split("T")
       ?.[0]
 
     api.get(`/v1/investment-updates`, {
         params: {
-          ...(beforeDate && { beforeDate: beforeDate }), 
+          ...(dateFrom && { dateFrom: dateFrom }), 
         },
       }
     )
@@ -173,34 +174,8 @@ export default function HomePage() {
   } 
 
   const fetchTransactions = async () => {
-    const beforeDate = convertToDate(selectedDateRange)
-      ?.toISOString()
-      ?.split("T")
-      ?.[0]
-
-    api
-      .get(`/v1/transactions`, {
-        params: {
-          ...(beforeDate && { beforeDate: beforeDate }),
-        },
-      })
-      .then((res) => setTransactions(res.data));
+    api.get(`/v1/transactions`).then((res) => setTransactions(res.data));
   };
-
-  function compareInvestmentUpdateByDateAsc(
-    a: InvestmentUpdate,
-    b: InvestmentUpdate
-  ): number {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateA.getTime() - dateB.getTime();
-  }
-
-  function compareTransactionByDateAsc(a: Transaction, b: Transaction): number {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateA.getTime() - dateB.getTime();
-  }
 
   const buildPrincipalAndValueLineData = (
     updateDataPoints: UpdateDataPoint[]

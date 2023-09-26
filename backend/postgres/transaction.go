@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"growfolio/domain"
+	"log/slog"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -52,6 +54,38 @@ func (r TransactionRepository) FindByID(id string) (domain.Transaction, error) {
 	return entity.toDomainTransaction(), nil
 }
 
+func (r TransactionRepository) Find(findQuery domain.FindTransactionQuery) ([]domain.Transaction, error) {
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	queryBuilder := psql.Select("*").From("transaction")
+
+	if findQuery.InvestmentIDs != nil {
+		queryBuilder = queryBuilder.Where(sq.Eq{"investment_id": *findQuery.InvestmentIDs})
+	}
+	if findQuery.DateFrom != nil {
+		queryBuilder = queryBuilder.Where(sq.Expr("date >= ?", *findQuery.DateFrom))
+	}
+
+	queryBuilder = queryBuilder.OrderBy("date ASC")
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+	slog.Info("query: " + query)
+
+	entities := []Transaction{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select transaction: %w", err)
+	}
+
+	updates := make([]domain.Transaction, 0)
+	for _, entity := range entities {
+		updates = append(updates, entity.toDomainTransaction())
+	}
+
+	return updates, nil
+}
+
 func (r TransactionRepository) DeleteByInvestmentID(investmentID string) error {
 	_, err := uuid.Parse(investmentID)
 	if err != nil {
@@ -60,59 +94,6 @@ func (r TransactionRepository) DeleteByInvestmentID(investmentID string) error {
 
 	_, err = r.db.Exec("DELETE FROM transaction WHERE investment_id=$1", investmentID)
 	return err
-}
-
-func (r TransactionRepository) Find(investmentID *string) ([]domain.Transaction, error) {
-	query := "SELECT * FROM transaction"
-	args := make([]any, 0)
-	if investmentID != nil {
-		query += " WHERE investment_id = $1"
-		args = append(args, *investmentID)
-	}
-	query += " ORDER BY date ASC"
-
-	entities := []Transaction{}
-	err := r.db.Select(&entities, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select transactions: %w", err)
-	}
-
-	transactions := make([]domain.Transaction, 0)
-	for _, entity := range entities {
-		transactions = append(transactions, entity.toDomainTransaction())
-	}
-
-	return transactions, nil
-}
-
-func (r TransactionRepository) FindByInvestmentIDs(investmentIDs []string) ([]domain.Transaction, error) {
-	if len(investmentIDs) == 0 {
-		return []domain.Transaction{}, nil
-	}
-
-	query, args, err := sqlx.In(`
-		SELECT * 
-		FROM transaction 
-		WHERE investment_id IN (?) 
-		ORDER BY date ASC
-	`, investmentIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
-	}
-	query = r.db.Rebind(query)
-
-	entities := []Transaction{}
-	err = r.db.Select(&entities, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select transactions: %w", err)
-	}
-
-	transactions := make([]domain.Transaction, 0)
-	for _, entity := range entities {
-		transactions = append(transactions, entity.toDomainTransaction())
-	}
-
-	return transactions, nil
 }
 
 func (r TransactionRepository) Create(cmd domain.CreateTransactionCommand) (domain.Transaction, error) {

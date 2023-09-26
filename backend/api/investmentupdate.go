@@ -14,17 +14,14 @@ import (
 )
 
 type InvestmentUpdateHandler struct {
-	investmentRepository    services.InvestmentRepository
-	investmentUpdateService services.InvestmentUpdateService
+	investmentRepository services.InvestmentRepository
 }
 
 func NewInvestmentUpdateHandler(
 	investmentRepository services.InvestmentRepository,
-	investmentUpdateService services.InvestmentUpdateService,
 ) InvestmentUpdateHandler {
 	return InvestmentUpdateHandler{
-		investmentRepository:    investmentRepository,
-		investmentUpdateService: investmentUpdateService,
+		investmentRepository: investmentRepository,
 	}
 }
 
@@ -32,7 +29,7 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 	investmentIDFilter := stringOrNil(c.Query("investmentId"))
-	beforeDateFilter := stringOrNil(c.Query("beforeDate"))
+	dateFromFilter := stringOrNil(c.Query("dateFrom"))
 
 	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
 	if err != nil {
@@ -52,7 +49,7 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 
 	updates, err := h.investmentRepository.FindUpdates(domain.FindInvestmentUpdateQuery{
 		InvestmentIDs: &investmentIDs,
-		BeforeDate:    beforeDateFilter,
+		DateFrom:      dateFromFilter,
 	})
 	if err != nil {
 		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investment updates: %w", err)

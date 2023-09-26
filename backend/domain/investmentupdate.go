@@ -28,19 +28,7 @@ func NewInvestmentUpdate(id string, date time.Time, investmentID string, value i
 	}
 }
 
-type InvestmentUpdateWithInvestment struct {
-	Update     InvestmentUpdate
-	Investment Investment
-}
-
-func NewInvestmentUpdateWithInvestment(update InvestmentUpdate, investment Investment) InvestmentUpdateWithInvestment {
-	return InvestmentUpdateWithInvestment{
-		Update:     update,
-		Investment: investment,
-	}
-}
-
 type FindInvestmentUpdateQuery struct {
 	InvestmentIDs *[]string
-	BeforeDate    *string
+	DateFrom      *string
 }

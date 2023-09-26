@@ -107,36 +107,6 @@ func (r InvestmentRepository) FindUpdateByID(id string) (domain.InvestmentUpdate
 	return entity.toDomainInvestmentUpdate(), nil
 }
 
-func (r InvestmentRepository) FindUpdatesByInvestmentIDs(investmentIDs []string) ([]domain.InvestmentUpdate, error) {
-	if len(investmentIDs) == 0 {
-		return []domain.InvestmentUpdate{}, nil
-	}
-
-	query, args, err := sqlx.In(`
-		SELECT * 
-		FROM investment_update 
-		WHERE investment_id IN (?) 
-		ORDER BY date ASC
-	`, investmentIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
-	}
-	query = r.db.Rebind(query)
-
-	entities := []InvestmentUpdate{}
-	err = r.db.Select(&entities, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select investment updates: %w", err)
-	}
-
-	updates := make([]domain.InvestmentUpdate, 0)
-	for _, entity := range entities {
-		updates = append(updates, entity.toDomainInvestmentUpdate())
-	}
-
-	return updates, nil
-}
-
 func (r InvestmentRepository) FindUpdates(findQuery domain.FindInvestmentUpdateQuery) ([]domain.InvestmentUpdate, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	queryBuilder := psql.Select("*").From("investment_update")
@@ -144,8 +114,8 @@ func (r InvestmentRepository) FindUpdates(findQuery domain.FindInvestmentUpdateQ
 	if findQuery.InvestmentIDs != nil {
 		queryBuilder = queryBuilder.Where(sq.Eq{"investment_id": *findQuery.InvestmentIDs})
 	}
-	if findQuery.BeforeDate != nil {
-		queryBuilder = queryBuilder.Where(sq.Expr("date >= ?", *findQuery.BeforeDate))
+	if findQuery.DateFrom != nil {
+		queryBuilder = queryBuilder.Where(sq.Expr("date >= ?", *findQuery.DateFrom))
 	}
 
 	queryBuilder = queryBuilder.OrderBy("date ASC")
@@ -232,27 +202,4 @@ func (r InvestmentRepository) CreateUpdate(c domain.CreateInvestmentUpdateComman
 	}
 
 	return entity.toDomainInvestmentUpdate(), nil
-}
-
-func (r InvestmentRepository) FindUpdatesByInvestmentID(investmentID *string) ([]domain.InvestmentUpdate, error) {
-	query := "SELECT * FROM investment_update"
-	args := make([]any, 0)
-	if investmentID != nil {
-		query += " WHERE investment_id = $1"
-		args = append(args, *investmentID)
-	}
-	query += " ORDER BY date ASC"
-
-	entities := []InvestmentUpdate{}
-	err := r.db.Select(&entities, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select investment updates: %w", err)
-	}
-
-	updates := make([]domain.InvestmentUpdate, 0)
-	for _, entity := range entities {
-		updates = append(updates, entity.toDomainInvestmentUpdate())
-	}
-
-	return updates, nil
 }

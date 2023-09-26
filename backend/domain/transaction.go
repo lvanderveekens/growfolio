@@ -65,14 +65,7 @@ func NewTransaction(id string, date time.Time, t TransactionType, investmentID s
 	}
 }
 
-type TransactionWithInvestment struct {
-	Transaction Transaction
-	Investment  Investment
-}
-
-func NewTransactionWithInvestment(transaction Transaction, investment Investment) TransactionWithInvestment {
-	return TransactionWithInvestment{
-		Transaction: transaction,
-		Investment:  investment,
-	}
+type FindTransactionQuery struct {
+	InvestmentIDs *[]string
+	DateFrom      *string
 }
