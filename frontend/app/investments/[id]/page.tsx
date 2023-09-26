@@ -22,7 +22,6 @@ import {
   Tooltip
 } from "chart.js";
 import "chartjs-adapter-moment";
-import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -99,9 +98,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       acc.set(yearMonthKey, obj);
       return acc;
     }, new Map<string, UpdateDataPoint>());
-    console.log(lastUpdateByMonth)
 
-    const dataPoints = []
+    const dataPoints: MonthlyChangeDataPoint[] = []
     const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
 
     for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
@@ -109,7 +107,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       const currentUpdate = lastUpdateByMonthEntries[i];
 
       dataPoints.push({
-        yearAndMonth: currentUpdate[0],
+        yearMonth: currentUpdate[0],
         value: (currentUpdate[1].value - previousUpdate[1].value),
         principal: (currentUpdate[1].principal - previousUpdate[1].principal),
         return: (currentUpdate[1].return - previousUpdate[1].return),
@@ -592,7 +590,7 @@ export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
   }
 
   interface MonthlyChangeDataPoint {
-    yearAndMonth: string;
+    yearMonth: string;
     value: number;
     principal: number;
     return: number;
@@ -619,7 +617,6 @@ export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
 export const buildMonthlyGrowthBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
-  console.log(monthlyChangeDataPoints);
   return {
     datasets: [
       {
@@ -627,7 +624,7 @@ export const buildMonthlyGrowthBarData = (
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
-          x: dataPoint.yearAndMonth,
+          x: dataPoint.yearMonth,
           y: dataPoint.principal / 100,
         })),
       },
@@ -636,7 +633,7 @@ export const buildMonthlyGrowthBarData = (
         borderColor: chartBackgroundColors[1],
         backgroundColor: chartBackgroundColors[1],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
-          x: dataPoint.yearAndMonth,
+          x: dataPoint.yearMonth,
           y: dataPoint.return / 100,
         })),
       },
@@ -647,7 +644,6 @@ export const buildMonthlyGrowthBarData = (
 export const buildYearlyGrowthBarData = (
   yearlyChangeDataPoints: YearlyChangeDataPoint[]
 ): ChartData<"bar"> => {
-  console.log(yearlyChangeDataPoints);
   return {
     datasets: [
       {

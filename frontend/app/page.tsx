@@ -66,44 +66,47 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    Promise.all([
-      fetchInvestments(),
-      fetchInvestmentUpdates(),
-      fetchTransactions(),
-    ]).finally(() => setLoading(false));
+    console.log("selectedDateRage: " + selectedDateRange);
+    if (selectedDateRange) {
+      Promise.all([
+        fetchInvestments(),
+        fetchInvestmentUpdates(),
+        fetchTransactions(),
+      ]).finally(() => setLoading(false));
+    }
   }, [selectedDateRange]);
 
   useEffect(() => {
-    if (transactons.length > 0 && updates.length > 0) {
-      const uniqueUpdateDates = Array.from(
-        new Set(updates.map((update) => update.date))
-      );
+    const uniqueUpdateDates = Array.from(
+      new Set(updates.map((update) => update.date))
+    );
 
-      const updateDataPoints = uniqueUpdateDates.map((date) => {
-        const value = calculateTotalValueForDate(date, updates)
-        const principal = calculateTotalPrincipalForDate(date, transactons);
-        const returnValue = value - principal;
-        const roi = returnValue / principal;
+    const updateDataPoints = uniqueUpdateDates.map((date) => {
+      const value = calculateTotalValueForDate(date, updates);
+      const principal = calculateTotalPrincipalForDate(date, transactons);
+      const returnValue = value - principal;
+      const roi = returnValue / principal;
 
-        return {
-          date: date,
-          value: value,
-          principal: principal,
-          return: returnValue,
-          roi: roi,
-        };
-      });
+      return {
+        date: date,
+        value: value,
+        principal: principal,
+        return: returnValue,
+        roi: roi,
+      };
+    });
 
-      setUpdateDataPoints(updateDataPoints);
-      setMonthlyChangeDataPoints(calculateMonthlyChangeDataPoints(updateDataPoints))
-      setYearlyChangeDataPoints(calculateYearlyChangeDataPoints(updateDataPoints))
-    }
+    setUpdateDataPoints(updateDataPoints);
+    setMonthlyChangeDataPoints(
+      calculateMonthlyChangeDataPoints(updateDataPoints)
+    );
+    setYearlyChangeDataPoints(
+      calculateYearlyChangeDataPoints(updateDataPoints)
+    );
 
     if (investments.length > 0) {
       const investmentRows = investments.map((i) => {
-        const lastUpdate = updates.findLast(
-          (u) => u.investmentId == i.id
-        )!;
+        const lastUpdate = updates.findLast((u) => u.investmentId == i.id)!;
 
         const value = lastUpdate?.value ?? 0;
         const principal = getInvestmentPrincipal(i);
@@ -134,6 +137,7 @@ export default function HomePage() {
   };
 
   const fetchInvestmentUpdates = async () => {
+    // console.log("fetching investment updates with date range " + selectedDateRange)
     const dateFrom = convertToDate(selectedDateRange)
       ?.toISOString()
       ?.split("T")
@@ -148,30 +152,81 @@ export default function HomePage() {
     .then((res) => setUpdates(res.data));
   };
 
-  const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
-    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
-      const yearMonthKey = obj.date.substr(0, 7);
-      acc.set(yearMonthKey, obj);
-      return acc;
-    }, new Map<string, UpdateDataPoint>());
-    console.log(lastUpdateByMonth)
+  const calculateMonthlyChangeDataPoints = (
+    updateDataPoints: UpdateDataPoint[]
+  ) => {
+    // console.log("calculating monthly change data points with update data points")
+    // console.log(updateDataPoints)
+    // console.log("end")
 
-    const dataPoints = []
-    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
+    const firstAndLastUpdatesByYearMonth = new Map<
+      string,
+      [UpdateDataPoint, UpdateDataPoint]
+    >();
 
-    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
-      const previousUpdate = lastUpdateByMonthEntries[i - 1];
-      const currentUpdate = lastUpdateByMonthEntries[i];
+    console.log("@>updateDataPoints")
+    console.log(updateDataPoints)
+    console.log("@<updateDataPoints")
+
+    let currentYearMonth: string | null = null;
+    let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
+
+    for (const updateDataPoint of updateDataPoints) {
+      const yearMonth = updateDataPoint.date.substr(0, 7);
+      if (yearMonth !== currentYearMonth) {
+        currentYearMonth = yearMonth;
+        firstUpdateOfYearMonth = updateDataPoint;
+
+        firstAndLastUpdatesByYearMonth.set(yearMonth, [
+          firstUpdateOfYearMonth!!,
+          firstUpdateOfYearMonth!!,
+        ]);
+      } else {
+        firstAndLastUpdatesByYearMonth.set(yearMonth, [
+          firstUpdateOfYearMonth!!,
+          updateDataPoint,
+        ]);
+      }
+    }
+
+    console.log("@>firstAndLastUpdatesByYearMonth")
+    console.log(firstAndLastUpdatesByYearMonth)
+    console.log("@<firstAndLastUpdatesByYearMonth")
+
+    const dataPoints: MonthlyChangeDataPoint[] = [];
+    const firstAndLastUpdatesByYearMonthEntries = Array.from(
+      firstAndLastUpdatesByYearMonth.entries()
+    );
+
+    for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
+      const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
+
+      if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
+        dataPoints.push({
+          yearMonth: currentYearMonth[0],
+          value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
+          principal:
+            currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
+          return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
+        });
+        break;
+      }
+
+      const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
 
       dataPoints.push({
-        yearAndMonth: currentUpdate[0],
-        value: (currentUpdate[1].value - previousUpdate[1].value),
-        principal: (currentUpdate[1].principal - previousUpdate[1].principal),
-        return: (currentUpdate[1].return - previousUpdate[1].return),
+        yearMonth: currentYearMonth[0],
+        value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
+        principal: nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
+        return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
       });
     }
-    return dataPoints
-  } 
+
+    console.log("@>dataPoints")
+    console.log(dataPoints)
+    console.log("@<dataPoints")
+    return dataPoints;
+  }; 
 
   const fetchTransactions = async () => {
     api.get(`/v1/transactions`).then((res) => setTransactions(res.data));
@@ -279,8 +334,6 @@ export default function HomePage() {
               }
             }, 0);
 
-
-            console.log(totalVisibleValue)
 
             if (context.parsed !== null) {
               const valueString = formatAmountInCentsAsEuroString(context.parsed);
@@ -712,7 +765,7 @@ export interface UpdateDataPoint {
 }
 
 export interface MonthlyChangeDataPoint {
-  yearAndMonth: string;
+  yearMonth: string;
   value: number;
   principal: number;
   return: number;
