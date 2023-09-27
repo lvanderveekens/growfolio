@@ -137,7 +137,6 @@ export default function HomePage() {
   };
 
   const fetchInvestmentUpdates = async () => {
-    // console.log("fetching investment updates with date range " + selectedDateRange)
     const dateFrom = convertToDate(selectedDateRange)
       ?.toISOString()
       ?.split("T")
@@ -155,18 +154,10 @@ export default function HomePage() {
   const calculateMonthlyChangeDataPoints = (
     updateDataPoints: UpdateDataPoint[]
   ) => {
-    // console.log("calculating monthly change data points with update data points")
-    // console.log(updateDataPoints)
-    // console.log("end")
-
     const firstAndLastUpdatesByYearMonth = new Map<
       string,
       [UpdateDataPoint, UpdateDataPoint]
     >();
-
-    console.log("@>updateDataPoints")
-    console.log(updateDataPoints)
-    console.log("@<updateDataPoints")
 
     let currentYearMonth: string | null = null;
     let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
@@ -188,10 +179,6 @@ export default function HomePage() {
         ]);
       }
     }
-
-    console.log("@>firstAndLastUpdatesByYearMonth")
-    console.log(firstAndLastUpdatesByYearMonth)
-    console.log("@<firstAndLastUpdatesByYearMonth")
 
     const dataPoints: MonthlyChangeDataPoint[] = [];
     const firstAndLastUpdatesByYearMonthEntries = Array.from(
@@ -222,9 +209,6 @@ export default function HomePage() {
       });
     }
 
-    console.log("@>dataPoints")
-    console.log(dataPoints)
-    console.log("@<dataPoints")
     return dataPoints;
   }; 
 
@@ -740,7 +724,7 @@ export interface Investment {
 }
 
 export interface InvestmentUpdate {
-  id: string;
+  id?: string;
   date: string;
   investmentId: string;
   value: number;

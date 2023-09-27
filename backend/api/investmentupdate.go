@@ -14,14 +14,20 @@ import (
 )
 
 type InvestmentUpdateHandler struct {
-	investmentRepository services.InvestmentRepository
+	investmentRepository       services.InvestmentRepository
+	investmentUpdateRepository services.InvestmentUpdateRepository
+	investmentUpdateService    services.InvestmentUpdateService
 }
 
 func NewInvestmentUpdateHandler(
 	investmentRepository services.InvestmentRepository,
+	investmentUpdateRepository services.InvestmentUpdateRepository,
+	investmentUpdateService services.InvestmentUpdateService,
 ) InvestmentUpdateHandler {
 	return InvestmentUpdateHandler{
-		investmentRepository: investmentRepository,
+		investmentRepository:       investmentRepository,
+		investmentUpdateRepository: investmentUpdateRepository,
+		investmentUpdateService:    investmentUpdateService,
 	}
 }
 
@@ -29,7 +35,15 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 	investmentIDFilter := stringOrNil(c.Query("investmentId"))
-	dateFromFilter := stringOrNil(c.Query("dateFrom"))
+
+	var dateFromFilter *time.Time
+	if c.Query("dateFrom") != "" {
+		parsed, err := time.Parse("2006-01-02", c.Query("dateFrom"))
+		if err != nil {
+			return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to parse dateFrom: %w", err)
+		}
+		dateFromFilter = &parsed
+	}
 
 	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
 	if err != nil {
@@ -47,8 +61,8 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 		investmentIDs = []string{*investmentIDFilter}
 	}
 
-	updates, err := h.investmentRepository.FindUpdates(domain.FindInvestmentUpdateQuery{
-		InvestmentIDs: &investmentIDs,
+	updates, err := h.investmentUpdateService.Find(domain.FindInvestmentUpdateQuery{
+		InvestmentIDs: investmentIDs,
 		DateFrom:      dateFromFilter,
 	})
 	if err != nil {
@@ -90,7 +104,7 @@ func (h InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (respons
 		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	update, err := h.investmentRepository.CreateUpdate(command)
+	update, err := h.investmentUpdateRepository.Create(command)
 	if err != nil {
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
 	}
@@ -103,7 +117,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	update, err := h.investmentRepository.FindUpdateByID(id)
+	update, err := h.investmentUpdateRepository.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentUpdateNotFound {
 			return response[empty]{}, NewError(http.StatusNotFound, err.Error())
@@ -123,7 +137,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment update")
 	}
 
-	err = h.investmentRepository.DeleteUpdateByID(id)
+	err = h.investmentUpdateRepository.DeleteByID(id)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete investment update: %w", err)
 	}

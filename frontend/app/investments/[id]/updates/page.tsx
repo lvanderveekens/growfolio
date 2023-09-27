@@ -96,7 +96,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                           size={24}
                           color="red"
                           onClick={async () => {
-                            await deleteUpdate(update.id);
+                            await deleteUpdate(update.id!!);
                             fetchUpdates();
                           }}
                         />

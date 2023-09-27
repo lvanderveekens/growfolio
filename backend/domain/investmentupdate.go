@@ -29,6 +29,6 @@ func NewInvestmentUpdate(id string, date time.Time, investmentID string, value i
 }
 
 type FindInvestmentUpdateQuery struct {
-	InvestmentIDs *[]string
-	DateFrom      *string
+	InvestmentIDs []string
+	DateFrom      *time.Time
 }

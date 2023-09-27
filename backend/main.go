@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"growfolio/api"
+	"growfolio/domain/services"
 	"growfolio/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -50,13 +51,15 @@ func main() {
 	}
 
 	investmentRepository := postgres.NewInvestmentRepository(db)
+	investmentUpdateRepository := postgres.NewInvestmentUpdateRepository(db)
+	investmentUpdateService := services.NewInvestmentUpdateService(investmentUpdateRepository)
 	transactionRepository := postgres.NewTransactionRepository(db)
 	userRepository := postgres.NewUserRepository(db)
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"))
 
-	investmentHandler := api.NewInvestmentHandler(&investmentRepository, transactionRepository)
-	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository)
+	investmentHandler := api.NewInvestmentHandler(&investmentRepository, &investmentUpdateRepository, transactionRepository)
+	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository, &investmentUpdateRepository, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(&transactionRepository, &investmentRepository)
 	authHandler := api.NewAuthHandler(&userRepository, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)

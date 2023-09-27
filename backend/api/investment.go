@@ -16,15 +16,21 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentRepository  services.InvestmentRepository
-	transactionRepository services.TransactionRepository
+	investmentRepository       services.InvestmentRepository
+	investmentUpdateRepository services.InvestmentUpdateRepository
+	transactionRepository      services.TransactionRepository
 }
 
 func NewInvestmentHandler(
 	investmentRepository services.InvestmentRepository,
+	investmentUpdateRepository services.InvestmentUpdateRepository,
 	transactionRepository services.TransactionRepository,
 ) InvestmentHandler {
-	return InvestmentHandler{investmentRepository: investmentRepository, transactionRepository: transactionRepository}
+	return InvestmentHandler{
+		investmentRepository:       investmentRepository,
+		investmentUpdateRepository: investmentUpdateRepository,
+		transactionRepository:      transactionRepository,
+	}
 }
 
 func (h InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investmentDto], error) {
@@ -79,7 +85,7 @@ func (h InvestmentHandler) DeleteInvestment(c *gin.Context) (response[empty], er
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment")
 	}
 
-	err = h.investmentRepository.DeleteUpdatesByInvestmentID(investment.ID)
+	err = h.investmentUpdateRepository.DeleteByInvestmentID(investment.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete updates: %w", err)
 	}
@@ -173,7 +179,7 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 
 	for _, command := range commands {
 		slog.Info("Received update: " + fmt.Sprintf("%+v", command))
-		_, err := h.investmentRepository.CreateUpdate(command)
+		_, err := h.investmentUpdateRepository.Create(command)
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to create update: %w", err)
 		}
