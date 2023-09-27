@@ -3,9 +3,10 @@
 import { api } from "@/app/axios";
 import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
+import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
-import { Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateYearlyChangeDataPoints, chartBackgroundColors } from "@/app/page";
+import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate } from "@/app/page";
 import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
@@ -57,11 +58,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const router = useRouter()
 
+  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
+
   useEffect(() => {
     fetchInvestment()
+    fetchInvestmentUpdates()
     fetchTransactions()
-    fetchUpdates()
-  }, []);
+  }, [selectedDateRange]);
 
   useEffect(() => {
     const updateDataPoints = updates.map((update) => {
@@ -92,29 +95,29 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     );
   }, [transactions, updates]);
 
-  const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
-    const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
-      const yearMonthKey = obj.date.substr(0, 7);
-      acc.set(yearMonthKey, obj);
-      return acc;
-    }, new Map<string, UpdateDataPoint>());
+  // const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
+  //   const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
+  //     const yearMonthKey = obj.date.substr(0, 7);
+  //     acc.set(yearMonthKey, obj);
+  //     return acc;
+  //   }, new Map<string, UpdateDataPoint>());
 
-    const dataPoints: MonthlyChangeDataPoint[] = []
-    const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
+  //   const dataPoints: MonthlyChangeDataPoint[] = []
+  //   const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
 
-    for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
-      const previousUpdate = lastUpdateByMonthEntries[i - 1];
-      const currentUpdate = lastUpdateByMonthEntries[i];
+  //   for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
+  //     const previousUpdate = lastUpdateByMonthEntries[i - 1];
+  //     const currentUpdate = lastUpdateByMonthEntries[i];
 
-      dataPoints.push({
-        yearMonth: currentUpdate[0],
-        value: (currentUpdate[1].value - previousUpdate[1].value),
-        principal: (currentUpdate[1].principal - previousUpdate[1].principal),
-        return: (currentUpdate[1].return - previousUpdate[1].return),
-      });
-    }
-    return dataPoints
-  } 
+  //     dataPoints.push({
+  //       yearMonth: currentUpdate[0],
+  //       value: (currentUpdate[1].value - previousUpdate[1].value),
+  //       principal: (currentUpdate[1].principal - previousUpdate[1].principal),
+  //       return: (currentUpdate[1].return - previousUpdate[1].return),
+  //     });
+  //   }
+  //   return dataPoints
+  // } 
 
   const fetchInvestment = () => {
     api.get(`/v1/investments/${params.id}`)
@@ -131,30 +134,29 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       .then((res) => setTransactions(res.data));
   }
 
-  const fetchUpdates = () => {
-    // TODO: server side time range filter
-    api.get(`/v1/investment-updates?investmentId=${params.id}`)
-      .then((res) => {
-        // const currentDate = new Date();
-        // const dateThreshold = new Date(currentDate);
-        // dateThreshold.setDate(currentDate.getDate() - timeRangeDays);
+  const fetchInvestmentUpdates = () => {
+    const dateFrom = convertToDate(selectedDateRange)
+      ?.toISOString()
+      ?.split("T")?.[0];
 
-        // const filteredUpdates = updates.filter((update) =>
-        //   moment(update.date).isAfter(dateThreshold)
-        // );
-
-        setUpdates(res.data);
-      });
-  }
+    api
+      .get(`/v1/investment-updates?investmentId=${params.id}`, {
+        params: {
+          ...(dateFrom && { dateFrom: dateFrom }),
+        },
+      })
+      .then((res) => setUpdates(res.data));
+  };
 
   const deleteInvestment = () => {
-    api.delete(`/v1/investments/${params.id}`)
-    .then((res) => {
-      if (res.status == 204) {
-        router.push("/")
-      }
-    })
-    .catch((err) => console.log(err))
+    api
+      .delete(`/v1/investments/${params.id}`)
+      .then((res) => {
+        if (res.status == 204) {
+          router.push("/");
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   const findLastUpdate = () => {
@@ -168,6 +170,20 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     <>
       <Navbar />
       <div className="p-8">
+        <div className="mb-4">
+          <label className="font-bold">Date range:</label>
+          <select
+            value={selectedDateRange}
+            onChange={(e) => setSelectedDateRange(e.target.value)}
+            className="border border-1 block"
+          >
+            {Object.values(DateRange).map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
         {loading && <p>Loading...</p>}
         {error && <p>Error: ${error}</p>}
         {investment && (

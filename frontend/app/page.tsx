@@ -30,7 +30,6 @@ import { api } from "./axios"
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useLocalStorage } from "./localstorage";
-// import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   // ChartDataLabels,
@@ -66,14 +65,11 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    console.log("selectedDateRage: " + selectedDateRange);
-    if (selectedDateRange) {
-      Promise.all([
-        fetchInvestments(),
-        fetchInvestmentUpdates(),
-        fetchTransactions(),
-      ]).finally(() => setLoading(false));
-    }
+    Promise.all([
+      fetchInvestments(),
+      fetchInvestmentUpdates(),
+      fetchTransactions(),
+    ]).finally(() => setLoading(false));
   }, [selectedDateRange]);
 
   useEffect(() => {
@@ -150,67 +146,6 @@ export default function HomePage() {
     )
     .then((res) => setUpdates(res.data));
   };
-
-  const calculateMonthlyChangeDataPoints = (
-    updateDataPoints: UpdateDataPoint[]
-  ) => {
-    const firstAndLastUpdatesByYearMonth = new Map<
-      string,
-      [UpdateDataPoint, UpdateDataPoint]
-    >();
-
-    let currentYearMonth: string | null = null;
-    let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
-
-    for (const updateDataPoint of updateDataPoints) {
-      const yearMonth = updateDataPoint.date.substr(0, 7);
-      if (yearMonth !== currentYearMonth) {
-        currentYearMonth = yearMonth;
-        firstUpdateOfYearMonth = updateDataPoint;
-
-        firstAndLastUpdatesByYearMonth.set(yearMonth, [
-          firstUpdateOfYearMonth!!,
-          firstUpdateOfYearMonth!!,
-        ]);
-      } else {
-        firstAndLastUpdatesByYearMonth.set(yearMonth, [
-          firstUpdateOfYearMonth!!,
-          updateDataPoint,
-        ]);
-      }
-    }
-
-    const dataPoints: MonthlyChangeDataPoint[] = [];
-    const firstAndLastUpdatesByYearMonthEntries = Array.from(
-      firstAndLastUpdatesByYearMonth.entries()
-    );
-
-    for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
-      const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
-
-      if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
-        dataPoints.push({
-          yearMonth: currentYearMonth[0],
-          value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
-          principal:
-            currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
-          return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
-        });
-        break;
-      }
-
-      const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
-
-      dataPoints.push({
-        yearMonth: currentYearMonth[0],
-        value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
-        principal: nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
-        return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
-      });
-    }
-
-    return dataPoints;
-  }; 
 
   const fetchTransactions = async () => {
     api.get(`/v1/transactions`).then((res) => setTransactions(res.data));
@@ -724,7 +659,7 @@ export interface Investment {
 }
 
 export interface InvestmentUpdate {
-  id?: string;
+  id: string;
   date: string;
   investmentId: string;
   value: number;
@@ -835,7 +770,7 @@ export enum DateRange {
   ALL = "All",
 }
 
-function convertToDate(range: DateRange): Date | null {
+export function convertToDate(range: DateRange): Date | null {
   const today = new Date();
   var minusDays: number | null = null
 
@@ -871,3 +806,65 @@ function convertToDate(range: DateRange): Date | null {
   date.setDate(today.getDate() - minusDays!!);
   return date
 }
+
+export const calculateMonthlyChangeDataPoints = (
+  updateDataPoints: UpdateDataPoint[]
+) => {
+  const firstAndLastUpdatesByYearMonth = new Map<
+    string,
+    [UpdateDataPoint, UpdateDataPoint]
+  >();
+
+  let currentYearMonth: string | null = null;
+  let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
+
+  for (const updateDataPoint of updateDataPoints) {
+    const yearMonth = updateDataPoint.date.substr(0, 7);
+    if (yearMonth !== currentYearMonth) {
+      currentYearMonth = yearMonth;
+      firstUpdateOfYearMonth = updateDataPoint;
+
+      firstAndLastUpdatesByYearMonth.set(yearMonth, [
+        firstUpdateOfYearMonth!!,
+        firstUpdateOfYearMonth!!,
+      ]);
+    } else {
+      firstAndLastUpdatesByYearMonth.set(yearMonth, [
+        firstUpdateOfYearMonth!!,
+        updateDataPoint,
+      ]);
+    }
+  }
+
+  const dataPoints: MonthlyChangeDataPoint[] = [];
+  const firstAndLastUpdatesByYearMonthEntries = Array.from(
+    firstAndLastUpdatesByYearMonth.entries()
+  );
+
+  for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
+    const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
+
+    if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
+      dataPoints.push({
+        yearMonth: currentYearMonth[0],
+        value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
+        principal:
+          currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
+        return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
+      });
+      break;
+    }
+
+    const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
+
+    dataPoints.push({
+      yearMonth: currentYearMonth[0],
+      value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
+      principal:
+        nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
+      return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
+    });
+  }
+
+  return dataPoints;
+}; 
