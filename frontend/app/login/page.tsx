@@ -12,7 +12,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white border border-1 border-gray-300">
+      <div className="m-8 bg-white border border-1 border-gray-300 w-full sm:w-[400px]">
         <div className="p-8 text-4xl text-green-400 font-bold text-center border-b-[1px] border-gray-300">
           <AiOutlineStock size={48} className="inline mr-1" />
           growfolio
@@ -20,7 +20,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
         <div className="p-8">
           <div className="text-xl text-center font-bold pb-8">Login</div>
           <button
-            className="border border-black p-4 rounded-md w-[400px]"
+            className="border border-black p-4 rounded-md w-full"
             onClick={() => {
               router.push("/api/v1/auth/google");
             }}

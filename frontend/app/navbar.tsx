@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaCaretDown } from "react-icons/fa6";
 import { Investment, User } from "./page";
 import { AiOutlineStock } from "react-icons/ai";
+import { RxHamburgerMenu } from "react-icons/rx";
 import { useRouter } from "next/navigation";
 import { api } from "./axios"
 import ClipLoader from "react-spinners/ClipLoader";
@@ -24,6 +25,8 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const investmentsDropdownRef = useRef(null);
 
   const router = useRouter();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
@@ -83,31 +86,46 @@ export const Navbar: React.FC<NavbarProps> = () => {
     };
   }, []);
 
+  const toggleNavbar = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <nav>
-      <div className="px-8 py-4 w-full bg-gray-200 flex items-center gap-8 font-bold ">
-        <div className="text-4xl text-green-400">
-          <Link href="/">
-            <AiOutlineStock size={48} className="inline mr-1" />
-            growfolio
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-between text-lg">
-          <div className="flex gap-6">
-            <Link className={`hover:text-green-400`} href="/">
-              Overview
+      <div className="px-8 py-4 w-full bg-gray-200 sm:flex sm:items-center font-bold sm:gap-8">
+        <div className="flex justify-between items-center w-full sm:w-auto">
+          <div className="text-3xl sm:text-4xl text-green-400">
+            <Link href="/">
+              <AiOutlineStock size={48} className="inline mr-1" />
+              growfolio
             </Link>
+          </div>
+          <div className="sm:hidden">
+            <RxHamburgerMenu size={32} onClick={toggleNavbar} />
+          </div>
+        </div>
+        <div
+          className={`${
+            isOpen ? "block" : "hidden"
+          } sm:block sm:flex sm:flex-1 sm:items-center sm:justify-between text-lg`}
+        >
+          <div className="sm:flex sm:gap-8">
+            <div className="my-2">
+              <Link className={`hover:text-green-400`} href="/">
+                Overview
+              </Link>
+            </div>
             {investments.length > 0 && (
-              <div className="flex relative" ref={investmentsDropdownRef}>
+              <div className="sm:flex relative" ref={investmentsDropdownRef}>
                 <div
-                  className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+                  className="my-2 flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
                   onClick={toggleInvestmentsDropdown}
                 >
                   Investments
                   <FaCaretDown />
                 </div>
                 <div
-                  className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
+                  className={`sm:absolute sm:left-0 sm:top-full bg-gray-300 px-4 py-2 ${
                     isInvestmentsDropdownOpen ? "block" : "hidden"
                   } whitespace-nowrap`}
                 >
@@ -150,16 +168,16 @@ export const Navbar: React.FC<NavbarProps> = () => {
               </button>
             )}
             {!isLoadingUser && user && (
-              <div className="flex relative" ref={userDropdownRef}>
+              <div className="relative" ref={userDropdownRef}>
                 <div
-                  className="flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
+                  className="my-2 flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
                   onClick={toggleUserDropdown}
                 >
                   {user.email}
                   <FaCaretDown />
                 </div>
                 <div
-                  className={`absolute left-0 top-full bg-gray-300 px-4 py-2 ${
+                  className={`sm:absolute sm:left-0 sm:top-full bg-gray-300 px-4 py-2 ${
                     isUserDropdownOpen ? "block" : "hidden"
                   } whitespace-nowrap`}
                 >

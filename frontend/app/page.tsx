@@ -333,7 +333,7 @@ export default function HomePage() {
       <Navbar />
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-8">Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-8">Overview</h1>
 
           <div className="mb-4">
             <label className="font-bold">Date range:</label>
@@ -444,19 +444,18 @@ export default function HomePage() {
               />
             </Modal>
           )}
-
         </div>
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8 flex gap-8">
-            <div className="w-[50%] aspect-square">
+          <div className="mb-8 flex gap-8 grid grid-cols-1 sm:grid-cols-2">
+            <div className="aspect-square">
               <h1 className="text-xl font-bold mb-4">Allocation</h1>
               <Pie
                 options={allocationPieOptions}
                 data={calculateAllocationPieData(investments)}
               />
             </div>
-            <div className="w-[50%] aspect-square">
+            <div className="aspect-square">
               <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
               <Pie
                 options={allocationPieOptions}
@@ -469,50 +468,64 @@ export default function HomePage() {
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Principal and value</h1>
-            <Line
-              options={principalAndValueLineOptions}
-              data={buildPrincipalAndValueLineData(updateDataPoints)}
-            />
+
+            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+              <Line
+                options={principalAndValueLineOptions}
+                data={buildPrincipalAndValueLineData(updateDataPoints)}
+              />
+            </div>
           </div>
         )}
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Return</h1>
-            <Line
-              options={returnLineOptions}
-              data={buildReturnLineData(updateDataPoints)}
-            />
+
+            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+              <Line
+                options={returnLineOptions}
+                data={buildReturnLineData(updateDataPoints)}
+              />
+            </div>
           </div>
         )}
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">ROI</h1>
-            <Line
-              options={roiLineOptions}
-              data={buildROILineData(updateDataPoints)}
-            />
+
+            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+              <Line
+                options={roiLineOptions}
+                data={buildROILineData(updateDataPoints)}
+              />
+            </div>
           </div>
         )}
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-            <Bar
-              options={monthlyGrowthBarOptions}
-              data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-            />
+            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+              <Bar
+                options={monthlyGrowthBarOptions}
+                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+              />
+            </div>
           </div>
         )}
 
         {updateDataPoints.length > 0 && (
           <div className="mb-8">
             <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
-            <Bar
-              options={yearlyGrowthBarOptions}
-              data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-            />
+
+            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+              <Bar
+                options={yearlyGrowthBarOptions}
+                data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -521,6 +534,7 @@ export default function HomePage() {
 }
 
 export const principalAndValueLineOptions: any = {
+  maintainAspectRatio: false,
   interaction: {
     mode: "index",
     intersect: false,
@@ -561,6 +575,7 @@ export const principalAndValueLineOptions: any = {
 };
 
 export const returnLineOptions: ChartOptions = {
+  maintainAspectRatio: false,
   interaction: {
     mode: "index",
     intersect: false,
@@ -604,6 +619,7 @@ export const returnLineOptions: ChartOptions = {
 };
 
 export const roiLineOptions: ChartOptions = {
+  maintainAspectRatio: false,
   interaction: {
     mode: "index",
     intersect: false,

@@ -478,44 +478,46 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
 export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += formatAmountAsEuroString(context.parsed.y);
-            }
+  maintainAspectRatio: false,
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAmountAsEuroString(context.parsed.y);
+          }
 
-            return label;
-          },
+          return label;
         },
       },
     },
-    scales: {
-      x: {
-        stacked: true,
-        type: "time",
-        time: {
-          unit: "month",
-          tooltipFormat: "YYYY-MM",
-        },
+  },
+  scales: {
+    x: {
+      stacked: true,
+      type: "time",
+      time: {
+        unit: "month",
+        tooltipFormat: "YYYY-MM",
       },
-      y: {
-        stacked: true,
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return formatAmountAsEuroString(value);
-          },
+    },
+    y: {
+      stacked: true,
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAmountAsEuroString(value);
         },
       },
     },
-  };
+  },
+};
 
 export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
+    maintainAspectRatio: false,
     plugins: {
       tooltip: {
         callbacks: {
