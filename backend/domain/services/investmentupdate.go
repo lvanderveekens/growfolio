@@ -40,15 +40,18 @@ func (s InvestmentUpdateService) Find(query domain.FindInvestmentUpdateQuery) ([
 				*query.DateFrom,
 			)
 			if err != nil {
-				return []domain.InvestmentUpdate{}, fmt.Errorf("failed to find last update: %w", err)
+				if err != domain.ErrInvestmentUpdateNotFound {
+					return []domain.InvestmentUpdate{}, fmt.Errorf("failed to find last update: %w", err)
+				}
 			}
-
-			updates = append(updates, domain.NewInvestmentUpdate(
-				lastUpdate.ID,
-				*query.DateFrom,
-				lastUpdate.InvestmentID,
-				lastUpdate.Value,
-			))
+			if err != domain.ErrInvestmentUpdateNotFound {
+				updates = append(updates, domain.NewInvestmentUpdate(
+					lastUpdate.ID,
+					*query.DateFrom,
+					lastUpdate.InvestmentID,
+					lastUpdate.Value,
+				))
+			}
 		}
 	}
 
