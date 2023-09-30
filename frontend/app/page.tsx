@@ -24,12 +24,13 @@ import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./ca
 import { Transaction } from "./investments/transaction";
 import Modal from "./modal";
 import { Navbar } from "./navbar";
-import { capitalize, formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "./string";
+import { capitalize, formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAmountInCentsAsReturnString, formatAsROIPercentage } from "./string";
 import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
 import { api } from "./axios"
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useLocalStorage } from "./localstorage";
+import Link from "next/link";
 
 ChartJS.register(
   // ChartDataLabels,
@@ -256,7 +257,7 @@ export default function HomePage() {
 
             if (context.parsed !== null) {
               const valueString = formatAmountInCentsAsEuroString(context.parsed);
-              const totalValuePercentage = formatAsPercentage(
+              const totalValuePercentage = formatAsROIPercentage(
                 context.parsed / totalVisibleValue
               );
               label += `${valueString} (${totalValuePercentage})`;
@@ -333,10 +334,10 @@ export default function HomePage() {
       <Navbar />
       <div className="p-4 mt-[80px]">
         <div className="mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Dashboard</h1>
 
           <div className="mb-4">
-            <label className="font-bold">Date range:</label>
+            <label className="">Date range</label>
             <select
               value={selectedDateRange}
               onChange={(e) => setSelectedDateRange(e.target.value)}
@@ -349,6 +350,19 @@ export default function HomePage() {
               ))}
             </select>
           </div>
+
+          <div className="border p-12 text-center mb-4">
+            <div className="font-bold text-3xl">
+              {formatAmountInCentsAsEuroString(totalValue)}
+            </div>
+            <div className={`${getAmountTextColor(totalReturn)}`}>
+              {formatAsROIPercentage(totalRoi)} (
+              {formatAmountInCentsAsEuroString(totalReturn)})
+            </div>
+            <div></div>
+          </div>
+
+          <h2 className="text-xl font-bold mb-4">Investments</h2>
 
           {loading && (
             <div className="mb-4">
@@ -366,36 +380,41 @@ export default function HomePage() {
             <div className="grid grid-cols-1 gap-4 mb-4">
               {investmentRows.map((investmentRow) => {
                 return (
-                  <div key={investmentRow.id} className="border p-4">
-                    <div className="font-bold flex justify-between">
-                      <div>{investmentRow.name}</div>
-                      <div>
-                        {formatAmountInCentsAsEuroString(investmentRow.value)}
+                  <Link
+                    key={investmentRow.id}
+                    href={`/investments/${investmentRow.id}`}
+                  >
+                    <div className="border p-4">
+                      <div className="font-bold flex justify-between">
+                        <div>{investmentRow.name}</div>
+                        <div>
+                          {formatAmountInCentsAsEuroString(investmentRow.value)}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>ROI</div>
+                        <div
+                          className={`${getAmountTextColor(investmentRow.roi)}`}
+                        >
+                          {formatAsROIPercentage(investmentRow.roi)}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>Return</div>
+                        <div
+                          className={`${getAmountTextColor(investmentRow.roi)}`}
+                        >
+                          {formatAmountInCentsAsEuroString(
+                            investmentRow.return
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>Last update</div>
+                        <div>{investmentRow.lastUpdateDate}</div>
                       </div>
                     </div>
-                    <div className="flex justify-between">
-                      <div>Principal</div>
-                      <div>
-                        {formatAmountInCentsAsEuroString(
-                          investmentRow.principal
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>Return</div>
-                      <div>
-                        {formatAmountInCentsAsEuroString(investmentRow.return)}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>ROI</div>
-                      <div>{formatAsPercentage(investmentRow.roi)}</div>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>Last update</div>
-                      <div>{investmentRow.lastUpdateDate}</div>
-                    </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -456,12 +475,12 @@ export default function HomePage() {
 
         {updateDataPoints.length > 0 && (
           <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">Return</h1>
+            <h1 className="text-xl font-bold mb-4">ROI</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
               <Line
-                options={returnLineOptions}
-                data={buildReturnLineData(updateDataPoints)}
+                options={roiLineOptions}
+                data={buildROILineData(updateDataPoints)}
               />
             </div>
           </div>
@@ -469,12 +488,12 @@ export default function HomePage() {
 
         {updateDataPoints.length > 0 && (
           <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">ROI</h1>
+            <h1 className="text-xl font-bold mb-4">Return</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
               <Line
-                options={roiLineOptions}
-                data={buildROILineData(updateDataPoints)}
+                options={returnLineOptions}
+                data={buildReturnLineData(updateDataPoints)}
               />
             </div>
           </div>
@@ -612,7 +631,7 @@ export const roiLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAsPercentage(context.parsed.y);
+            label += formatAsROIPercentage(context.parsed.y);
           }
 
           return label;
@@ -631,7 +650,7 @@ export const roiLineOptions: ChartOptions = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAsPercentage(value);
+          return formatAsROIPercentage(value);
         },
       },
     },
@@ -860,3 +879,13 @@ export const calculateMonthlyChangeDataPoints = (
 
   return dataPoints;
 }; 
+
+const getAmountTextColor = (amount: number) => {
+  if (amount > 0) {
+    return "text-green-500"
+  }
+  if (amount < 0) {
+    return "text-red-500"
+  }
+  return ""
+}

@@ -19,18 +19,12 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const [isUserDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
   const userDropdownRef = useRef(null);
 
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [isLoadingInvestments, setLoadingInvestments] = useState<boolean>(true);
-  const [isInvestmentsDropdownOpen, setInvestmentsDropdownOpen] = useState<boolean>(false);
-  const investmentsDropdownRef = useRef(null);
-
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
-    fetchInvestments();
   }, []);
 
   const fetchCurrentUser = async () => {
@@ -45,25 +39,8 @@ export const Navbar: React.FC<NavbarProps> = () => {
       .finally(() => setLoadingUser(false));
   };
 
-  const fetchInvestments = async () => {
-    setLoadingInvestments(true);
-    api.get(`/v1/investments`)
-      .then((res) => {
-        setInvestments(res.data);
-      })
-      .finally(() => setLoadingInvestments(false));
-  };
-
-  const toggleInvestmentsDropdown = () => {
-    setInvestmentsDropdownOpen(!isInvestmentsDropdownOpen);
-  };
-
   const toggleUserDropdown = () => {
     setUserDropdownOpen(!isUserDropdownOpen);
-  };
-
-  const closeInvestmentsDropdown = () => {
-    setInvestmentsDropdownOpen(false);
   };
 
   const closeUserDropdown = () => {
@@ -72,9 +49,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (investmentsDropdownRef.current && !investmentsDropdownRef.current.contains(event.target)) {
-        closeInvestmentsDropdown();
-      }
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
         closeUserDropdown();
       }
@@ -111,42 +85,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
         <div className="sm:flex sm:gap-8">
           <div className="my-2">
             <Link className={`hover:text-green-400`} href="/">
-              Overview
+              Dashboard
             </Link>
           </div>
-          {investments.length > 0 && (
-            <div className="sm:flex relative" ref={investmentsDropdownRef}>
-              <div
-                className="my-2 flex items-center gap-1 hover:text-green-400 hover:cursor-pointer"
-                onClick={toggleInvestmentsDropdown}
-              >
-                Investments
-                <FaCaretDown />
-              </div>
-              <div
-                className={`sm:absolute sm:left-0 sm:top-full bg-gray-300 px-4 py-2 ${
-                  isInvestmentsDropdownOpen ? "block" : "hidden"
-                } whitespace-nowrap`}
-              >
-                {isLoadingInvestments && <p>Loading...</p>}
-                {investments.map((i) => {
-                  return (
-                    <div key={i.id} className={`py-1`}>
-                      <Link
-                        className={`hover:text-green-400`}
-                        href={`/investments/${i.id}`}
-                        onClick={closeInvestmentsDropdown}
-                      >
-                        <p className="overflow-hidden text-ellipsis">
-                          {i.name}
-                        </p>
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
         <div>
           {isLoadingUser && (

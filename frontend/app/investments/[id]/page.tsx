@@ -7,7 +7,7 @@ import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
 import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate } from "@/app/page";
-import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsPercentage } from "@/app/string";
+import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsROIPercentage } from "@/app/string";
 import {
   ArcElement,
   BarElement,
@@ -265,7 +265,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       }`}
                     >
                       {updateDataPoints.length > 0
-                        ? formatAsPercentage(
+                        ? formatAsROIPercentage(
                             updateDataPoints[updateDataPoints.length - 1].roi
                           )
                         : "-"}
