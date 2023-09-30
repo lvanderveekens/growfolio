@@ -331,16 +331,16 @@ export default function HomePage() {
   return (
     <main>
       <Navbar />
-      <div className="p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-8">Overview</h1>
+      <div className="p-4 mt-[80px]">
+        <div className="mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
 
           <div className="mb-4">
             <label className="font-bold">Date range:</label>
             <select
               value={selectedDateRange}
               onChange={(e) => setSelectedDateRange(e.target.value)}
-              className="border border-1 block"
+              className="w-full sm:w-auto border border-1 block"
             >
               {Object.values(DateRange).map((status) => (
                 <option key={status} value={status}>
@@ -363,70 +363,46 @@ export default function HomePage() {
             <div className="mb-4">There are no investments yet.</div>
           )}
           {!loading && investmentRows.length > 0 && (
-            <div className="overflow-x-auto mb-4">
-              <table className="w-full whitespace-nowrap">
-                <thead>
-                  <tr className="border">
-                    <th className="border px-3 text-left">Name</th>
-                    <th className="border px-3 text-left">Principal</th>
-                    <th className="border px-3 text-left">Value</th>
-                    <th className="border px-3 text-left">Return</th>
-                    <th className="border px-3 text-left">ROI</th>
-                    <th className="border px-3 text-left">Last update</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {investmentRows.map((investmentRow) => {
-                    return (
-                      <tr key={investmentRow.id} className="border">
-                        <td className="border px-3">{investmentRow.name}</td>
-                        <td className="border px-3">
-                          {formatAmountInCentsAsEuroString(
-                            investmentRow.principal
-                          )}
-                        </td>
-                        <td className="border px-3">
-                          {formatAmountInCentsAsEuroString(investmentRow.value)}
-                        </td>
-                        <td className="border px-3">
-                          {formatAmountInCentsAsEuroString(
-                            investmentRow.return
-                          )}
-                        </td>
-                        <td className="border px-3">
-                          {formatAsPercentage(investmentRow.roi)}
-                        </td>
-                        <td className="border px-3">
-                          {investmentRow.lastUpdateDate}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot className="border-2 border-t-black">
-                  <tr className="border">
-                    <td className="border px-3">Total</td>
-                    <td className="border px-3">
-                      {formatAmountInCentsAsEuroString(totalPrincipal)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAmountInCentsAsEuroString(totalValue)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAmountInCentsAsEuroString(totalReturn)}
-                    </td>
-                    <td className="border px-3">
-                      {formatAsPercentage(totalRoi)}
-                    </td>
-                    <td className="border px-3">-</td>
-                  </tr>
-                </tfoot>
-              </table>
+            <div className="grid grid-cols-1 gap-4 mb-4">
+              {investmentRows.map((investmentRow) => {
+                return (
+                  <div key={investmentRow.id} className="border p-4">
+                    <div className="font-bold flex justify-between">
+                      <div>{investmentRow.name}</div>
+                      <div>
+                        {formatAmountInCentsAsEuroString(investmentRow.value)}
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>Principal</div>
+                      <div>
+                        {formatAmountInCentsAsEuroString(
+                          investmentRow.principal
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>Return</div>
+                      <div>
+                        {formatAmountInCentsAsEuroString(investmentRow.return)}
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>ROI</div>
+                      <div>{formatAsPercentage(investmentRow.roi)}</div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>Last update</div>
+                      <div>{investmentRow.lastUpdateDate}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
           <button
-            className="border px-3 py-2 mb-4"
+            className="border px-3 py-2 mb-4 w-full sm:w-auto"
             type="submit"
             onClick={() => setShowAddInvestmentModal(true)}
           >
@@ -447,7 +423,7 @@ export default function HomePage() {
         </div>
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8 flex gap-8 grid grid-cols-1 sm:grid-cols-2">
+          <div className="mb-4 flex gap-8 grid grid-cols-1 sm:grid-cols-2">
             <div className="aspect-square">
               <h1 className="text-xl font-bold mb-4">Allocation</h1>
               <Pie
@@ -466,7 +442,7 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">Principal and value</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
@@ -479,7 +455,7 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">Return</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
@@ -492,7 +468,7 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">ROI</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
@@ -505,7 +481,7 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
               <Bar
@@ -517,7 +493,7 @@ export default function HomePage() {
         )}
 
         {updateDataPoints.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
