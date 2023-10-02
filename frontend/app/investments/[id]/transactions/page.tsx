@@ -70,8 +70,8 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   return (
     <>
       <Navbar />
-      <div className="p-8 mb-8">
-        <h1 className="text-3xl font-bold mb-8">
+      <div className="p-4 mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4">
           Transactions: {investment.name}
         </h1>
         {transactions.length === 0 && <div className="mb-4">No transactions found.</div>}
@@ -118,7 +118,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
 
         <div>
           <button
-            className="border px-3 py-2 mr-4"
+            className="border w-full mb-2 px-3 py-2 mr-4"
             type="submit"
             onClick={() => setShowAddTransactionModal(true)}
           >
@@ -139,7 +139,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
             </Modal>
           )}
           <button
-            className="border px-3 py-2"
+            className="border w-full px-3 py-2"
             type="submit"
             onClick={() => setShowImportTransactionsModal(true)}
           >

@@ -6,7 +6,7 @@ import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
-import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate } from "@/app/page";
+import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/page";
 import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsROIPercentage } from "@/app/string";
 import {
   ArcElement,
@@ -169,123 +169,66 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   return (
     <>
       <Navbar />
-      <div className="p-8">
-        <div className="mb-4">
-          <label className="font-bold">Date range:</label>
-          <select
-            value={selectedDateRange}
-            onChange={(e) => setSelectedDateRange(e.target.value)}
-            className="border border-1 block"
-          >
-            {Object.values(DateRange).map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="p-4">
         {loading && <p>Loading...</p>}
         {error && <p>Error: ${error}</p>}
         {investment && (
           <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold">
+            <div className="mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 Investment: {investment.name}
               </h1>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-4">
+              <label className="font-bold">Date range:</label>
+              <select
+                value={selectedDateRange}
+                onChange={(e) => setSelectedDateRange(e.target.value)}
+                className="border border-1 block"
+              >
+                {Object.values(DateRange).map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
               <div className="mb-4">
                 Last update: {findLastUpdate()?.date ?? "-"}
               </div>
-              <div className="flex gap-8 justify-between mb-4">
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Principal</div>
-                    <div className="text-3xl font-bold">
-                      {updateDataPoints.length > 0
-                        ? formatAmountInCentsAsEuroString(
-                            updateDataPoints[updateDataPoints.length - 1]
-                              .principal
-                          )
-                        : "-"}
-                    </div>
+
+              {findLastUpdate() && (
+                <div className="border p-12 text-center mb-4">
+                  <div className="font-bold text-3xl">
+                    {formatAmountInCentsAsEuroString(findLastUpdate()!!.value)}
+                  </div>
+                  <div
+                    className={`${getAmountTextColor(
+                      findLastUpdate()!!.return
+                    )}`}
+                  >
+                    {formatAsROIPercentage(findLastUpdate()!!.roi)} (
+                    {formatAmountInCentsAsEuroString(findLastUpdate()!!.return)}
+                    )
                   </div>
                 </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Value</div>
-                    <div className="text-3xl font-bold">
-                      {updateDataPoints.length > 0
-                        ? formatAmountInCentsAsEuroString(
-                            updateDataPoints[updateDataPoints.length - 1].value
-                          )
-                        : "-"}
-                    </div>
-                  </div>
-                </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>Return</div>
-                    <div
-                      className={`text-3xl font-bold 
-                        ${
-                          (findLastUpdate()?.return ?? 0) > 0
-                            ? "text-green-400"
-                            : ""
-                        }
-                        ${
-                          (findLastUpdate()?.return ?? 0) < 0
-                            ? "text-red-400"
-                            : ""
-                        }
-                      }`}
-                    >
-                      {updateDataPoints.length > 0
-                        ? formatAmountInCentsAsEuroString(
-                            updateDataPoints[updateDataPoints.length - 1].return
-                          )
-                        : "-"}
-                    </div>
-                  </div>
-                </div>
-                <div className="border grow flex justify-center items-center">
-                  <div className="py-8">
-                    <div>ROI</div>
-                    <div
-                      className={`text-3xl font-bold 
-                        ${
-                          (findLastUpdate()?.roi ?? 0) > 0
-                            ? "text-green-400"
-                            : ""
-                        }
-                        ${
-                          (findLastUpdate()?.roi ?? 0) < 0 ? "text-red-400" : ""
-                        }
-                      }`}
-                    >
-                      {updateDataPoints.length > 0
-                        ? formatAsROIPercentage(
-                            updateDataPoints[updateDataPoints.length - 1].roi
-                          )
-                        : "-"}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
+
               <div>
-                <button className="border px-3 py-2 mr-4">
+                <button className="w-full mb-2 border px-3 py-2 mr-4">
                   <Link href={`/investments/${params.id}/updates`}>
                     View updates
                   </Link>
                 </button>
-                <button className="border px-3 py-2 mr-4">
+                <button className="w-full mb-2 border px-3 py-2 mr-4">
                   <Link href={`/investments/${params.id}/transactions`}>
                     View transactions
                   </Link>
                 </button>
                 <button
-                  className="border px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
+                  className="w-full border mb-2 px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
                   onClick={() => setShowDeleteInvestmentModal(true)}
                 >
                   Delete investment
@@ -317,46 +260,56 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {updateDataPoints.length > 0 && (
               <>
-                <div className="mb-8">
+                <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">
                     Principal and value
                   </h1>
-                  <Line
-                    options={principalAndValueLineOptions}
-                    data={buildPrincipalAndValueLineData(updateDataPoints)}
-                  />
+                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                    <Line
+                      options={principalAndValueLineOptions}
+                      data={buildPrincipalAndValueLineData(updateDataPoints)}
+                    />
+                  </div>
                 </div>
 
-                <div className="mb-8">
+                <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Return</h1>
-                  <Line
-                    options={returnLineOptions}
-                    data={buildReturnLineData(updateDataPoints)}
-                  />
+                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                    <Line
+                      options={returnLineOptions}
+                      data={buildReturnLineData(updateDataPoints)}
+                    />
+                  </div>
                 </div>
 
-                <div className="mb-8">
+                <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">ROI</h1>
-                  <Line
-                    options={roiLineOptions}
-                    data={buildROILineData(updateDataPoints)}
-                  />
+                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                    <Line
+                      options={roiLineOptions}
+                      data={buildROILineData(updateDataPoints)}
+                    />
+                  </div>
                 </div>
 
-                <div className="mb-8">
+                <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-                  <Bar
-                    options={monthlyGrowthBarOptions}
-                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-                  />
+                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                    <Bar
+                      options={monthlyGrowthBarOptions}
+                      data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                    />
+                  </div>
                 </div>
 
-                <div className="mb-8">
+                <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
-                  <Bar
-                    options={yearlyGrowthBarOptions}
-                    data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-                  />
+                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                    <Bar
+                      options={yearlyGrowthBarOptions}
+                      data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -394,7 +347,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     };
   };
 
-  const principalAndValueLineOptions: any = {
+  const principalAndValueLineOptions: ChartOptions<"line"> = {
+    maintainAspectRatio: false,
     interaction: {
       mode: "index",
       intersect: false,
@@ -435,6 +389,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const returnLineOptions: ChartOptions<"line"> = {
+    maintainAspectRatio: false,
     interaction: {
       mode: "index",
       intersect: false,
@@ -556,6 +511,7 @@ export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
   };
 
   const roiLineOptions: ChartOptions<"line"> = {
+    maintainAspectRatio: false,
     interaction: {
       mode: "index",
       intersect: false,

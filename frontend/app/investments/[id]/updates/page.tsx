@@ -69,8 +69,8 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <>
       <Navbar />
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-8">Updates: {investment.name}</h1>
+      <div className="p-4">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Updates: {investment.name}</h1>
         {updates.length === 0 && <div className="mb-4">No updates found.</div>}
         {updates.length > 0 && (
           <div className="overflow-x-auto mb-4">
@@ -111,7 +111,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         <div>
           <button
-            className="border px-3 py-2 mr-4"
+            className="border w-full mb-2 px-3 py-2 mr-4"
             type="submit"
             onClick={() => setShowUpdateInvestmentModal(true)}
           >
@@ -132,7 +132,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             </Modal>
           )}
           <button
-            className="border px-3 py-2"
+            className="border w-full px-3 py-2"
             type="submit"
             onClick={() => setShowImportUpdatesModal(true)}
           >

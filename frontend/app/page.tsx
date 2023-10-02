@@ -332,7 +332,7 @@ export default function HomePage() {
   return (
     <main>
       <Navbar />
-      <div className="p-4 mt-[80px]">
+      <div className="p-4">
         <div className="mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">Dashboard</h1>
 
@@ -359,7 +359,6 @@ export default function HomePage() {
               {formatAsROIPercentage(totalRoi)} (
               {formatAmountInCentsAsEuroString(totalReturn)})
             </div>
-            <div></div>
           </div>
 
           <h2 className="text-xl font-bold mb-4">Investments</h2>
@@ -880,7 +879,7 @@ export const calculateMonthlyChangeDataPoints = (
   return dataPoints;
 }; 
 
-const getAmountTextColor = (amount: number) => {
+export const getAmountTextColor = (amount: number) => {
   if (amount > 0) {
     return "text-green-500"
   }

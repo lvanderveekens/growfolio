@@ -1,10 +1,12 @@
 import { ChangeEvent, useState } from 'react';
 import { Investment } from '../page';
 import DatePicker from "react-datepicker";
+import CurrencyInput from 'react-currency-input-field';
 
 import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 import { api } from '../axios';
+import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
 
 export interface CreateInvestmentUpdateRequest {
   date: string
@@ -22,7 +24,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   investmentId,
 }) => {
   const [date, setDate] = useState<Date>();
-  const [value, setValue] = useState<string>();
+  const [value, setValue] = useState<number>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
     const req: CreateInvestmentUpdateRequest = {
       date: moment(date).format("YYYY-MM-DD"),
       investmentId: investmentId,
-      value: Math.round(parseFloat(value!) * 100),
+      value: value! * 100,
     };
 
     await api.post("/v1/investment-updates", req, {
@@ -44,32 +46,36 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
     onAdd();
   };
 
-  const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/[^0-9.]/g, "");
-    setValue(numericValue);
+  const handleValueChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
+    if (values && values.float != null) {
+      setValue(values.float);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
+      <div className="mb-4">
         <div>Date</div>
         <DatePicker
-          className="border"
+          className="border w-full"
+          wrapperClassName='w-full'
           selected={date}
           onChange={(date) => date && setDate(date)}
           dateFormat="yyyy-MM-dd"
           required
         />
       </div>
-      <div className="mb-3">
+      <div className="mb-4">
         <label>
           <div>Value</div>
-          <input
-            className="border"
-            type="text"
-            value={value ?? ""}
-            onChange={handleValueChange}
+          <CurrencyInput
+            className='border w-full'
+            prefix='€ '
+            placeholder='€ '
+            decimalsLimit={2}
+            onValueChange={handleValueChange}
+            groupSeparator='.'
+            decimalSeparator=','
             required
           />
         </label>

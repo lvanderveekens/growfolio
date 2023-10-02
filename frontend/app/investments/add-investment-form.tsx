@@ -43,7 +43,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
+      <div className="mb-2">
         <label>
           <div>Type</div>
           <select
@@ -63,7 +63,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
           </select>
         </label>
       </div>
-      <div className="mb-3">
+      <div className="mb-2">
         <label>
           <div>Name</div>
           <input

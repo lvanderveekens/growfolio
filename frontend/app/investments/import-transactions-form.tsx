@@ -38,18 +38,18 @@ const ImportTransactionsForm: React.FC<ImportTransactionsFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
+      <div className="mb-4">
         <div className="">
           Provide a CSV that complies with the following format:
         </div>
-        <div className="p-3 text-white bg-black">
+        <div className="p-4 text-white bg-black">
           <div>Date,Type,AmountInCents</div>
           <div>2023-08-01,buy,10</div>
           <div>2023-08-09,buy,100</div>
           <div>2023-08-17,buy,90</div>
         </div>
       </div>
-      <div className="mb-3">
+      <div className="mb-4">
         <label className="block" htmlFor="csvFile">
           CSV file
         </label>

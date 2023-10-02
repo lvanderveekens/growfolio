@@ -38,16 +38,16 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
+      <div className="mb-4">
         <div className=''>Provide a CSV that complies with the following format:</div>
-        <div className="p-3 text-white bg-black">
+        <div className="p-4 text-white bg-black">
           <div>Date,ValueInCents</div>
           <div>2023-08-01,2000</div>
           <div>2023-08-09,5000</div>
           <div>2023-08-17,12000</div>
         </div>
       </div>
-      <div className="mb-3">
+      <div className="mb-4">
         <label className="block" htmlFor="csvFile">CSV file</label>
         <input
           type="file"

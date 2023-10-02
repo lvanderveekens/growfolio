@@ -1,11 +1,13 @@
 import { ChangeEvent, useState } from 'react';
 import DatePicker from "react-datepicker";
 
+import CurrencyInput from 'react-currency-input-field';
 import moment from 'moment';
 import "react-datepicker/dist/react-datepicker.css";
 import { Investment } from '../page';
 import { TransactionType } from './transaction';
 import { api } from '../axios';
+import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
 
 
 export interface CreateTransactionRequest {
@@ -26,7 +28,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 }) => {
   const [date, setDate] = useState<Date>();
   const [type, setType] = useState<TransactionType>();
-  const [amount, setAmount] = useState<string>();
+  const [amount, setAmount] = useState<number>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       date: moment(date).format("YYYY-MM-DD"),
       type: type!,
       investmentId: investmentId,
-      amount: Math.round(parseFloat(amount!) * 100),
+      amount: amount! * 100,
     };
 
     await api.post("/v1/transactions", req, {
@@ -51,18 +53,19 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
     onAdd()
   };
 
-  const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/[^0-9.]/g, "");
-    setAmount(numericValue);
+  const handleAmountChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
+    if (values && values.float != null) {
+      setAmount(values.float);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-4">
+      <div className="mb-4 w-full">
         <div>Date</div>
         <DatePicker
-          className="border"
+          wrapperClassName="w-full"
+          className="border w-full"
           selected={date}
           onChange={(date) => date && setDate(date)}
           dateFormat="yyyy-MM-dd"
@@ -73,7 +76,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
         <label>
           <div>Type</div>
           <select
-            className="border"
+            className="border w-full"
             value={type ?? ""}
             onChange={(e) => setType(e.target.value as TransactionType)}
             required
@@ -92,11 +95,14 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       <div className="mb-4">
         <label>
           <div>Amount</div>
-          <input
-            className="border"
-            type="text"
-            value={amount ?? ""}
-            onChange={handleAmountChange}
+          <CurrencyInput
+            className="border w-full"
+            prefix="€ "
+            placeholder="€ "
+            decimalsLimit={2}
+            onValueChange={handleAmountChange}
+            groupSeparator="."
+            decimalSeparator=","
             required
           />
         </label>
