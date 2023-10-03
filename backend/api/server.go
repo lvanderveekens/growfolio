@@ -79,6 +79,7 @@ type Handlers struct {
 	transaction      TransactionHandler
 	auth             AuthHandler
 	user             UserHandler
+	settings         SettingsHandler
 }
 
 func NewHandlers(
@@ -87,6 +88,7 @@ func NewHandlers(
 	transaction TransactionHandler,
 	auth AuthHandler,
 	user UserHandler,
+	settings SettingsHandler,
 ) Handlers {
 	return Handlers{
 		investment:       investment,
@@ -94,6 +96,7 @@ func NewHandlers(
 		transaction:      transaction,
 		auth:             auth,
 		user:             user,
+		settings:         settings,
 	}
 }
 

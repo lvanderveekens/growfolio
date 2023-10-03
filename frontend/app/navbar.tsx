@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const fetchCurrentUser = async () => {
     setLoadingUser(true);
     console.log("fetching current user")
-    api.get("/v1/users/current")
+    api.get("/v1/user")
       .then((res) => {
         if (res.status === 200) {
           setUser(res.data);

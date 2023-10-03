@@ -55,16 +55,26 @@ func main() {
 	investmentUpdateService := services.NewInvestmentUpdateService(investmentUpdateRepository)
 	transactionRepository := postgres.NewTransactionRepository(db)
 	userRepository := postgres.NewUserRepository(db)
+	settingsRepository := postgres.NewSettingsRepository(db)
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"))
+	settingsService := services.NewSettingsService(settingsRepository)
 
 	investmentHandler := api.NewInvestmentHandler(&investmentRepository, &investmentUpdateRepository, transactionRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository, &investmentUpdateRepository, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(&transactionRepository, &investmentRepository)
 	authHandler := api.NewAuthHandler(&userRepository, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)
+	settingsHandler := api.NewSettingsHandler(settingsService)
 
-	handlers := api.NewHandlers(investmentHandler, investmentUpdateHandler, transactionHandler, authHandler, userHandler)
+	handlers := api.NewHandlers(
+		investmentHandler,
+		investmentUpdateHandler,
+		transactionHandler,
+		authHandler,
+		userHandler,
+		settingsHandler,
+	)
 	middlewares := api.NewMiddlewares(api.TokenMiddleware(tokenService))
 	server := api.NewServer(
 		os.Getenv("GOOGLE_CLIENT_ID"),

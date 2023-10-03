@@ -42,6 +42,9 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		private.POST("/v1/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
 		private.DELETE("/v1/transactions/:id", createHandlerFunc(s.handlers.transaction.DeleteTransaction))
 
-		private.GET("/v1/users/current", createHandlerFunc(s.handlers.user.GetCurrentUser))
+		private.GET("/v1/user", createHandlerFunc(s.handlers.user.GetUser))
+
+		private.GET("/v1/settings", createHandlerFunc(s.handlers.settings.GetSettings))
+		private.PUT("/v1/settings", createHandlerFunc(s.handlers.settings.UpdateSettings))
 	}
 }

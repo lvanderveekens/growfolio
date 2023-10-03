@@ -18,7 +18,7 @@ func NewUserHandler(userRepository services.UserRepository) UserHandler {
 	return UserHandler{userRepository: userRepository}
 }
 
-func (h *UserHandler) GetCurrentUser(c *gin.Context) (response[userDto], error) {
+func (h *UserHandler) GetUser(c *gin.Context) (response[userDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
