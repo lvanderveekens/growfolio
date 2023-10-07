@@ -1,13 +1,13 @@
-import { ChangeEvent, useState } from 'react';
+import { useState } from 'react';
 import DatePicker from "react-datepicker";
 
-import CurrencyInput from 'react-currency-input-field';
 import moment from 'moment';
-import "react-datepicker/dist/react-datepicker.css";
-import { Investment } from '../page';
-import { TransactionType } from './transaction';
-import { api } from '../axios';
+import CurrencyInput from 'react-currency-input-field';
 import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
+import "react-datepicker/dist/react-datepicker.css";
+import { api } from '../axios';
+import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
+import { TransactionType } from './transaction';
 
 
 export interface CreateTransactionRequest {
@@ -20,11 +20,13 @@ export interface CreateTransactionRequest {
 type AddTransactionFormProps = {
   investmentId: string
   onAdd: () => void
+  currency: string
 };
 
 const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   investmentId,
   onAdd,
+  currency,
 }) => {
   const [date, setDate] = useState<Date>();
   const [type, setType] = useState<TransactionType>();
@@ -97,18 +99,18 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
           <div>Amount</div>
           <CurrencyInput
             className="border w-full"
-            prefix="€ "
-            placeholder="€ "
+            prefix={signPrefixesByCurrency[currency]}
+            placeholder={signPrefixesByCurrency[currency]}
             decimalsLimit={2}
             onValueChange={handleAmountChange}
-            groupSeparator="."
-            decimalSeparator=","
+            groupSeparator={groupSeparatorsByCurrency[currency]}
+            decimalSeparator={decimalSeparatorsByCurrency[currency]}
             required
           />
         </label>
       </div>
 
-      <button className="border px-3 py-2" type="submit">
+      <button className="border px-3 py-2 w-full sm:w-auto" type="submit">
         Submit
       </button>
     </form>

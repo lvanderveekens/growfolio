@@ -1,14 +1,15 @@
 "use client"
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { FaCaretDown } from "react-icons/fa6";
-import { Investment, User } from "./page";
-import { AiOutlineStock } from "react-icons/ai";
-import { RxHamburgerMenu } from "react-icons/rx";
 import { useRouter } from "next/navigation";
-import { api } from "./axios"
+import { useEffect, useRef, useState } from "react";
+import { AiOutlineStock } from "react-icons/ai";
+import { FaCaretDown } from "react-icons/fa6";
+import { RxHamburgerMenu } from "react-icons/rx";
 import ClipLoader from "react-spinners/ClipLoader";
+import { api } from "./axios";
+import { FeedbackButton } from "./feedback/feedback-button";
+import { User } from "./page";
 
 interface NavbarProps {
 }
@@ -104,16 +105,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
                 data-testid="loader"
               />
             )}
-            {!isLoadingUser && !user && (
-              <button
-                className="border border-black px-3 py-2 rounded-md"
-                onClick={() => {
-                  router.push("/api/v1/auth/google");
-                }}
-              >
-                Log in
-              </button>
-            )}
             {!isLoadingUser && user && (
               <div className="relative" ref={userDropdownRef}>
                 <div
@@ -148,6 +139,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
           </div>
         </div>
       </nav>
+      <FeedbackButton />
     </div>
   );
 };

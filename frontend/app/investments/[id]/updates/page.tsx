@@ -10,6 +10,7 @@ import AddUpdateForm from "../../add-update-form";
 import { Navbar } from "@/app/navbar";
 import { api } from "@/app/axios";
 import ImportUpdatesForm from "../../import-updates-form";
+import { Settings } from "@/app/settings/settings";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -25,10 +26,19 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
   const [showImportUpdatesModal, setShowImportUpdatesModal] = useState<boolean>(false);
 
+  const [settings, setSettings] = useState<Settings>();
+
   useEffect(() => {
     fetchInvestment()
     fetchUpdates()
+    fetchSettings()
   }, []);
+
+  const fetchSettings = async () => {
+    api.get(`/v1/settings`).then((res) => {
+      setSettings(res.data);
+    });
+  };
 
   const fetchInvestment = () => {
     api.get(`/v1/investments/${params.id}`)
@@ -70,7 +80,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
     <>
       <Navbar />
       <div className="p-4">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Updates: {investment.name}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4">{investment.name} updates</h1>
         {updates.length === 0 && <div className="mb-4">No updates found.</div>}
         {updates.length > 0 && (
           <div className="overflow-x-auto mb-4">
@@ -88,7 +98,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                     <tr key={update.id} className="border">
                       <td className="border px-3">{update.date}</td>
                       <td className="border px-3">
-                        {formatAmountInCentsAsCurrencyString(update.value)}
+                        {settings && formatAmountInCentsAsCurrencyString(update.value, settings.currency)}
                       </td>
                       <td className="border px-3">
                         <FaXmark
@@ -117,7 +127,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
           >
             Add update
           </button>
-          {showUpdateInvestmentModal && (
+          {showUpdateInvestmentModal && settings && (
             <Modal
               title="Add update"
               onClose={() => setShowUpdateInvestmentModal(false)}
@@ -128,6 +138,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                   fetchUpdates();
                 }}
                 investmentId={params.id}
+                currency={settings.currency}
               />
             </Modal>
           )}

@@ -36,7 +36,7 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
   }, []);
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center`}>
+    <div className={`z-50 fixed inset-0 flex items-center justify-center`}>
       <div ref={modalBackgroundRef} className="fixed inset-0 bg-black opacity-50"></div>
       <div className="bg-white rounded m-4 p-4 w-full sm:w-[400px] z-10">
         <div className="mb-4 flex justify-between items-center">

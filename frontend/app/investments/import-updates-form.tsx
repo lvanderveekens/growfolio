@@ -58,7 +58,7 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
           required
         />
       </div>
-      <button className="border px-3 py-2" type="submit">
+      <button className="border w-full sm:w-auto px-3 py-2" type="submit">
         Import
       </button>
     </form>

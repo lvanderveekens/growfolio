@@ -62,7 +62,7 @@ const ImportTransactionsForm: React.FC<ImportTransactionsFormProps> = ({
           required
         />
       </div>
-      <button className="border px-3 py-2" type="submit">
+      <button className="border px-3 py-2 w-full sm:w-auto" type="submit">
         Import
       </button>
     </form>

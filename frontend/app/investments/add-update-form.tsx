@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 import { api } from '../axios';
 import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
+import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
 
 export interface CreateInvestmentUpdateRequest {
   date: string
@@ -17,11 +18,13 @@ export interface CreateInvestmentUpdateRequest {
 type AddUpdateFormProps = {
   onAdd: () => void
   investmentId: string
+  currency: string
 };
 
 const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   onAdd,
   investmentId,
+  currency
 }) => {
   const [date, setDate] = useState<Date>();
   const [value, setValue] = useState<number>();
@@ -70,17 +73,17 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
           <div>Value</div>
           <CurrencyInput
             className='border w-full'
-            prefix='€ '
-            placeholder='€ '
+            prefix={signPrefixesByCurrency[currency]}
+            placeholder={signPrefixesByCurrency[currency]}
             decimalsLimit={2}
             onValueChange={handleValueChange}
-            groupSeparator='.'
-            decimalSeparator=','
+            groupSeparator={groupSeparatorsByCurrency[currency]}
+            decimalSeparator={decimalSeparatorsByCurrency[currency]}
             required
           />
         </label>
       </div>
-      <button className="border px-3 py-2" type="submit">
+      <button className="border w-full sm:w-auto px-3 py-2" type="submit">
         Submit
       </button>
     </form>

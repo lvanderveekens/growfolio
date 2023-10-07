@@ -2,12 +2,27 @@ export interface Settings {
   currency: string;
 }
 
-export const localesByCurrency: { [currency: string]: string } = {
-  EUR: "nl-NL",
-  USD: "en-US",
-};
-
 export enum Currency {
   EUR = "Euro",
   USD = "US Dollar",
 }
+
+export const localesByCurrency: { [currency: string]: string } = {
+  "EUR": "nl-NL",
+  "USD": "en-US",
+};
+
+export const signPrefixesByCurrency: { [currency: string]: string } = {
+  "EUR": "€ ",
+  "USD": "$",
+};
+
+export const groupSeparatorsByCurrency: { [currency: string]: string } = {
+  "EUR": ".",
+  "USD": ",",
+};
+
+export const decimalSeparatorsByCurrency: { [currency: string]: string } = {
+  "EUR": ",",
+  "USD": ".",
+};

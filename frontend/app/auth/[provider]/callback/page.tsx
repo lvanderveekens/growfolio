@@ -7,10 +7,11 @@ import { api } from "@/app/axios";
 
 export default function AuthProviderCallbackPage({ params, }: { params: { provider: string } }) {
   const queryString = window.location.search;
+  console.log("queryString=" + queryString)
   const router = useRouter();
 
   useEffect(() => {
-    const baseUrl = `/v1/auth/${params.provider}/callback`; // Replace with your API endpoint
+    const baseUrl = `/v1/auth/${params.provider}/callback`;
     const urlWithQuery = `${baseUrl}${queryString}`;
 
     api.get(urlWithQuery)

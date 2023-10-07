@@ -1,11 +1,9 @@
 
 "use client"
 
-import { useEffect } from "react";
-import { useRouter } from 'next/navigation';
-import Link from "next/link";
-import { AiOutlineStock } from "react-icons/ai";
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { AiOutlineStock } from "react-icons/ai";
 
 export default function LoginPage({ params, }: { params: { provider: string } }) {
   const router = useRouter();

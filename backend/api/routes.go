@@ -19,8 +19,12 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		google.New(s.googleClientId, s.googleClientSecret, "http://localhost:8080/auth/google/callback"),
 	)
 
-	r.GET("/v1/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
-	r.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
+	public := r.Group("")
+	{
+		public.GET("/v1/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
+		public.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
+		public.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
+	}
 
 	private := r.Group("")
 	private.Use(s.middlewares.token)

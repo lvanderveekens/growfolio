@@ -80,6 +80,7 @@ type Handlers struct {
 	auth             AuthHandler
 	user             UserHandler
 	settings         SettingsHandler
+	feedback         FeedbackHandler
 }
 
 func NewHandlers(
@@ -89,6 +90,7 @@ func NewHandlers(
 	auth AuthHandler,
 	user UserHandler,
 	settings SettingsHandler,
+	feedback FeedbackHandler,
 ) Handlers {
 	return Handlers{
 		investment:       investment,
@@ -97,6 +99,7 @@ func NewHandlers(
 		auth:             auth,
 		user:             user,
 		settings:         settings,
+		feedback:         feedback,
 	}
 }
 

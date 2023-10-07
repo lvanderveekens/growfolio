@@ -11,6 +11,7 @@ import AddTransactionForm from "../../add-transaction-form";
 import { Navbar } from "@/app/navbar";
 import { api } from "@/app/axios";
 import ImportTransactionsForm from "../../import-transactions-form";
+import { Settings } from "@/app/settings/settings";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -26,10 +27,19 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
   const [showImportTransactionsModal, setShowImportTransactionsModal] = useState<boolean>(false);
 
+  const [settings, setSettings] = useState<Settings>();
+
   useEffect(() => {
     fetchInvestment()
     fetchTransactions()
+    fetchSettings()
   }, []);
+
+  const fetchSettings = async () => {
+    api.get(`/v1/settings`).then((res) => {
+      setSettings(res.data);
+    });
+  };
 
   const fetchInvestment = () => {
     api.get(`/v1/investments/${params.id}`)
@@ -72,7 +82,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
       <Navbar />
       <div className="p-4 mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4">
-          Transactions: {investment.name}
+          {investment.name} transactions
         </h1>
         {transactions.length === 0 && <div className="mb-4">No transactions found.</div>}
         {transactions.length > 0 && (
@@ -95,7 +105,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                         {capitalize(transaction.type)}
                       </td>
                       <td className="border px-3">
-                        {formatAmountInCentsAsCurrencyString(transaction.amount)}
+                        {settings && formatAmountInCentsAsCurrencyString(transaction.amount, settings.currency)}
                       </td>
                       <td className="border px-3">
                         <FaXmark
@@ -124,7 +134,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
           >
             Add transaction
           </button>
-          {showAddTransactionModal && (
+          {showAddTransactionModal && settings &&(
             <Modal
               title="Add transaction"
               onClose={() => setShowAddTransactionModal(false)}
@@ -135,6 +145,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                   fetchTransactions();
                 }}
                 investmentId={params.id}
+                currency={settings.currency}
               />
             </Modal>
           )}

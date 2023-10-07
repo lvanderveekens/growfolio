@@ -18,8 +18,6 @@ export const formatAmountInCentsAsReturnString = (amountInCents: number, currenc
 
 export const formatAmountAsCurrencyString = (amount: number, currency: string) => {
   const locale = localesByCurrency[currency]
-  console.log("currency=" + currency)
-  console.log("locale=" + locale)
 
   return amount.toLocaleString(locale, {
     style: "currency",
