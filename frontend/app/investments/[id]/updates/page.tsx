@@ -2,7 +2,7 @@
 
 import Modal from "@/app/modal";
 import { Investment, InvestmentUpdate } from "@/app/page";
-import { formatAmountInCentsAsEuroString } from "@/app/string";
+import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
@@ -88,7 +88,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                     <tr key={update.id} className="border">
                       <td className="border px-3">{update.date}</td>
                       <td className="border px-3">
-                        {formatAmountInCentsAsEuroString(update.value)}
+                        {formatAmountInCentsAsCurrencyString(update.value)}
                       </td>
                       <td className="border px-3">
                         <FaXmark

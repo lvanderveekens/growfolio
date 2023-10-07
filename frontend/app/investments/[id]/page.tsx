@@ -7,7 +7,8 @@ import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { Navbar } from "@/app/navbar";
 import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/page";
-import { formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAsROIPercentage } from "@/app/string";
+import { Settings } from "@/app/settings/settings";
+import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
 import {
   ArcElement,
   BarElement,
@@ -32,7 +33,7 @@ ChartJS.register(
   ArcElement,
   Tooltip,
   Legend,
-  TimeScale, //Register timescale instead of category for X axis
+  TimeScale, 
   LinearScale,
   PointElement,
   LineElement,
@@ -60,10 +61,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
 
+  const [settings, setSettings] = useState<Settings>();
+
   useEffect(() => {
     fetchInvestment()
     fetchInvestmentUpdates()
     fetchTransactions()
+    fetchSettings()
   }, [selectedDateRange]);
 
   useEffect(() => {
@@ -95,30 +99,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     );
   }, [transactions, updates]);
 
-  // const calculateMonthlyChangeDataPoints = (updateDataPoints: UpdateDataPoint[]) => {
-  //   const lastUpdateByMonth = updateDataPoints.reduce((acc, obj) => {
-  //     const yearMonthKey = obj.date.substr(0, 7);
-  //     acc.set(yearMonthKey, obj);
-  //     return acc;
-  //   }, new Map<string, UpdateDataPoint>());
-
-  //   const dataPoints: MonthlyChangeDataPoint[] = []
-  //   const lastUpdateByMonthEntries = Array.from(lastUpdateByMonth.entries());
-
-  //   for (let i = 1; i < lastUpdateByMonthEntries.length; i++) {
-  //     const previousUpdate = lastUpdateByMonthEntries[i - 1];
-  //     const currentUpdate = lastUpdateByMonthEntries[i];
-
-  //     dataPoints.push({
-  //       yearMonth: currentUpdate[0],
-  //       value: (currentUpdate[1].value - previousUpdate[1].value),
-  //       principal: (currentUpdate[1].principal - previousUpdate[1].principal),
-  //       return: (currentUpdate[1].return - previousUpdate[1].return),
-  //     });
-  //   }
-  //   return dataPoints
-  // } 
-
   const fetchInvestment = () => {
     api.get(`/v1/investments/${params.id}`)
       .then((res) => setInvestment(res.data))
@@ -133,6 +113,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     api.get(`/v1/transactions?investmentId=${params.id}`)
       .then((res) => setTransactions(res.data));
   }
+
+  const fetchSettings = async () => {
+    api.get(`/v1/settings`).then((res) => {
+      setSettings(res.data);
+    });
+  };
 
   const fetchInvestmentUpdates = () => {
     const dateFrom = convertToDate(selectedDateRange)
@@ -176,7 +162,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           <>
             <div className="mb-4">
               <h1 className="text-2xl sm:text-3xl font-bold">
-                Investment: {investment.name}
+                {investment.name}
               </h1>
             </div>
 
@@ -202,7 +188,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               {findLastUpdate() && (
                 <div className="border p-12 text-center mb-4">
                   <div className="font-bold text-3xl">
-                    {formatAmountInCentsAsEuroString(findLastUpdate()!!.value)}
+                    {settings && formatAmountInCentsAsCurrencyString(findLastUpdate()!!.value, settings.currency)}
                   </div>
                   <div
                     className={`${getAmountTextColor(
@@ -210,7 +196,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     )}`}
                   >
                     {formatAsROIPercentage(findLastUpdate()!!.roi)} (
-                    {formatAmountInCentsAsEuroString(findLastUpdate()!!.return)}
+                    {settings && formatAmountInCentsAsCurrencyString(findLastUpdate()!!.return, settings.currency)}
                     )
                   </div>
                 </div>
@@ -265,20 +251,24 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     Principal and value
                   </h1>
                   <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-                    <Line
-                      options={principalAndValueLineOptions}
-                      data={buildPrincipalAndValueLineData(updateDataPoints)}
-                    />
+                    {settings && (
+                      <Line
+                        options={principalAndValueLineOptions(settings.currency)}
+                        data={buildPrincipalAndValueLineData(updateDataPoints)}
+                      />
+                    )}
                   </div>
                 </div>
 
                 <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Return</h1>
                   <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-                    <Line
-                      options={returnLineOptions}
-                      data={buildReturnLineData(updateDataPoints)}
-                    />
+                    {settings && (
+                      <Line
+                        options={returnLineOptions(settings.currency)}
+                        data={buildReturnLineData(updateDataPoints)}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -295,20 +285,24 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
                   <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-                    <Bar
-                      options={monthlyGrowthBarOptions}
-                      data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-                    />
+                    {settings && (
+                      <Bar
+                        options={monthlyGrowthBarOptions(settings.currency)}
+                        data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                      />
+                    )}
                   </div>
                 </div>
 
                 <div className="mb-4">
                   <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
                   <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-                    <Bar
-                      options={yearlyGrowthBarOptions}
-                      data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-                    />
+                    {settings && (
+                      <Bar
+                        options={yearlyGrowthBarOptions(settings.currency)}
+                        data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                      />
+                    )}
                   </div>
                 </div>
               </>
@@ -320,119 +314,117 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   );
 }
 
-  const buildPrincipalAndValueLineData = (
-    updateRows: UpdateDataPoint[]
-  ) => {
-    return {
-      datasets: [
-        {
-          label: "Principal",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
-          data: updateRows.map((x) => ({
-            x: x.date,
-            y: x.principal / 100,
-          })),
-        },
-        {
-          label: "Value",
-          borderColor: chartBackgroundColors[1],
-          backgroundColor: chartBackgroundColors[1],
-          data: updateRows.map((x) => ({
-            x: x.date,
-            y: x.value / 100,
-          })),
-        },
-      ],
-    };
+const buildPrincipalAndValueLineData = (updateRows: UpdateDataPoint[]) => {
+  return {
+    datasets: [
+      {
+        label: "Principal",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: updateRows.map((x) => ({
+          x: x.date,
+          y: x.principal / 100,
+        })),
+      },
+      {
+        label: "Value",
+        borderColor: chartBackgroundColors[1],
+        backgroundColor: chartBackgroundColors[1],
+        data: updateRows.map((x) => ({
+          x: x.date,
+          y: x.value / 100,
+        })),
+      },
+    ],
   };
+};
 
-  const principalAndValueLineOptions: ChartOptions<"line"> = {
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += formatAmountAsEuroString(context.parsed.y);
-            }
+const principalAndValueLineOptions = (currency: string) => ({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
+          }
 
-            return label;
-          },
+          return label;
         },
       },
     },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "month",
-          tooltipFormat: "YYYY-MM-DD",
-        },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "month",
+        tooltipFormat: "YYYY-MM-DD",
       },
-      y: {
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return formatAmountAsEuroString(value);
-          },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAmountAsCurrencyString(value, currency);
         },
       },
     },
-  };
+  },
+});
 
-  const returnLineOptions: ChartOptions<"line"> = {
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
+const returnLineOptions = (currency: string) => ({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false,
     },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += formatAmountAsEuroString(context.parsed.y);
-            }
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
+          }
 
-            return label;
-          },
+          return label;
         },
       },
     },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "month",
-          tooltipFormat: "YYYY-MM-DD",
-        },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "month",
+        tooltipFormat: "YYYY-MM-DD",
       },
-      y: {
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return formatAmountAsEuroString(value);
-          },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAmountAsCurrencyString(value, currency);
         },
       },
     },
-  };
+  },
+});
 
-export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
+export const monthlyGrowthBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
   plugins: {
     tooltip: {
@@ -443,7 +435,7 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAmountAsEuroString(context.parsed.y);
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
           }
 
           return label;
@@ -464,129 +456,127 @@ export const monthlyGrowthBarOptions: ChartOptions<"bar"> = {
       stacked: true,
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAmountAsEuroString(value);
+          return formatAmountAsCurrencyString(value, currency);
+        },
+      },
+    },
+  },
+});
+
+export const yearlyGrowthBarOptions = (currency: string) => ({
+  maintainAspectRatio: false,
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      stacked: true,
+      type: "time",
+      time: {
+        unit: "year",
+        tooltipFormat: "YYYY",
+      },
+    },
+    y: {
+      stacked: true,
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAmountAsCurrencyString(value, currency);
+        },
+      },
+    },
+  },
+});
+
+const roiLineOptions: ChartOptions<"line"> = {
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += context.parsed.y + "%";
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      type: "time",
+      time: {
+        unit: "month",
+        tooltipFormat: "YYYY-MM-DD",
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return value + "%";
         },
       },
     },
   },
 };
 
-export const yearlyGrowthBarOptions: ChartOptions<"bar"> = {
-    maintainAspectRatio: false,
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += formatAmountAsEuroString(context.parsed.y);
-            }
+interface UpdateDataPoint {
+  id: string;
+  date: string;
+  principal: number;
+  value: number;
+  return: number;
+  roi: number;
+}
 
-            return label;
-          },
-        },
+interface MonthlyChangeDataPoint {
+  yearMonth: string;
+  value: number;
+  principal: number;
+  return: number;
+}
+
+const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
+  return {
+    datasets: [
+      {
+        label: "Return",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: updateDataPoints.map((x) => ({
+          x: x.date,
+          y: (x.value - x.principal) / 100,
+        })),
       },
-    },
-    scales: {
-      x: {
-        stacked: true,
-        type: "time",
-        time: {
-          unit: "year",
-          tooltipFormat: "YYYY",
-        },
-      },
-      y: {
-        stacked: true,
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return formatAmountAsEuroString(value);
-          },
-        },
-      },
-    },
+    ],
   };
-
-  const roiLineOptions: ChartOptions<"line"> = {
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += context.parsed.y + "%";
-            }
-
-            return label;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "month",
-          tooltipFormat: "YYYY-MM-DD",
-        },
-      },
-      y: {
-        ticks: {
-          callback: function (value: any, index: any, ticks: any) {
-            return value + "%";
-          },
-        },
-      },
-    },
-  };
-
-  interface UpdateDataPoint {
-    id: string
-    date: string;
-    principal: number;
-    value: number;
-    return: number;
-    roi: number;
-  }
-
-  interface MonthlyChangeDataPoint {
-    yearMonth: string;
-    value: number;
-    principal: number;
-    return: number;
-  }
-
-  const buildReturnLineData = (
-    updateDataPoints: UpdateDataPoint[]
-  ) => {
-    return {
-      datasets: [
-        {
-          label: "Return",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
-          data: updateDataPoints.map((x) => ({
-            x: x.date,
-            y: (x.value - x.principal) / 100,
-          })),
-        },
-      ],
-    };
-  };
+};
 
 export const buildMonthlyGrowthBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]

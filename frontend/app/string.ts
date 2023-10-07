@@ -1,10 +1,11 @@
+import { localesByCurrency } from "./settings/settings";
 
-export const formatAmountInCentsAsEuroString = (amountInCents: number) => {
-  return formatAmountAsEuroString(amountInCents / 100)
+export const formatAmountInCentsAsCurrencyString = (amountInCents: number, currency: string) => {
+  return formatAmountAsCurrencyString(amountInCents / 100, currency)
 }
 
-export const formatAmountInCentsAsReturnString = (amountInCents: number) => {
-  const euroString = formatAmountAsEuroString(amountInCents / 100)
+export const formatAmountInCentsAsReturnString = (amountInCents: number, currency: string) => {
+  const euroString = formatAmountAsCurrencyString(amountInCents / 100, currency)
 
   if (amountInCents > 0) {
     return `+${euroString}`;
@@ -15,10 +16,14 @@ export const formatAmountInCentsAsReturnString = (amountInCents: number) => {
   }
 }
 
-export const formatAmountAsEuroString = (amount: number) => {
-  return amount.toLocaleString("nl-NL", {
+export const formatAmountAsCurrencyString = (amount: number, currency: string) => {
+  const locale = localesByCurrency[currency]
+  console.log("currency=" + currency)
+  console.log("locale=" + locale)
+
+  return amount.toLocaleString(locale, {
     style: "currency",
-    currency: "EUR",
+    currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

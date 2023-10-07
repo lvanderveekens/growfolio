@@ -5,6 +5,7 @@ import { InvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
 
 import {
+  CategoryScale,
   ArcElement,
   ChartData,
   Chart as ChartJS,
@@ -19,21 +20,22 @@ import {
   TooltipItem,
 } from "chart.js";
 import "chartjs-adapter-moment";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bar, Line, Pie } from "react-chartjs-2";
+import ClipLoader from "react-spinners/ClipLoader";
+import { api } from "./axios";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
+import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
+import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
 import { Navbar } from "./navbar";
-import { capitalize, formatAmountAsEuroString, formatAmountInCentsAsEuroString, formatAmountInCentsAsReturnString, formatAsROIPercentage } from "./string";
-import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
-import { api } from "./axios"
-import { useRouter } from "next/navigation";
-import ClipLoader from "react-spinners/ClipLoader";
-import { useLocalStorage } from "./localstorage";
-import Link from "next/link";
+import { Settings } from "./settings/settings";
+import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 
 ChartJS.register(
-  // ChartDataLabels,
+  CategoryScale,
   ArcElement,
   Tooltip,
   Legend,
@@ -52,24 +54,27 @@ export default function HomePage() {
     InvestmentUpdate[]
   >([]);
   const [transactons, setTransactions] = useState<Transaction[]>([]);
-
+  
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
-
+  
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
-
+  
   const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
-
+  
   const router = useRouter()
-
+  
   const [loading, setLoading] = useState(true); 
+
+  const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
     Promise.all([
       fetchInvestments(),
       fetchInvestmentUpdates(),
       fetchTransactions(),
+      fetchSettings(),
     ]).finally(() => setLoading(false));
   }, [selectedDateRange]);
 
@@ -150,6 +155,12 @@ export default function HomePage() {
 
   const fetchTransactions = async () => {
     api.get(`/v1/transactions`).then((res) => setTransactions(res.data));
+  };
+
+  const fetchSettings = async () => {
+    api.get(`/v1/settings`).then((res) => {
+      setSettings(res.data);
+    });
   };
 
   const buildPrincipalAndValueLineData = (
@@ -256,7 +267,7 @@ export default function HomePage() {
 
 
             if (context.parsed !== null) {
-              const valueString = formatAmountInCentsAsEuroString(context.parsed);
+              const valueString = settings && formatAmountInCentsAsCurrencyString(context.parsed, settings.currency);
               const totalValuePercentage = formatAsROIPercentage(
                 context.parsed / totalVisibleValue
               );
@@ -334,7 +345,7 @@ export default function HomePage() {
       <Navbar />
       <div className="p-4">
         <div className="mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
 
           <div className="mb-4">
             <label className="">Date range</label>
@@ -353,11 +364,20 @@ export default function HomePage() {
 
           <div className="border p-12 text-center mb-4">
             <div className="font-bold text-3xl">
-              {formatAmountInCentsAsEuroString(totalValue)}
+              {settings &&
+                formatAmountInCentsAsCurrencyString(
+                  totalValue,
+                  settings.currency
+                )}
             </div>
             <div className={`${getAmountTextColor(totalReturn)}`}>
               {formatAsROIPercentage(totalRoi)} (
-              {formatAmountInCentsAsEuroString(totalReturn)})
+              {settings &&
+                formatAmountInCentsAsCurrencyString(
+                  totalReturn,
+                  settings.currency
+                )}
+              )
             </div>
           </div>
 
@@ -387,7 +407,11 @@ export default function HomePage() {
                       <div className="font-bold flex justify-between">
                         <div>{investmentRow.name}</div>
                         <div>
-                          {formatAmountInCentsAsEuroString(investmentRow.value)}
+                          {settings &&
+                            formatAmountInCentsAsCurrencyString(
+                              investmentRow.value,
+                              settings.currency
+                            )}
                         </div>
                       </div>
                       <div className="flex justify-between">
@@ -403,9 +427,11 @@ export default function HomePage() {
                         <div
                           className={`${getAmountTextColor(investmentRow.roi)}`}
                         >
-                          {formatAmountInCentsAsEuroString(
-                            investmentRow.return
-                          )}
+                          {settings &&
+                            formatAmountInCentsAsCurrencyString(
+                              investmentRow.return,
+                              settings.currency
+                            )}
                         </div>
                       </div>
                       <div className="flex justify-between">
@@ -464,10 +490,12 @@ export default function HomePage() {
             <h1 className="text-xl font-bold mb-4">Principal and value</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              <Line
-                options={principalAndValueLineOptions}
-                data={buildPrincipalAndValueLineData(updateDataPoints)}
-              />
+              {settings && (
+                <Line
+                  options={principalAndValueLineOptions(settings.currency)}
+                  data={buildPrincipalAndValueLineData(updateDataPoints)}
+                />
+              )}
             </div>
           </div>
         )}
@@ -490,10 +518,12 @@ export default function HomePage() {
             <h1 className="text-xl font-bold mb-4">Return</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              <Line
-                options={returnLineOptions}
-                data={buildReturnLineData(updateDataPoints)}
-              />
+              {settings && (
+                <Line
+                  options={returnLineOptions(settings.currency)}
+                  data={buildReturnLineData(updateDataPoints)}
+                />
+              )}
             </div>
           </div>
         )}
@@ -502,10 +532,12 @@ export default function HomePage() {
           <div className="mb-4">
             <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              <Bar
-                options={monthlyGrowthBarOptions}
-                data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-              />
+              {settings && (
+                <Bar
+                  options={monthlyGrowthBarOptions(settings.currency)}
+                  data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                />
+              )}
             </div>
           </div>
         )}
@@ -515,10 +547,12 @@ export default function HomePage() {
             <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
 
             <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              <Bar
-                options={yearlyGrowthBarOptions}
-                data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-              />
+              {settings && (
+                <Bar
+                  options={yearlyGrowthBarOptions(settings.currency)}
+                  data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                />
+              )}
             </div>
           </div>
         )}
@@ -527,7 +561,7 @@ export default function HomePage() {
   );
 }
 
-export const principalAndValueLineOptions: any = {
+export const principalAndValueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",
@@ -542,7 +576,7 @@ export const principalAndValueLineOptions: any = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAmountAsEuroString(context.parsed.y);
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
           }
 
           return label;
@@ -561,14 +595,14 @@ export const principalAndValueLineOptions: any = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAmountAsEuroString(value);
+          return formatAmountAsCurrencyString(value, currency);
         },
       },
     },
   },
-};
+});
 
-export const returnLineOptions: ChartOptions = {
+export const returnLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",
@@ -586,7 +620,7 @@ export const returnLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAmountAsEuroString(context.parsed.y);
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
           }
 
           return label;
@@ -605,12 +639,12 @@ export const returnLineOptions: ChartOptions = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAmountAsEuroString(value);
+          return formatAmountAsCurrencyString(value, currency);
         },
       },
     },
   },
-};
+});
 
 export const roiLineOptions: ChartOptions = {
   maintainAspectRatio: false,

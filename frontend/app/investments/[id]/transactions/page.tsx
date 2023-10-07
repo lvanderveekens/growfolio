@@ -2,7 +2,7 @@
 
 import Modal from "@/app/modal";
 import { Investment, InvestmentUpdate } from "@/app/page";
-import { capitalize, formatAmountInCentsAsEuroString } from "@/app/string";
+import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
@@ -95,7 +95,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                         {capitalize(transaction.type)}
                       </td>
                       <td className="border px-3">
-                        {formatAmountInCentsAsEuroString(transaction.amount)}
+                        {formatAmountInCentsAsCurrencyString(transaction.amount)}
                       </td>
                       <td className="border px-3">
                         <FaXmark

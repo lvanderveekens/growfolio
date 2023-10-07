@@ -29,7 +29,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const fetchCurrentUser = async () => {
     setLoadingUser(true);
-    console.log("fetching current user")
     api.get("/v1/user")
       .then((res) => {
         if (res.status === 200) {
@@ -86,7 +85,14 @@ export const Navbar: React.FC<NavbarProps> = () => {
           <div className="sm:flex sm:gap-8">
             <div className="my-2">
               <Link className={`hover:text-green-400`} href="/">
-                Dashboard
+                Overview
+              </Link>
+            </div>
+          </div>
+          <div className="sm:flex sm:gap-8">
+            <div className="my-2">
+              <Link className={`hover:text-green-400`} href="/settings">
+                Settings
               </Link>
             </div>
           </div>
