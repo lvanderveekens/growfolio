@@ -16,30 +16,30 @@ export default function SettingsPage() {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
-    fetchSettings()
+    setLoading(true);
+    Promise.all([fetchSettings()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   const fetchSettings = async () => {
-    setLoading(true);
-    api.get(`/v1/settings`)
-    .then((res) => setSettings(res.data))
-    .finally(() => setLoading(false));
+    api
+      .get(`/v1/settings`)
+      .then((res) => setSettings(res.data))
   };
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      setSuccessMessage(undefined)
-      setErrorMessage(undefined)
-      api
-        .put(`/v1/settings`, settings)
-        .then((res) => {
-          if (res.status === 200) {
-            setSuccessMessage("Settings saved.") 
-          } else {
-            setErrorMessage("Something went wrong.")
-          }
-        })
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMessage(undefined);
+    setErrorMessage(undefined);
+    api.put(`/v1/settings`, settings).then((res) => {
+      if (res.status === 200) {
+        setSuccessMessage("Settings saved.");
+      } else {
+        setErrorMessage("Something went wrong.");
+      }
+    });
+  };
 
   const setCurrency = (currency: Currency) => {
     setSettings({...settings, currency: currency})
@@ -50,7 +50,6 @@ export default function SettingsPage() {
       <Navbar />
       <div className="p-4">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4">Settings</h1>
-
         {loading && (
           <div className="mb-4">
             <ClipLoader
@@ -86,15 +85,9 @@ export default function SettingsPage() {
             <button className="border px-3 py-2" type="submit">
               Save
             </button>
-            {successMessage && (
-              <div className="mt-4">
-                {successMessage}
-              </div>
-            )}
+            {successMessage && <div className="mt-4">{successMessage}</div>}
             {errorMessage && (
-              <div className="mt-4 text-red-500">
-                {errorMessage}
-              </div>
+              <div className="mt-4 text-red-500">{errorMessage}</div>
             )}
           </form>
         )}

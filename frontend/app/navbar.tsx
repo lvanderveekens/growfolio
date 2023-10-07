@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AiOutlineStock } from "react-icons/ai";
+import { AiOutlineBarChart, AiOutlineStock, AiOutlineUser } from "react-icons/ai";
+import { IoSettingsOutline } from "react-icons/io5";
 import { FaCaretDown } from "react-icons/fa6";
 import { RxHamburgerMenu } from "react-icons/rx";
 import ClipLoader from "react-spinners/ClipLoader";
 import { api } from "./axios";
 import { FeedbackButton } from "./feedback/feedback-button";
 import { User } from "./page";
+import { TbLogout } from 'react-icons/tb';
 
 interface NavbarProps {
 }
@@ -84,21 +86,58 @@ export const Navbar: React.FC<NavbarProps> = () => {
           } sm:block sm:flex sm:flex-1 sm:items-center sm:justify-between text-lg`}
         >
           <div className="sm:flex sm:gap-8">
+            {!isLoadingUser && user && <div className="my-2 font-normal">{user.email}</div>}
             <div className="my-2">
               <Link className={`hover:text-green-400`} href="/">
-                Overview
+                <div className="flex items-center">
+                  <AiOutlineBarChart className="mr-2" size={24} />
+                  Overview
+                </div>
               </Link>
             </div>
+            <div className="my-2">
+              <Link className={`hover:text-green-400`} href="/profile">
+                <div className="flex items-center">
+                  <AiOutlineUser className="mr-2" size={24} />
+                  Profile
+                </div>
+              </Link>
+            </div>
+            <div className="my-2">
+              <Link className={`hover:text-green-400`} href="/settings">
+                <div className="flex items-center">
+                  <IoSettingsOutline className="mr-2" size={24} />
+                  Settings
+                </div>
+              </Link>
+            </div>
+            <div className={`my-2`}>
+              <button
+                className={`hover:text-green-400`}
+                onClick={() => {
+                  api.post(`/v1/auth/logout`).then((res) => {
+                    if (res.status === 200) {
+                      router.push("/login");
+                    }
+                  });
+                }}
+              >
+                <div className="flex items-center">
+                  <TbLogout className="mr-2" size={24} />
+                  Log out
+                </div>
+              </button>
+            </div>
           </div>
-          <div className="sm:flex sm:gap-8">
+          {/* <div className="sm:flex sm:gap-8">
             <div className="my-2">
               <Link className={`hover:text-green-400`} href="/settings">
                 Settings
               </Link>
             </div>
-          </div>
-          <div>
-            {isLoadingUser && (
+          </div> */}
+          {/* <div> */}
+          {/* {isLoadingUser && (
               <ClipLoader
                 size={28}
                 aria-label="Loading Spinner"
@@ -118,25 +157,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
                   className={`sm:absolute sm:left-0 sm:top-full bg-gray-300 px-4 py-2 ${
                     isUserDropdownOpen ? "block" : "hidden"
                   } whitespace-nowrap`}
-                >
-                  <div className={`py-1`}>
-                    <button
-                      className={`hover:text-green-400`}
-                      onClick={() => {
-                        api.post(`/v1/auth/logout`).then((res) => {
-                          if (res.status === 200) {
-                            router.push("/login");
-                          }
-                        });
-                      }}
-                    >
-                      Log out
-                    </button>
-                  </div>
-                </div>
+                ></div>
               </div>
-            )}
-          </div>
+            )} */}
+          {/* </div> */}
         </div>
       </nav>
       <FeedbackButton />
