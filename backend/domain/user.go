@@ -1,29 +1,24 @@
 package domain
 
-type CreateUserCommand struct {
-	ID       string
-	Email    string
-	Provider string
-}
-
-func NewCreateUserCommand(id, email, provider string) CreateUserCommand {
-	return CreateUserCommand{
-		ID:       id,
-		Email:    email,
-		Provider: provider,
-	}
-}
-
 type User struct {
-	ID       string
-	Email    string
-	Provider string
+	ID          string
+	Email       string
+	Provider    string
+	AccountType AccountType
 }
 
-func NewUser(id, email, provider string) User {
+func NewUser(id, email, provider string, accountType AccountType) User {
 	return User{
-		ID:       id,
-		Email:    email,
-		Provider: provider,
+		ID:          id,
+		Email:       email,
+		Provider:    provider,
+		AccountType: accountType,
 	}
 }
+
+type AccountType string
+
+const (
+	AccountTypeFree    TransactionType = "free"
+	AccountTypePremium TransactionType = "premium"
+)

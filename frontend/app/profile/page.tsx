@@ -5,7 +5,7 @@ import { Navbar } from "@/app/navbar";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
-import { User } from "../page";
+import { User, getAccountTypeLabel } from "../page";
 
 export default function ProfilePage() {
 
@@ -43,17 +43,30 @@ export default function ProfilePage() {
           </div>
         )}
         {!loading && (
-          <div className="mb-4">
-            <label>
-              <div>Email</div>
-              <input
-                className="border w-full"
-                type="text"
-                value={user?.email || ""}
-                disabled
-              />
-            </label>
-          </div>
+          <>
+            <div className="mb-4">
+              <label>
+                <div>Email</div>
+                <input
+                  className="border w-full"
+                  type="text"
+                  value={user?.email || ""}
+                  disabled
+                />
+              </label>
+            </div>
+            <div className="mb-4">
+              <label>
+                <div>Account type</div>
+                <input
+                  className="border w-full"
+                  type="text"
+                  value={user && getAccountTypeLabel(user.accountType) || ""}
+                  disabled
+                />
+              </label>
+            </div>
+          </>
         )}
       </div>
     </>

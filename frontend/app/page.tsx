@@ -694,6 +694,23 @@ export interface User {
   id: string;
   email: string;
   provider: string;
+  accountType: AccountType;
+}
+
+export enum AccountType {
+  FREE = "free",
+  PREMIUM = "premium",
+}
+
+export function getAccountTypeLabel(accountType: AccountType): string {
+  switch(accountType) {
+      case AccountType.FREE:
+        return "Free";
+      case AccountType.PREMIUM:
+        return "Premium"
+      default:
+        return accountType
+  }
 }
 
 export interface Investment {

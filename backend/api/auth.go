@@ -49,7 +49,7 @@ func (h *AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 	}
 
 	// TODO: get exp from token?
-	c.SetCookie("token", jwt, 60 * 60 * 2, "/", "localhost", false, true)
+	c.SetCookie("token", jwt, 60*60*2, "/", "localhost", false, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
@@ -62,7 +62,7 @@ func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) 
 	user, err := h.userRepository.FindByID(gothUser.UserID)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
-			created, err := h.userRepository.Create(toCreateUserCommand(gothUser))
+			created, err := h.userRepository.Create(toUser(gothUser))
 			if err != nil {
 				return domain.User{}, fmt.Errorf("failed to create user: %w", err)
 			}
@@ -74,8 +74,13 @@ func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) 
 	return user, nil
 }
 
-func toCreateUserCommand(gothUser goth.User) domain.CreateUserCommand {
-	return domain.NewCreateUserCommand(gothUser.UserID, gothUser.Email, gothUser.Provider)
+func toUser(gothUser goth.User) domain.User {
+	return domain.NewUser(
+		gothUser.UserID,
+		gothUser.Email,
+		gothUser.Provider,
+		domain.AccountType(domain.AccountTypeFree),
+	)
 }
 
 func getProviderName(c *gin.Context) func(*http.Request) (string, error) {

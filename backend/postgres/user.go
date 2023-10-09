@@ -11,15 +11,16 @@ import (
 )
 
 type User struct {
-	ID        string
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Email     string
-	Provider  string
+	ID          string    `db:"id"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+	Email       string    `db:"email"`
+	Provider    string    `db:"provider"`
+	AccountType string    `db:"account_type"`
 }
 
-func (u *User) toDomainUser() domain.User {
-	return domain.NewUser(u.ID, u.Email, u.Provider)
+func (u User) toDomainUser() domain.User {
+	return domain.NewUser(u.ID, u.Email, u.Provider, domain.AccountType(u.AccountType))
 }
 
 type UserRepository struct {
@@ -43,13 +44,13 @@ func (r *UserRepository) FindByID(id string) (domain.User, error) {
 	return entity.toDomainUser(), nil
 }
 
-func (r *UserRepository) Create(cmd domain.CreateUserCommand) (domain.User, error) {
+func (r *UserRepository) Create(user domain.User) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`
-		INSERT INTO "user" (id, email, provider) 
-		VALUES ($1, $2, $3)
+		INSERT INTO "user" (id, email, provider, account_type) 
+		VALUES ($1, $2, $3, $4)
 		RETURNING *
-	`, cmd.ID, cmd.Email, cmd.Provider).StructScan(&entity)
+	`, user.ID, user.Email, user.Provider, user.AccountType).StructScan(&entity)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to insert user: %w", err)
 	}

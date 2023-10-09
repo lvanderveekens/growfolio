@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE "user" ADD COLUMN account_type TEXT NOT NULL DEFAULT 'free';  
+
+COMMIT;
