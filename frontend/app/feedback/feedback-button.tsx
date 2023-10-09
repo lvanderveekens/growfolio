@@ -27,7 +27,7 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = () => {
       pageUrl: window.location.pathname,
     };
 
-    api.post(`/v1/feedback`, request).catch((err) => console.error(err));
+    return api.post(`/v1/feedback`, request)
   };
 
   return (

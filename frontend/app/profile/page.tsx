@@ -12,9 +12,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User>();
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [successMessage, setSuccessMessage] = useState<string>();
-  const [errorMessage, setErrorMessage] = useState<string>();
-
   useEffect(() => {
     setLoading(true);
     Promise.all([fetchUser()]).finally(() =>
@@ -31,21 +28,6 @@ export default function ProfilePage() {
       })
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setSuccessMessage(undefined);
-    setErrorMessage(undefined);
-    // api.put(`/v1/settings`, settings).then((res) => {
-    //   if (res.status === 200) {
-    //     setSuccessMessage("Settings saved.");
-    //   } else {
-    //     setErrorMessage("Something went wrong.");
-    //   }
-    // });
-  };
-
-
   return (
     <>
       <Navbar />
@@ -61,27 +43,17 @@ export default function ProfilePage() {
           </div>
         )}
         {!loading && (
-          // <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label>
-                <div>Email</div>
-                <input
-                  className="border w-full"
-                  type="text"
-                  value={user?.email || ""}
-                  disabled
-                />
-              </label>
-            </div>
-
-          //   <button className="border px-3 py-2" type="submit">
-          //     Save
-          //   </button>
-          //   {successMessage && <div className="mt-4">{successMessage}</div>}
-          //   {errorMessage && (
-          //     <div className="mt-4 text-red-500">{errorMessage}</div>
-          //   )}
-          // </form>
+          <div className="mb-4">
+            <label>
+              <div>Email</div>
+              <input
+                className="border w-full"
+                type="text"
+                value={user?.email || ""}
+                disabled
+              />
+            </label>
+          </div>
         )}
       </div>
     </>

@@ -66,7 +66,7 @@ func main() {
 	authHandler := api.NewAuthHandler(&userRepository, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
-	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"))
+	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
 
 	handlers := api.NewHandlers(
 		investmentHandler,

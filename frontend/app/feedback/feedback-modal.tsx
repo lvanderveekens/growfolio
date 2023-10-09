@@ -4,12 +4,13 @@ import { useState } from "react";
 import Modal from "../modal";
 
 interface FeedbackModalProps {
-  onSubmit: (text: any) => void
+  onSubmit: (text: any) => Promise<any>
   onClose: () => void
 }
 
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose}) => {
   const [text, setText] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
 
@@ -17,12 +18,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
     event.preventDefault();
     setSubmitting(true);
     setSubmitted(false);
+    setErrorMessage("")
 
     onSubmit(text)
+      .then(() => {
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error(err)
+        setErrorMessage("Something went wrong...");
+      });
 
     setText("")
     setSubmitting(false);
-    setSubmitted(true);
   };
 
   return (
@@ -46,6 +54,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
         </button>
       </form>
       {submitted && <div className="mt-4">Thanks for your feedback! 😀</div>}
+      {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
     </Modal>
   );
 };

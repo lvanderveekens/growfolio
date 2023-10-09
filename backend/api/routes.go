@@ -23,7 +23,6 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	{
 		public.GET("/v1/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
 		public.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
-		public.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
 	}
 
 	private := r.Group("")
@@ -50,5 +49,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 
 		private.GET("/v1/settings", createHandlerFunc(s.handlers.settings.GetSettings))
 		private.PUT("/v1/settings", createHandlerFunc(s.handlers.settings.UpdateSettings))
+
+		private.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
 	}
 }
