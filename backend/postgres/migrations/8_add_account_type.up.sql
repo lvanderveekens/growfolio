@@ -1,5 +1,5 @@
 BEGIN;
 
-ALTER TABLE "user" ADD COLUMN account_type TEXT NOT NULL DEFAULT 'free';  
+ALTER TABLE "user" ADD COLUMN account_type TEXT NOT NULL DEFAULT 'basic';  
 
 COMMIT;

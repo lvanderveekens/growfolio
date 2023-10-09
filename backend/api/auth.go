@@ -79,7 +79,7 @@ func toUser(gothUser goth.User) domain.User {
 		gothUser.UserID,
 		gothUser.Email,
 		gothUser.Provider,
-		domain.AccountType(domain.AccountTypeFree),
+		domain.AccountType(domain.AccountTypeBasic),
 	)
 }
 

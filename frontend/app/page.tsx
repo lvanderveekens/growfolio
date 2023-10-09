@@ -698,14 +698,14 @@ export interface User {
 }
 
 export enum AccountType {
-  FREE = "free",
+  BASIC = "basic",
   PREMIUM = "premium",
 }
 
 export function getAccountTypeLabel(accountType: AccountType): string {
   switch(accountType) {
-      case AccountType.FREE:
-        return "Free";
+      case AccountType.BASIC:
+        return "Basic";
       case AccountType.PREMIUM:
         return "Premium"
       default:
