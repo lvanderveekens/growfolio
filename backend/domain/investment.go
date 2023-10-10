@@ -15,13 +15,15 @@ type CreateInvestmentCommand struct {
 	Type   InvestmentType
 	Name   string
 	UserID string
+	Locked bool
 }
 
-func NewCreateInvestmentCommand(t InvestmentType, name, userID string) CreateInvestmentCommand {
+func NewCreateInvestmentCommand(t InvestmentType, name, userID string, locked bool) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
 		Type:   t,
 		Name:   name,
 		UserID: userID,
+		Locked: locked,
 	}
 
 }
@@ -31,13 +33,15 @@ type Investment struct {
 	Type   InvestmentType
 	Name   string
 	UserID string
+	Locked bool
 }
 
-func NewInvestment(id string, t InvestmentType, name, userID string) Investment {
+func NewInvestment(id string, t InvestmentType, name, userID string, locked bool) Investment {
 	return Investment{
 		ID:     id,
 		Type:   t,
 		Name:   name,
 		UserID: userID,
+		Locked: locked,
 	}
 }

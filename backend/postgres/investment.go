@@ -18,10 +18,11 @@ type Investment struct {
 	Type      domain.InvestmentType `db:"type"`
 	Name      string                `db:"name"`
 	UserID    string                `db:"user_id"`
+	Locked    bool                  `db:"locked"`
 }
 
 func (i Investment) toDomainInvestment() domain.Investment {
-	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID)
+	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID, i.Locked)
 }
 
 type InvestmentRepository struct {
@@ -84,10 +85,10 @@ func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.I
 
 	var entity Investment
 	err = r.db.QueryRowx(`
-		INSERT INTO investment (id, "type", "name", user_id) 
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO investment (id, "type", "name", user_id, locked) 
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING *
-	`, id, c.Type, c.Name, c.UserID).StructScan(&entity)
+	`, id, c.Type, c.Name, c.UserID, c.Locked).StructScan(&entity)
 	if err != nil {
 		return domain.Investment{}, fmt.Errorf("failed to insert investment: %w", err)
 	}

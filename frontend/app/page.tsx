@@ -33,6 +33,7 @@ import Modal from "./modal";
 import { Navbar } from "./navbar";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
+import { BiLockAlt } from 'react-icons/bi'
 
 ChartJS.register(
   CategoryScale,
@@ -123,6 +124,7 @@ export default function HomePage() {
           value: value,
           return: returnValue,
           roi: roi,
+          locked: i.locked,
         } as InvestmentRow;
       });
 
@@ -340,6 +342,43 @@ export default function HomePage() {
   const [showAddInvestmentModal, setShowAddInvestmentModal] =
     useState<boolean>(false);
 
+  const renderInvestment = (investmentRow: InvestmentRow) => {
+    return (
+      <div className="border p-4">
+        <div className="font-bold flex justify-between">
+          <div>{investmentRow.name}</div>
+          <div>
+            {settings &&
+              formatAmountInCentsAsCurrencyString(
+                investmentRow.value,
+                settings.currency
+              )}
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div>ROI</div>
+          <div className={`${getAmountTextColor(investmentRow.roi)}`}>
+            {formatAsROIPercentage(investmentRow.roi)}
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div>Return</div>
+          <div className={`${getAmountTextColor(investmentRow.roi)}`}>
+            {settings &&
+              formatAmountInCentsAsCurrencyString(
+                investmentRow.return,
+                settings.currency
+              )}
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <div>Last update</div>
+          <div>{investmentRow.lastUpdateDate}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main>
       <Navbar />
@@ -398,49 +437,26 @@ export default function HomePage() {
           {!loading && investmentRows.length > 0 && (
             <div className="grid grid-cols-1 gap-4 mb-4">
               {investmentRows.map((investmentRow) => {
-                return (
-                  <Link
-                    key={investmentRow.id}
-                    href={`/investments/${investmentRow.id}`}
-                  >
-                    <div className="border p-4">
-                      <div className="font-bold flex justify-between">
-                        <div>{investmentRow.name}</div>
-                        <div>
-                          {settings &&
-                            formatAmountInCentsAsCurrencyString(
-                              investmentRow.value,
-                              settings.currency
-                            )}
-                        </div>
+                if (investmentRow.locked) {
+                  return (
+                    <div key={investmentRow.id} className="relative">
+                      <div className="absolute bg-gray-200 opacity-60 w-full h-full flex items-center justify-center"></div>
+                      <div className="absolute w-full h-full flex items-center justify-center">
+                        <BiLockAlt size={32} />
                       </div>
-                      <div className="flex justify-between">
-                        <div>ROI</div>
-                        <div
-                          className={`${getAmountTextColor(investmentRow.roi)}`}
-                        >
-                          {formatAsROIPercentage(investmentRow.roi)}
-                        </div>
-                      </div>
-                      <div className="flex justify-between">
-                        <div>Return</div>
-                        <div
-                          className={`${getAmountTextColor(investmentRow.roi)}`}
-                        >
-                          {settings &&
-                            formatAmountInCentsAsCurrencyString(
-                              investmentRow.return,
-                              settings.currency
-                            )}
-                        </div>
-                      </div>
-                      <div className="flex justify-between">
-                        <div>Last update</div>
-                        <div>{investmentRow.lastUpdateDate}</div>
-                      </div>
+                      {renderInvestment(investmentRow)}
                     </div>
-                  </Link>
-                );
+                  );
+                } else {
+                  return (
+                    <Link
+                      key={investmentRow.id}
+                      href={`/investments/${investmentRow.id}`}
+                    >
+                      {renderInvestment(investmentRow)}
+                    </Link>
+                  );
+                }
               })}
             </div>
           )}
@@ -717,6 +733,7 @@ export interface Investment {
   id: string;
   type: InvestmentType;
   name: string;
+  locked: boolean;
 }
 
 export interface InvestmentUpdate {
@@ -734,6 +751,7 @@ export interface InvestmentRow {
   value: number;
   return: number;
   roi: number;
+  locked: boolean;
 }
 
 export interface UpdateDataPoint {

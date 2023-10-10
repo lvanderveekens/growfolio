@@ -259,7 +259,7 @@ type InvestmentUpdateRecord struct {
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {
-	return newInvestmentDto(i.ID, i.Type, i.Name)
+	return newInvestmentDto(i.ID, i.Type, i.Name, i.Locked)
 }
 
 type CreateInvestmentRequest struct {
@@ -278,15 +278,16 @@ func (r CreateInvestmentRequest) validate() error {
 }
 
 func (r CreateInvestmentRequest) toCommand(userID string) domain.CreateInvestmentCommand {
-	return domain.NewCreateInvestmentCommand(r.Type, r.Name, userID)
+	return domain.NewCreateInvestmentCommand(r.Type, r.Name, userID, false)
 }
 
 type investmentDto struct {
-	ID   string                `json:"id"`
-	Type domain.InvestmentType `json:"type"`
-	Name string                `json:"name"`
+	ID     string                `json:"id"`
+	Type   domain.InvestmentType `json:"type"`
+	Name   string                `json:"name"`
+	Locked bool                  `json:"locked"`
 }
 
-func newInvestmentDto(id string, t domain.InvestmentType, name string) investmentDto {
-	return investmentDto{ID: id, Type: t, Name: name}
+func newInvestmentDto(id string, t domain.InvestmentType, name string, locked bool) investmentDto {
+	return investmentDto{ID: id, Type: t, Name: name, Locked: locked}
 }
