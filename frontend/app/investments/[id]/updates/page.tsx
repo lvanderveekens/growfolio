@@ -11,6 +11,8 @@ import { Navbar } from "@/app/navbar";
 import { api } from "@/app/axios";
 import ImportUpdatesForm from "../../import-updates-form";
 import { Settings } from "@/app/settings/settings";
+import { BiLockAlt } from "react-icons/bi";
+import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -76,11 +78,22 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
     return <p>Error: ${loadingUpdatesError}</p>;
   }
 
+  if (!investment) {
+    return <p>Error: Investment not found.</p>;
+  }
+
   return (
     <>
       <Navbar />
       <div className="p-4">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">{investment.name} updates</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4">
+          {investment.name} updates
+        </h1>
+
+        {investment.locked && (
+          <InvestmentIsLockedMessage />
+        )}
+
         {updates.length === 0 && <div className="mb-4">No updates found.</div>}
         {updates.length > 0 && (
           <div className="overflow-x-auto mb-4">
@@ -98,7 +111,11 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                     <tr key={update.id} className="border">
                       <td className="border px-3">{update.date}</td>
                       <td className="border px-3">
-                        {settings && formatAmountInCentsAsCurrencyString(update.value, settings.currency)}
+                        {settings &&
+                          formatAmountInCentsAsCurrencyString(
+                            update.value,
+                            settings.currency
+                          )}
                       </td>
                       <td className="border px-3">
                         <FaXmark
@@ -121,9 +138,10 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         <div>
           <button
-            className="border w-full mb-2 px-3 py-2 mr-4"
+            className="border w-full mb-2 px-3 py-2 disabled:opacity-40"
             type="submit"
             onClick={() => setShowUpdateInvestmentModal(true)}
+            disabled={investment.locked}
           >
             Add update
           </button>
@@ -143,9 +161,10 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             </Modal>
           )}
           <button
-            className="border w-full px-3 py-2"
+            className="border w-full px-3 py-2 disabled:opacity-40"
             type="submit"
             onClick={() => setShowImportUpdatesModal(true)}
+            disabled={investment.locked}
           >
             Import updates
           </button>

@@ -70,12 +70,15 @@ export default function HomePage() {
 
   const [settings, setSettings] = useState<Settings>();
 
+  const [user, setUser] = useState<User>();
+
   useEffect(() => {
     Promise.all([
       fetchInvestments(),
       fetchInvestmentUpdates(),
       fetchTransactions(),
       fetchSettings(),
+      fetchUser(),
     ]).finally(() => setLoading(false));
   }, [selectedDateRange]);
 
@@ -131,6 +134,15 @@ export default function HomePage() {
       setInvestmentRows(investmentRows);
     }
   }, [investments, transactons, updates]);
+
+  const fetchUser = async () => {
+    api.get("/v1/user")
+      .then((res) => {
+        if (res.status === 200) {
+          setUser(res.data);
+        }
+      })
+  };
 
   const fetchInvestments = async () => {
     api
@@ -437,26 +449,27 @@ export default function HomePage() {
           {!loading && investmentRows.length > 0 && (
             <div className="grid grid-cols-1 gap-4 mb-4">
               {investmentRows.map((investmentRow) => {
-                if (investmentRow.locked) {
-                  return (
-                    <div key={investmentRow.id} className="relative">
-                      <div className="absolute bg-gray-200 opacity-60 w-full h-full flex items-center justify-center"></div>
-                      <div className="absolute w-full h-full flex items-center justify-center">
-                        <BiLockAlt size={32} />
+                return (
+                  <Link
+                    key={investmentRow.id}
+                    href={`/investments/${investmentRow.id}`}
+                  >
+                    {investmentRow.locked ? (
+                      <div
+                        key={investmentRow.id}
+                        className="relative border border-4 border-black"
+                      >
+                        <div className="absolute w-full h-full bg-white opacity-60"></div>
+                        <div className="absolute w-full h-full flex items-center justify-center">
+                          <BiLockAlt size={32} />
+                        </div>
+                        {renderInvestment(investmentRow)}
                       </div>
-                      {renderInvestment(investmentRow)}
-                    </div>
-                  );
-                } else {
-                  return (
-                    <Link
-                      key={investmentRow.id}
-                      href={`/investments/${investmentRow.id}`}
-                    >
-                      {renderInvestment(investmentRow)}
-                    </Link>
-                  );
-                }
+                    ) : (
+                      renderInvestment(investmentRow)
+                    )}
+                  </Link>
+                );
               })}
             </div>
           )}
@@ -473,11 +486,19 @@ export default function HomePage() {
               title="Add investment"
               onClose={() => setShowAddInvestmentModal(false)}
             >
-              <AddInvestmentForm
-                onAdd={(investmentId) => {
-                  router.push(`/investments/${investmentId}`);
-                }}
-              />
+              {user?.accountType === AccountType.BASIC &&
+              investments.length >= 2 ? (
+                <div>
+                  You've reached the limit of 2 investments for a Basic account.
+                  Upgrade to Premium to track more.
+                </div>
+              ) : (
+                <AddInvestmentForm
+                  onAdd={(investmentId) => {
+                    router.push(`/investments/${investmentId}`);
+                  }}
+                />
+              )}
             </Modal>
           )}
         </div>

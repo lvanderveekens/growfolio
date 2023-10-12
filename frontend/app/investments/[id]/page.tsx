@@ -28,6 +28,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
+import { BiLockAlt } from 'react-icons/bi'
+import { InvestmentIsLockedMessage } from "../investment-locked-message";
 
 ChartJS.register(
   ArcElement,
@@ -166,6 +168,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </h1>
             </div>
 
+            {investment.locked && (
+              <InvestmentIsLockedMessage />
+            )}
+
             <div className="mb-4">
               <label className="font-bold">Date range:</label>
               <select
@@ -188,7 +194,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               {findLastUpdate() && (
                 <div className="border p-12 text-center mb-4">
                   <div className="font-bold text-3xl">
-                    {settings && formatAmountInCentsAsCurrencyString(findLastUpdate()!!.value, settings.currency)}
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        findLastUpdate()!!.value,
+                        settings.currency
+                      )}
                   </div>
                   <div
                     className={`${getAmountTextColor(
@@ -196,7 +206,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     )}`}
                   >
                     {formatAsROIPercentage(findLastUpdate()!!.roi)} (
-                    {settings && formatAmountInCentsAsCurrencyString(findLastUpdate()!!.return, settings.currency)}
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        findLastUpdate()!!.return,
+                        settings.currency
+                      )}
                     )
                   </div>
                 </div>
@@ -253,7 +267,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
                     {settings && (
                       <Line
-                        options={principalAndValueLineOptions(settings.currency)}
+                        options={principalAndValueLineOptions(
+                          settings.currency
+                        )}
                         data={buildPrincipalAndValueLineData(updateDataPoints)}
                       />
                     )}
@@ -288,7 +304,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     {settings && (
                       <Bar
                         options={monthlyGrowthBarOptions(settings.currency)}
-                        data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                        data={buildMonthlyGrowthBarData(
+                          monthlyChangeDataPoints
+                        )}
                       />
                     )}
                   </div>

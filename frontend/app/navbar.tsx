@@ -27,10 +27,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    fetchCurrentUser();
+    fetchUser();
   }, []);
 
-  const fetchCurrentUser = async () => {
+  const fetchUser = async () => {
     setLoadingUser(true);
     api.get("/v1/user")
       .then((res) => {

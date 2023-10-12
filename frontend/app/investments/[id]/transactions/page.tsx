@@ -1,17 +1,18 @@
 "use client"
 
+import { api } from "@/app/axios";
 import Modal from "@/app/modal";
-import { Investment, InvestmentUpdate } from "@/app/page";
+import { Navbar } from "@/app/navbar";
+import { Investment } from "@/app/page";
+import { Settings } from "@/app/settings/settings";
 import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
-import { Transaction } from "../../transaction";
 import AddTransactionForm from "../../add-transaction-form";
-import { Navbar } from "@/app/navbar";
-import { api } from "@/app/axios";
 import ImportTransactionsForm from "../../import-transactions-form";
-import { Settings } from "@/app/settings/settings";
+import { Transaction } from "../../transaction";
+import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -77,6 +78,10 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
     return <p>Error: ${loadingTransactionsError}</p>;
   }
 
+  if (!investment) {
+    return <p>Error: Investment not found.</p>;
+  }
+
   return (
     <>
       <Navbar />
@@ -84,6 +89,11 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
         <h1 className="text-2xl sm:text-3xl font-bold mb-4">
           {investment.name} transactions
         </h1>
+
+        {investment.locked && (
+          <InvestmentIsLockedMessage />
+        )}
+
         {transactions.length === 0 && <div className="mb-4">No transactions found.</div>}
         {transactions.length > 0 && (
           <div className="overflow-x-auto mb-4">
@@ -128,9 +138,10 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
 
         <div>
           <button
-            className="border w-full mb-2 px-3 py-2 mr-4"
+            className="border w-full mb-2 px-3 py-2 mr-4 disabled:opacity-40"
             type="submit"
             onClick={() => setShowAddTransactionModal(true)}
+            disabled={investment?.locked}
           >
             Add transaction
           </button>
@@ -150,9 +161,10 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
             </Modal>
           )}
           <button
-            className="border w-full px-3 py-2"
+            className="border w-full px-3 py-2 disabled:opacity-40"
             type="submit"
             onClick={() => setShowImportTransactionsModal(true)}
+            disabled={investment?.locked}
           >
             Import transactions
           </button>
