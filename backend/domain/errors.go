@@ -11,3 +11,7 @@ var ErrUserNotFound = errors.New("user not found")
 var ErrTransactionNotFound = errors.New("transaction not found")
 
 var ErrSettingsNotFound = errors.New("settings not found")
+
+var ErrMaxInvestmentsReached = errors.New("max investments reached")
+
+var ErrInvestmentIsLocked = errors.New("investment is locked")

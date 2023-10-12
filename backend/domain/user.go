@@ -19,6 +19,6 @@ func NewUser(id, email, provider string, accountType AccountType) User {
 type AccountType string
 
 const (
-	AccountTypeBasic   TransactionType = "basic"
-	AccountTypePremium TransactionType = "premium"
+	AccountTypeBasic   AccountType = "basic"
+	AccountTypePremium AccountType = "premium"
 )

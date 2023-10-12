@@ -14,20 +14,17 @@ import (
 )
 
 type InvestmentUpdateHandler struct {
-	investmentRepository       services.InvestmentRepository
-	investmentUpdateRepository services.InvestmentUpdateRepository
-	investmentUpdateService    services.InvestmentUpdateService
+	investmentService       services.InvestmentService
+	investmentUpdateService services.InvestmentUpdateService
 }
 
 func NewInvestmentUpdateHandler(
-	investmentRepository services.InvestmentRepository,
-	investmentUpdateRepository services.InvestmentUpdateRepository,
+	investmentService services.InvestmentService,
 	investmentUpdateService services.InvestmentUpdateService,
 ) InvestmentUpdateHandler {
 	return InvestmentUpdateHandler{
-		investmentRepository:       investmentRepository,
-		investmentUpdateRepository: investmentUpdateRepository,
-		investmentUpdateService:    investmentUpdateService,
+		investmentService:       investmentService,
+		investmentUpdateService: investmentUpdateService,
 	}
 }
 
@@ -45,7 +42,7 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 		dateFromFilter = &parsed
 	}
 
-	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
+	investments, err := h.investmentService.FindByUserID(tokenUserID)
 	if err != nil {
 		return response[[]investmentUpdateDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
@@ -87,7 +84,7 @@ func (h InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (respons
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
 
-	investment, err := h.investmentRepository.FindByID(request.InvestmentID)
+	investment, err := h.investmentService.FindByID(request.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -104,7 +101,7 @@ func (h InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (respons
 		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	update, err := h.investmentUpdateRepository.Create(command)
+	update, err := h.investmentUpdateService.Create(command)
 	if err != nil {
 		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
 	}
@@ -117,7 +114,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	update, err := h.investmentUpdateRepository.FindByID(id)
+	update, err := h.investmentUpdateService.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentUpdateNotFound {
 			return response[empty]{}, NewError(http.StatusNotFound, err.Error())
@@ -125,7 +122,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 		return response[empty]{}, fmt.Errorf("failed to find investment update: %w", err)
 	}
 
-	investment, err := h.investmentRepository.FindByID(update.InvestmentID)
+	investment, err := h.investmentService.FindByID(update.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
@@ -137,7 +134,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment update")
 	}
 
-	err = h.investmentUpdateRepository.DeleteByID(id)
+	err = h.investmentUpdateService.DeleteByID(id)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete investment update: %w", err)
 	}

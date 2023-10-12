@@ -59,10 +59,12 @@ func main() {
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"))
 	settingsService := services.NewSettingsService(settingsRepository)
+	investmentService := services.NewInvestmentService(investmentRepository)
+	transactionService := services.NewTransactionService(transactionRepository)
 
-	investmentHandler := api.NewInvestmentHandler(&investmentRepository, &investmentUpdateRepository, transactionRepository)
-	investmentUpdateHandler := api.NewInvestmentUpdateHandler(&investmentRepository, &investmentUpdateRepository, investmentUpdateService)
-	transactionHandler := api.NewTransactionHandler(&transactionRepository, &investmentRepository)
+	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
+	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
+	transactionHandler := api.NewTransactionHandler(transactionService, investmentService)
 	authHandler := api.NewAuthHandler(&userRepository, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)

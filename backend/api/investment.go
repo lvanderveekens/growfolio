@@ -16,20 +16,23 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentRepository       services.InvestmentRepository
+	investmentService          services.InvestmentService
 	investmentUpdateRepository services.InvestmentUpdateRepository
 	transactionRepository      services.TransactionRepository
+	userRepository             services.UserRepository
 }
 
 func NewInvestmentHandler(
-	investmentRepository services.InvestmentRepository,
+	investmentService services.InvestmentService,
 	investmentUpdateRepository services.InvestmentUpdateRepository,
 	transactionRepository services.TransactionRepository,
+	userRepository services.UserRepository,
 ) InvestmentHandler {
 	return InvestmentHandler{
-		investmentRepository:       investmentRepository,
+		investmentService:          investmentService,
 		investmentUpdateRepository: investmentUpdateRepository,
 		transactionRepository:      transactionRepository,
+		userRepository:             userRepository,
 	}
 }
 
@@ -37,7 +40,7 @@ func (h InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investment
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
-	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
+	investments, err := h.investmentService.FindByUserID(tokenUserID)
 	if err != nil {
 		return response[[]investmentDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
@@ -55,7 +58,7 @@ func (h InvestmentHandler) GetInvestment(c *gin.Context) (response[investmentDto
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	investment, err := h.investmentRepository.FindByID(id)
+	investment, err := h.investmentService.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -74,7 +77,7 @@ func (h InvestmentHandler) DeleteInvestment(c *gin.Context) (response[empty], er
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
-	investment, err := h.investmentRepository.FindByID(c.Param("id"))
+	investment, err := h.investmentService.FindByID(c.Param("id"))
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
@@ -95,7 +98,7 @@ func (h InvestmentHandler) DeleteInvestment(c *gin.Context) (response[empty], er
 		return response[empty]{}, fmt.Errorf("failed to delete transactions: %w", err)
 	}
 
-	err = h.investmentRepository.DeleteByID(investment.ID)
+	err = h.investmentService.DeleteByID(investment.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete investment: %w", err)
 	}
@@ -107,8 +110,13 @@ func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investment
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
+	user, err := h.userRepository.FindByID(tokenUserID)
+	if err != nil {
+		return response[investmentDto]{}, fmt.Errorf("failed to find user: %w", err)
+	}
+
 	var request CreateInvestmentRequest
-	err := c.ShouldBindJSON(&request)
+	err = c.ShouldBindJSON(&request)
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to decode request body: %w", err)
 	}
@@ -116,7 +124,7 @@ func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investment
 		return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.investmentRepository.Create(request.toCommand(tokenUserID))
+	created, err := h.investmentService.Create(request.toCommand(user))
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to create investment: %w", err)
 	}
@@ -129,7 +137,7 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	investment, err := h.investmentRepository.FindByID(id)
+	investment, err := h.investmentService.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
@@ -193,7 +201,7 @@ func (h InvestmentHandler) ImportTransactions(c *gin.Context) (response[empty], 
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	investment, err := h.investmentRepository.FindByID(id)
+	investment, err := h.investmentService.FindByID(id)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
@@ -277,8 +285,8 @@ func (r CreateInvestmentRequest) validate() error {
 	return nil
 }
 
-func (r CreateInvestmentRequest) toCommand(userID string) domain.CreateInvestmentCommand {
-	return domain.NewCreateInvestmentCommand(r.Type, r.Name, userID, false)
+func (r CreateInvestmentRequest) toCommand(user domain.User) domain.CreateInvestmentCommand {
+	return domain.NewCreateInvestmentCommand(r.Type, r.Name, user, false)
 }
 
 type investmentDto struct {

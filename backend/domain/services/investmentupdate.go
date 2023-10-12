@@ -59,3 +59,30 @@ func (s InvestmentUpdateService) Find(query domain.FindInvestmentUpdateQuery) ([
 
 	return updates, nil
 }
+
+func (s InvestmentUpdateService) FindByID(id string) (domain.InvestmentUpdate, error) {
+	return s.investmentUpdateRepository.FindByID(id)
+}
+
+func (s InvestmentUpdateService) FindLastByInvestmentIDAndDateLessThanEqual(
+	investmentID string,
+	date time.Time,
+) (domain.InvestmentUpdate, error) {
+	return s.investmentUpdateRepository.FindLastByInvestmentIDAndDateLessThanEqual(investmentID, date)
+}
+
+func (s InvestmentUpdateService) Create(command domain.CreateInvestmentUpdateCommand) (domain.InvestmentUpdate, error) {
+	if command.Investment.Locked {
+		return domain.InvestmentUpdate{}, domain.ErrInvestmentIsLocked
+	}
+
+	return s.investmentUpdateRepository.Create(command)
+}
+
+func (s InvestmentUpdateService) DeleteByInvestmentID(investmentID string) error {
+	return s.investmentUpdateRepository.DeleteByInvestmentID(investmentID)
+}
+
+func (s InvestmentUpdateService) DeleteByID(id string) error {
+	return s.investmentUpdateRepository.DeleteByID(id)
+}

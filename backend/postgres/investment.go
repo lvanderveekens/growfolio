@@ -88,7 +88,7 @@ func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.I
 		INSERT INTO investment (id, "type", "name", user_id, locked) 
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING *
-	`, id, c.Type, c.Name, c.UserID, c.Locked).StructScan(&entity)
+	`, id, c.Type, c.Name, c.User.ID, c.Locked).StructScan(&entity)
 	if err != nil {
 		return domain.Investment{}, fmt.Errorf("failed to insert investment: %w", err)
 	}

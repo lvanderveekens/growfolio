@@ -15,17 +15,17 @@ import (
 )
 
 type TransactionHandler struct {
-	transactionRepository services.TransactionRepository
-	investmentRepository  services.InvestmentRepository
+	transactionService services.TransactionService
+	investmentService  services.InvestmentService
 }
 
 func NewTransactionHandler(
-	transactionRepository services.TransactionRepository,
-	investmentRepository services.InvestmentRepository,
+	transactionService services.TransactionService,
+	investmentService services.InvestmentService,
 ) TransactionHandler {
 	return TransactionHandler{
-		transactionRepository: transactionRepository,
-		investmentRepository:  investmentRepository,
+		transactionService: transactionService,
+		investmentService:  investmentService,
 	}
 }
 
@@ -35,7 +35,7 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transact
 	investmentIDFilter := c.Query("investmentId")
 	dateFromFilter := stringOrNil(c.Query("dateFrom"))
 
-	investments, err := h.investmentRepository.FindByUserID(tokenUserID)
+	investments, err := h.investmentService.FindByUserID(tokenUserID)
 	if err != nil {
 		return response[[]transactionDto]{}, fmt.Errorf("failed to find investments: %w", err)
 	}
@@ -51,7 +51,7 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) (response[[]transact
 		investmentIDs = []string{investmentIDFilter}
 	}
 
-	transactions, err := h.transactionRepository.Find(domain.FindTransactionQuery{
+	transactions, err := h.transactionService.Find(domain.FindTransactionQuery{
 		InvestmentIDs: &investmentIDs,
 		DateFrom:      dateFromFilter,
 	})
@@ -87,7 +87,7 @@ func (h TransactionHandler) CreateTransaction(c *gin.Context) (response[transact
 		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	investment, err := h.investmentRepository.FindByID(request.InvestmentID)
+	investment, err := h.investmentService.FindByID(request.InvestmentID)
 	if err != nil {
 		if err == domain.ErrInvestmentNotFound {
 			return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
@@ -104,7 +104,7 @@ func (h TransactionHandler) CreateTransaction(c *gin.Context) (response[transact
 		return response[transactionDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	transaction, err := h.transactionRepository.Create(command)
+	transaction, err := h.transactionService.Create(command)
 	if err != nil {
 		return response[transactionDto]{}, fmt.Errorf("failed to create transaction: %w", err)
 	}
@@ -117,7 +117,7 @@ func (h TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], 
 	tokenUserID := tokenClaims["userId"].(string)
 
 	id := c.Param("id")
-	transaction, err := h.transactionRepository.FindByID(id)
+	transaction, err := h.transactionService.FindByID(id)
 	if err != nil {
 		if err == domain.ErrTransactionNotFound {
 			return newEmptyResponse(http.StatusNoContent), nil
@@ -125,7 +125,7 @@ func (h TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], 
 		return response[empty]{}, fmt.Errorf("failed to find transaction: %w", err)
 	}
 
-	investment, err := h.investmentRepository.FindByID(transaction.InvestmentID)
+	investment, err := h.investmentService.FindByID(transaction.InvestmentID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to find investment: %w", err)
 	}
@@ -134,7 +134,7 @@ func (h TransactionHandler) DeleteTransaction(c *gin.Context) (response[empty], 
 
 	}
 
-	err = h.transactionRepository.DeleteByID(transaction.ID)
+	err = h.transactionService.DeleteByID(transaction.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete transaction: %w", err)
 	}

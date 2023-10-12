@@ -14,18 +14,17 @@ const (
 type CreateInvestmentCommand struct {
 	Type   InvestmentType
 	Name   string
-	UserID string
+	User   User
 	Locked bool
 }
 
-func NewCreateInvestmentCommand(t InvestmentType, name, userID string, locked bool) CreateInvestmentCommand {
+func NewCreateInvestmentCommand(t InvestmentType, name string, user User, locked bool) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
 		Type:   t,
 		Name:   name,
-		UserID: userID,
+		User:   user,
 		Locked: locked,
 	}
-
 }
 
 type Investment struct {
