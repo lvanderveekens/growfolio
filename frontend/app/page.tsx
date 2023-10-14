@@ -391,12 +391,23 @@ export default function HomePage() {
     );
   }
 
+  const handleCheckout = () => {
+    return api.post(`/v1/checkout`)
+    .then(res => {
+      if (res.status === 200) {
+        window.location.href = res.data.url;
+      }
+    })
+  };
+
   return (
     <main>
       <Navbar />
       <div className="p-4">
         <div className="mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
+
+          <button className="border" onClick={handleCheckout}>Checkout</button>
 
           <div className="mb-4">
             <label className="">Date range</label>

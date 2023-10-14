@@ -51,5 +51,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		private.PUT("/v1/settings", createHandlerFunc(s.handlers.settings.UpdateSettings))
 
 		private.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
+
+		private.POST("/v1/checkout", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
 	}
 }
