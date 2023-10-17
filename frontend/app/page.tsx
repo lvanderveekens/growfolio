@@ -391,8 +391,17 @@ export default function HomePage() {
     );
   }
 
-  const handleCheckout = () => {
+  const createCheckoutSession = () => {
     return api.post(`/v1/stripe/checkout-sessions`)
+    .then(res => {
+      if (res.status === 200) {
+        window.location.href = res.data.url;
+      }
+    })
+  };
+
+  const createPortalSession = () => {
+    return api.post(`/v1/stripe/portal-sessions`)
     .then(res => {
       if (res.status === 200) {
         window.location.href = res.data.url;
@@ -407,7 +416,17 @@ export default function HomePage() {
         <div className="mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-          <button className="border" onClick={handleCheckout}>Checkout</button>
+          <div>
+            <button className="border" onClick={createCheckoutSession}>
+              Checkout
+            </button>
+          </div>
+
+          <div>
+            <button className="border" onClick={createPortalSession}>
+              Manage subscription
+            </button>
+          </div>
 
           <div className="mb-4">
             <label className="">Date range</label>

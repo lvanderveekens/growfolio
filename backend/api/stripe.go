@@ -11,8 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stripe/stripe-go/v75"
-	"github.com/stripe/stripe-go/v75/checkout/session"
-	"github.com/stripe/stripe-go/webhook"
+	portalsession "github.com/stripe/stripe-go/v75/billingportal/session"
+	checkoutsession "github.com/stripe/stripe-go/v75/checkout/session"
+	"github.com/stripe/stripe-go/v75/webhook"
 )
 
 type StripeHandler struct {
@@ -28,17 +29,17 @@ func NewStripeHandler(stripeKey, stripeWebhookSecret string, userRepository serv
 	}
 }
 
-type checkoutSessionDto struct {
+type sessionDto struct {
 	URL string `json:"url"`
 }
 
-func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[checkoutSessionDto], error) {
+func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
 	user, err := h.userRepository.FindByID(tokenUserID)
 	if err != nil {
-		return response[checkoutSessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
+		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
 	}
 
 	domain := "http://localhost:8080"
@@ -55,12 +56,39 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[checkoutS
 		CustomerEmail: stripe.String(user.Email),
 	}
 
-	session, err := session.New(params)
+	checkoutSession, err := checkoutsession.New(params)
 	if err != nil {
-		return response[checkoutSessionDto]{}, err
+		return response[sessionDto]{}, err
 	}
 
-	return newResponse(http.StatusOK, checkoutSessionDto{URL: session.URL}), nil
+	return newResponse(http.StatusOK, sessionDto{URL: checkoutSession.URL}), nil
+}
+
+func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	user, err := h.userRepository.FindByID(tokenUserID)
+	if err != nil {
+		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
+	}
+
+	if user.StripeCustomerID == nil {
+		return response[sessionDto]{}, fmt.Errorf("user does not have a stripe customer id")
+	}
+
+	domain := "http://localhost:8080"
+	params := &stripe.BillingPortalSessionParams{
+		Customer:  user.StripeCustomerID,
+		ReturnURL: stripe.String(domain),
+	}
+
+	portalSession, err := portalsession.New(params)
+	if err != nil {
+		return response[sessionDto]{}, err
+	}
+
+	return newResponse(http.StatusOK, sessionDto{URL: portalSession.URL}), nil
 }
 
 func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
@@ -73,6 +101,8 @@ func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to construct event %w", err)
 	}
+
+	// TODO: handle "customer.subscription.deleted"
 
 	switch event.Type {
 	case "checkout.session.completed":
@@ -92,7 +122,7 @@ func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
 			}
 		}
 	default:
-		slog.Info("Unhandled event type: " + event.Type)
+		slog.Info("Unhandled event type: " + string(event.Type))
 	}
 
 	return newEmptyResponse(http.StatusOK), nil

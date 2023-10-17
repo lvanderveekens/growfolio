@@ -55,6 +55,6 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		private.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
 
 		private.POST("/v1/stripe/checkout-sessions", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
-		// private.POST("/v1/stripe/portal-sessions", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
+		private.POST("/v1/stripe/portal-sessions", createHandlerFunc(s.handlers.stripe.CreatePortalSession))
 	}
 }
