@@ -392,7 +392,7 @@ export default function HomePage() {
   }
 
   const handleCheckout = () => {
-    return api.post(`/v1/checkout`)
+    return api.post(`/v1/stripe/checkout-sessions`)
     .then(res => {
       if (res.status === 200) {
         window.location.href = res.data.url;

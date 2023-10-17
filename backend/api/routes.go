@@ -23,6 +23,8 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	{
 		public.GET("/v1/auth/:provider", createHandlerFunc(s.handlers.auth.Begin))
 		public.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
+
+		public.POST("/v1/stripe/webhook", createHandlerFunc(s.handlers.stripe.Webhook))
 	}
 
 	private := r.Group("")
@@ -52,6 +54,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 
 		private.POST("/v1/feedback", createHandlerFunc(s.handlers.feedback.SubmitFeedback))
 
-		private.POST("/v1/checkout", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
+		private.POST("/v1/stripe/checkout-sessions", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
+		// private.POST("/v1/stripe/portal-sessions", createHandlerFunc(s.handlers.stripe.CreateCheckoutSession))
 	}
 }

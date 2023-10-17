@@ -80,6 +80,7 @@ func toUser(gothUser goth.User) domain.User {
 		gothUser.Email,
 		gothUser.Provider,
 		domain.AccountType(domain.AccountTypeBasic),
+		nil,
 	)
 }
 

@@ -69,7 +69,7 @@ func main() {
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
-	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"))
+	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_WEBHOOK_SECRET"), &userRepository)
 
 	handlers := api.NewHandlers(
 		investmentHandler,

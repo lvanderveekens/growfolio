@@ -30,22 +30,24 @@ func (h *UserHandler) GetUser(c *gin.Context) (response[userDto], error) {
 		return response[userDto]{}, fmt.Errorf("failed to find user by id %s: %w", tokenUserID, err)
 	}
 
-	dto := newUserDto(user.ID, user.Email, user.Provider, string(user.AccountType))
+	dto := newUserDto(user.ID, user.Email, user.Provider, string(user.AccountType), user.StripeCustomerID)
 	return newResponse(http.StatusOK, dto), nil
 }
 
 type userDto struct {
-	ID          string `json:"id"`
-	Email       string `json:"email"`
-	Provider    string `json:"provider"`
-	AccountType string `json:"accountType"`
+	ID               string  `json:"id"`
+	Email            string  `json:"email"`
+	Provider         string  `json:"provider"`
+	AccountType      string  `json:"accountType"`
+	StripeCustomerID *string `json:"stripeCustomerId"`
 }
 
-func newUserDto(id, email, provider, accountType string) userDto {
+func newUserDto(id, email, provider, accountType string, stripeCustomerID *string) userDto {
 	return userDto{
-		ID:          id,
-		Email:       email,
-		Provider:    provider,
-		AccountType: accountType,
+		ID:               id,
+		Email:            email,
+		Provider:         provider,
+		AccountType:      accountType,
+		StripeCustomerID: stripeCustomerID,
 	}
 }
