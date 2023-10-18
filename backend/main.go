@@ -61,6 +61,7 @@ func main() {
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository)
 	transactionService := services.NewTransactionService(transactionRepository)
+	userService := services.NewUserService(userRepository, investmentRepository)
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
@@ -69,7 +70,7 @@ func main() {
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
-	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_WEBHOOK_SECRET"), &userRepository)
+	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_WEBHOOK_SECRET"), userService)
 
 	handlers := api.NewHandlers(
 		investmentHandler,

@@ -11,6 +11,7 @@ type InvestmentRepository interface {
 
 	Create(command domain.CreateInvestmentCommand) (domain.Investment, error)
 	DeleteByID(id string) error
+	UpdateLocked(id string, locked bool) error
 }
 
 type InvestmentService struct {

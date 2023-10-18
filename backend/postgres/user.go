@@ -45,6 +45,19 @@ func (r UserRepository) FindByID(id string) (domain.User, error) {
 	return entity.toDomainUser(), nil
 }
 
+func (r UserRepository) FindByEmail(email string) (domain.User, error) {
+	entity := User{}
+	err := r.db.Get(&entity, `SELECT * FROM "user" WHERE email=$1`, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.User{}, domain.ErrUserNotFound
+		}
+		return domain.User{}, fmt.Errorf("failed to select user: %w", err)
+	}
+
+	return entity.toDomainUser(), nil
+}
+
 func (r UserRepository) Create(user domain.User) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`
@@ -59,17 +72,17 @@ func (r UserRepository) Create(user domain.User) (domain.User, error) {
 	return entity.toDomainUser(), nil
 }
 
-func (r UserRepository) UpdateStripeCustomerIDByEmail(email string, stripeCustomerID string) error {
+func (r UserRepository) Update(user domain.User) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`
 		UPDATE "user"
-		SET stripe_customer_id = $1 
-		WHERE email = $2
+		SET email = $2, provider = $3, account_type = $4, stripe_customer_id = $5
+		WHERE id = $1
 		RETURNING *;
-	`, stripeCustomerID, email).StructScan(&entity)
+	`, user.ID, user.Email, user.Provider, user.AccountType, user.StripeCustomerID).StructScan(&entity)
 	if err != nil {
-		return fmt.Errorf("failed to update user: %w", err)
+		return domain.User{}, fmt.Errorf("failed to insert user: %w", err)
 	}
 
-	return nil
+	return entity.toDomainUser(), nil
 }

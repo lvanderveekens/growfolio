@@ -18,14 +18,14 @@ import (
 
 type StripeHandler struct {
 	stripeWebhookSecret string
-	userRepository      services.UserRepository
+	userService         services.UserService
 }
 
-func NewStripeHandler(stripeKey, stripeWebhookSecret string, userRepository services.UserRepository) StripeHandler {
+func NewStripeHandler(stripeKey, stripeWebhookSecret string, userService services.UserService) StripeHandler {
 	stripe.Key = stripeKey
 	return StripeHandler{
 		stripeWebhookSecret: stripeWebhookSecret,
-		userRepository:      userRepository,
+		userService:         userService,
 	}
 }
 
@@ -37,7 +37,7 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
-	user, err := h.userRepository.FindByID(tokenUserID)
+	user, err := h.userService.FindByID(tokenUserID)
 	if err != nil {
 		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
 	}
@@ -68,7 +68,7 @@ func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto]
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
-	user, err := h.userRepository.FindByID(tokenUserID)
+	user, err := h.userService.FindByID(tokenUserID)
 	if err != nil {
 		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
 	}
@@ -112,15 +112,20 @@ func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
 			return response[empty]{}, fmt.Errorf("failed to unmarshal event %w", err)
 		}
 
-		if checkoutSession.Customer != nil {
-			err := h.userRepository.UpdateStripeCustomerIDByEmail(
-				checkoutSession.CustomerEmail,
-				checkoutSession.Customer.ID,
-			)
-			if err != nil {
-				return response[empty]{}, fmt.Errorf("failed to update user with stripe customer id: %w", err)
-			}
+		if checkoutSession.Customer == nil {
+			return response[empty]{}, fmt.Errorf("stripe customer id not found")
 		}
+
+		user, err := h.userService.FindByEmail(checkoutSession.CustomerEmail)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to find user: %w", err)
+		}
+
+		err = h.userService.UpgradeToPremium(user, checkoutSession.Customer.ID)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to upgrade user to premium: %w", err)
+		}
+		// }
 	default:
 		slog.Info("Unhandled event type: " + string(event.Type))
 	}

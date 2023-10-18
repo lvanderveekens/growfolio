@@ -95,3 +95,18 @@ func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.I
 
 	return entity.toDomainInvestment(), nil
 }
+
+func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
+	var entity User
+	err := r.db.QueryRowx(`
+		UPDATE investment
+		SET locked = $2
+		WHERE id = $1
+		RETURNING *;
+	`, id, locked).StructScan(&entity)
+	if err != nil {
+		return fmt.Errorf("failed to insert user: %w", err)
+	}
+
+	return nil
+}
