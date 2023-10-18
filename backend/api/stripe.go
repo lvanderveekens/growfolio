@@ -102,7 +102,7 @@ func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
 		return response[empty]{}, fmt.Errorf("failed to construct event %w", err)
 	}
 
-	// TODO: handle "customer.subscription.deleted"
+	slog.Info("Received event: " + string(event.Data.Raw))
 
 	switch event.Type {
 	case "checkout.session.completed":
@@ -125,7 +125,26 @@ func (h StripeHandler) Webhook(c *gin.Context) (response[empty], error) {
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to upgrade user to premium: %w", err)
 		}
-		// }
+	case "customer.subscription.deleted":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to unmarshal event %w", err)
+		}
+
+		if subscription.Customer == nil {
+			return response[empty]{}, fmt.Errorf("stripe customer id not found")
+		}
+
+		user, err := h.userService.FindByStripeCustomerID(subscription.Customer.ID)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to find user: %w", err)
+		}
+
+		err = h.userService.DowngradeToBasic(user)
+		if err != nil {
+			return response[empty]{}, fmt.Errorf("failed to downgrade user to basic: %w", err)
+		}
 	default:
 		slog.Info("Unhandled event type: " + string(event.Type))
 	}

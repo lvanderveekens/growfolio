@@ -58,6 +58,19 @@ func (r UserRepository) FindByEmail(email string) (domain.User, error) {
 	return entity.toDomainUser(), nil
 }
 
+func (r UserRepository) FindByStripeCustomerID(stripeCustomerID string) (domain.User, error) {
+	entity := User{}
+	err := r.db.Get(&entity, `SELECT * FROM "user" WHERE stripe_customer_id=$1`, stripeCustomerID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.User{}, domain.ErrUserNotFound
+		}
+		return domain.User{}, fmt.Errorf("failed to select user: %w", err)
+	}
+
+	return entity.toDomainUser(), nil
+}
+
 func (r UserRepository) Create(user domain.User) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`

@@ -97,7 +97,7 @@ func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.I
 }
 
 func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
-	var entity User
+	var entity Investment
 	err := r.db.QueryRowx(`
 		UPDATE investment
 		SET locked = $2
@@ -105,7 +105,7 @@ func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
 		RETURNING *;
 	`, id, locked).StructScan(&entity)
 	if err != nil {
-		return fmt.Errorf("failed to insert user: %w", err)
+		return fmt.Errorf("failed to update investment: %w", err)
 	}
 
 	return nil
