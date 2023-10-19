@@ -16,6 +16,10 @@ import (
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
+const (
+	frontendHost = "http://localhost:8080"
+)
+
 type StripeHandler struct {
 	stripeWebhookSecret string
 	userService         services.UserService
@@ -42,7 +46,6 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
 	}
 
-	domain := "http://localhost:8080"
 	params := &stripe.CheckoutSessionParams{
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
@@ -51,8 +54,8 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 			},
 		},
 		Mode:          stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-		SuccessURL:    stripe.String(domain + "?success=true"),
-		CancelURL:     stripe.String(domain + "?canceled=true"),
+		SuccessURL:    stripe.String(frontendHost + "/checkout/success"),
+		CancelURL:     stripe.String(frontendHost + "/profile"),
 		CustomerEmail: stripe.String(user.Email),
 	}
 
@@ -77,10 +80,9 @@ func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto]
 		return response[sessionDto]{}, fmt.Errorf("user does not have a stripe customer id")
 	}
 
-	domain := "http://localhost:8080"
 	params := &stripe.BillingPortalSessionParams{
 		Customer:  user.StripeCustomerID,
-		ReturnURL: stripe.String(domain),
+		ReturnURL: stripe.String(frontendHost),
 	}
 
 	portalSession, err := portalsession.New(params)
