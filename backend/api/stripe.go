@@ -33,6 +33,14 @@ func NewStripeHandler(stripeKey, stripeWebhookSecret string, userService service
 	}
 }
 
+type createCheckoutSessionRequest struct {
+	CancelURL string `json:"cancelUrl"`
+}
+
+type createPortalSessionRequest struct {
+	ReturnURL string `json:"returnUrl"`
+}
+
 type sessionDto struct {
 	URL string `json:"url"`
 }
@@ -40,6 +48,12 @@ type sessionDto struct {
 func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
+
+	var request createCheckoutSessionRequest
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		return response[sessionDto]{}, NewError(http.StatusBadRequest, err.Error())
+	}
 
 	user, err := h.userService.FindByID(tokenUserID)
 	if err != nil {
@@ -55,7 +69,7 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 		},
 		Mode:          stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 		SuccessURL:    stripe.String(frontendHost + "/checkout/success"),
-		CancelURL:     stripe.String(frontendHost + "/profile"),
+		CancelURL:     stripe.String(request.CancelURL),
 		CustomerEmail: stripe.String(user.Email),
 	}
 
@@ -71,6 +85,12 @@ func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto]
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
 
+	var request createPortalSessionRequest
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		return response[sessionDto]{}, NewError(http.StatusBadRequest, err.Error())
+	}
+
 	user, err := h.userService.FindByID(tokenUserID)
 	if err != nil {
 		return response[sessionDto]{}, fmt.Errorf("failed to find user by id: %s: %w", tokenUserID, err)
@@ -82,7 +102,7 @@ func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto]
 
 	params := &stripe.BillingPortalSessionParams{
 		Customer:  user.StripeCustomerID,
-		ReturnURL: stripe.String(frontendHost + "/profile"),
+		ReturnURL: stripe.String(request.ReturnURL),
 	}
 
 	portalSession, err := portalsession.New(params)

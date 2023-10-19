@@ -34,6 +34,7 @@ import { Navbar } from "./navbar";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 import { BiLockAlt } from 'react-icons/bi'
+import { createCheckoutSession } from "./stripe/client";
 
 ChartJS.register(
   CategoryScale,
@@ -488,8 +489,20 @@ export default function HomePage() {
               {user?.accountType === AccountType.BASIC &&
               investments.length >= 2 ? (
                 <div>
-                  You've reached the limit of 2 investments for a Basic account.
-                  Upgrade to Premium to track more.
+                  <div>
+                    You've reached the limit of 2 investments for a Basic
+                    account. Upgrade to Premium to track more.
+                  </div>
+                  {user && user.accountType == AccountType.BASIC && (
+                    <div className="mt-4">
+                      <button
+                        className="border w-full sm:w-auto px-3 py-2"
+                        onClick={createCheckoutSession}
+                      >
+                        Upgrade to Premium
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <AddInvestmentForm

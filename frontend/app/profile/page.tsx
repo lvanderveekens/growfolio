@@ -6,6 +6,7 @@ import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { AccountType, User, getAccountTypeLabel } from "../page";
+import { createCheckoutSession, createPortalSession } from "../stripe/client";
 
 export default function ProfilePage() {
 
@@ -26,24 +27,6 @@ export default function ProfilePage() {
           setUser(res.data);
         } 
       })
-  };
-
-  const createCheckoutSession = () => {
-    return api.post(`/v1/stripe/checkout-sessions`)
-    .then(res => {
-      if (res.status === 200) {
-        window.location.href = res.data.url;
-      }
-    })
-  };
-
-  const createPortalSession = () => {
-    return api.post(`/v1/stripe/portal-sessions`)
-    .then(res => {
-      if (res.status === 200) {
-        window.location.href = res.data.url;
-      }
-    })
   };
 
   return (
