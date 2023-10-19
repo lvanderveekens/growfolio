@@ -82,7 +82,7 @@ func (h StripeHandler) CreatePortalSession(c *gin.Context) (response[sessionDto]
 
 	params := &stripe.BillingPortalSessionParams{
 		Customer:  user.StripeCustomerID,
-		ReturnURL: stripe.String(frontendHost),
+		ReturnURL: stripe.String(frontendHost + "/profile"),
 	}
 
 	portalSession, err := portalsession.New(params)

@@ -5,7 +5,7 @@ import { Navbar } from "@/app/navbar";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
-import { User, getAccountTypeLabel } from "../page";
+import { AccountType, User, getAccountTypeLabel } from "../page";
 
 export default function ProfilePage() {
 
@@ -26,6 +26,24 @@ export default function ProfilePage() {
           setUser(res.data);
         } 
       })
+  };
+
+  const createCheckoutSession = () => {
+    return api.post(`/v1/stripe/checkout-sessions`)
+    .then(res => {
+      if (res.status === 200) {
+        window.location.href = res.data.url;
+      }
+    })
+  };
+
+  const createPortalSession = () => {
+    return api.post(`/v1/stripe/portal-sessions`)
+    .then(res => {
+      if (res.status === 200) {
+        window.location.href = res.data.url;
+      }
+    })
   };
 
   return (
@@ -61,11 +79,31 @@ export default function ProfilePage() {
                 <input
                   className="border w-full"
                   type="text"
-                  value={user && getAccountTypeLabel(user.accountType) || ""}
+                  value={(user && getAccountTypeLabel(user.accountType)) || ""}
                   disabled
                 />
               </label>
             </div>
+            {user && user.accountType == AccountType.BASIC && (
+              <div>
+                <button
+                  className="border w-full sm:w-auto px-3 py-2"
+                  onClick={createCheckoutSession}
+                >
+                  Upgrade to Premium
+                </button>
+              </div>
+            )}
+            {user && user.accountType == AccountType.PREMIUM && (
+              <div>
+                <button
+                  className="border w-full sm:w-auto px-3 py-2"
+                  onClick={createPortalSession}
+                >
+                  Manage subscription
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
