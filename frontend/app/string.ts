@@ -36,8 +36,6 @@ export function formatAsROIPercentage(number: number) {
 
   if (number > 0) {
     return `+${percentageString}`;
-  } else if (number < 0) {
-    return `-${percentageString}`;
   } else {
     return percentageString; 
   }
