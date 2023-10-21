@@ -25,6 +25,8 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		public.GET("/v1/auth/:provider/callback", createHandlerFunc(s.handlers.auth.Callback))
 
 		public.POST("/v1/stripe/webhook", createHandlerFunc(s.handlers.stripe.Webhook))
+
+		public.POST("/v1/contact", createHandlerFunc(s.handlers.contact.SendContactMessage))
 	}
 
 	private := r.Group("")

@@ -71,6 +71,7 @@ func main() {
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
 	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_WEBHOOK_SECRET"), userService)
+	contactHandler := api.NewContactHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_CONTACT_CHANNEL_ID"))
 
 	handlers := api.NewHandlers(
 		investmentHandler,
@@ -81,6 +82,7 @@ func main() {
 		settingsHandler,
 		feedbackHandler,
 		stripeHandler,
+		contactHandler,
 	)
 	middlewares := api.NewMiddlewares(api.TokenMiddleware(tokenService))
 	server := api.NewServer(

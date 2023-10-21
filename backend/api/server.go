@@ -82,6 +82,7 @@ type Handlers struct {
 	settings         SettingsHandler
 	feedback         FeedbackHandler
 	stripe           StripeHandler
+	contact          ContactHandler
 }
 
 func NewHandlers(
@@ -93,6 +94,7 @@ func NewHandlers(
 	settings SettingsHandler,
 	feedback FeedbackHandler,
 	stripe StripeHandler,
+	contact ContactHandler,
 ) Handlers {
 	return Handlers{
 		investment:       investment,
@@ -103,6 +105,7 @@ func NewHandlers(
 		settings:         settings,
 		feedback:         feedback,
 		stripe:           stripe,
+		contact:          contact,
 	}
 }
 
