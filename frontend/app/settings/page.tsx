@@ -48,8 +48,8 @@ export default function SettingsPage() {
   return (
     <>
       <Navbar />
-      <div className="p-4">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Settings</h1>
+      <div className="container mt-4">
+        <h1 className="text-3xl sm:text-3xl font-bold mb-4">Settings</h1>
         {loading && (
           <div className="mb-4">
             <ClipLoader

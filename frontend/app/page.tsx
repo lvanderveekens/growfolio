@@ -394,9 +394,9 @@ export default function HomePage() {
   return (
     <main>
       <Navbar />
-      <div className="p-4">
+      <div className="container mt-4">
         <div className="mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Overview</h1>
+          <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
           <div className="mb-4">
             <label className="">Date range</label>
@@ -412,6 +412,8 @@ export default function HomePage() {
               ))}
             </select>
           </div>
+
+          <h2 className="text-2xl font-bold mb-4">Value</h2>
 
           <div className="border p-12 text-center mb-4">
             <div className="font-bold text-3xl">
@@ -432,7 +434,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <h2 className="text-xl font-bold mb-4">Investments</h2>
+          <h2 className="text-2xl font-bold mb-4">Investments</h2>
 
           {loading && (
             <div className="mb-4">
@@ -447,7 +449,7 @@ export default function HomePage() {
             <div className="mb-4">There are no investments yet.</div>
           )}
           {!loading && investmentRows.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               {investmentRows.map((investmentRow) => {
                 return (
                   <Link
@@ -455,10 +457,7 @@ export default function HomePage() {
                     href={`/investments/${investmentRow.id}`}
                   >
                     {investmentRow.locked ? (
-                      <div
-                        key={investmentRow.id}
-                        className="relative border border-4 border-black"
-                      >
+                      <div key={investmentRow.id} className="relative">
                         <div className="absolute w-full h-full bg-white opacity-60"></div>
                         <div className="absolute w-full h-full flex items-center justify-center">
                           <BiLockAlt size={32} />
@@ -515,93 +514,85 @@ export default function HomePage() {
           )}
         </div>
 
+        <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
         {updateDataPoints.length > 0 && (
-          <div className="mb-4 flex gap-8 grid grid-cols-1 sm:grid-cols-2">
+          <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
             <div className="aspect-square">
-              <h1 className="text-xl font-bold mb-4">Allocation</h1>
-              <Pie
-                options={allocationPieOptions}
-                data={calculateAllocationPieData(investments)}
-              />
+              <h3 className="font-bold mb-4">Allocation</h3>
+              <div className="w-full h-full">
+                <Pie
+                  options={allocationPieOptions}
+                  data={calculateAllocationPieData(investments)}
+                />
+              </div>
             </div>
             <div className="aspect-square">
-              <h1 className="text-xl font-bold mb-4">Allocation by type</h1>
-              <Pie
-                options={allocationPieOptions}
-                data={calculateAllocationByTypePieData(investments)}
-              />
+              <h3 className="font-bold mb-4">Allocation by type</h3>
+              <div className="w-full h-full">
+                <Pie
+                  options={allocationPieOptions}
+                  data={calculateAllocationByTypePieData(investments)}
+                />
+              </div>
             </div>
-          </div>
-        )}
 
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">Principal and value</h1>
+            <div className="aspect-square">
+              <h3 className="font-bold mb-4">Principal and value</h3>
 
-            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              {settings && (
+              <div className="w-full h-full">
+                {settings && (
+                  <Line
+                    options={principalAndValueLineOptions(settings.currency)}
+                    data={buildPrincipalAndValueLineData(updateDataPoints)}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="aspect-square">
+              <h3 className="font-bold mb-4">ROI</h3>
+
+              <div className="w-full h-full">
                 <Line
-                  options={principalAndValueLineOptions(settings.currency)}
-                  data={buildPrincipalAndValueLineData(updateDataPoints)}
+                  options={roiLineOptions}
+                  data={buildROILineData(updateDataPoints)}
                 />
-              )}
+              </div>
             </div>
-          </div>
-        )}
+            <div className="aspect-square">
+              <h3 className="font-bold mb-4">Return</h3>
 
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">ROI</h1>
-
-            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              <Line
-                options={roiLineOptions}
-                data={buildROILineData(updateDataPoints)}
-              />
+              <div className="w-full h-full">
+                {settings && (
+                  <Line
+                    options={returnLineOptions(settings.currency)}
+                    data={buildReturnLineData(updateDataPoints)}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        )}
-
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">Return</h1>
-
-            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              {settings && (
-                <Line
-                  options={returnLineOptions(settings.currency)}
-                  data={buildReturnLineData(updateDataPoints)}
-                />
-              )}
+            <div className="aspect-square">
+              <h3 className="font-bold mb-4">Monthly growth</h3>
+              <div className="w-full h-full">
+                {settings && (
+                  <Bar
+                    options={monthlyGrowthBarOptions(settings.currency)}
+                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        )}
+            <div className="aspect-square">
+              <h3 className="font-bold mb-4">Yearly growth</h3>
 
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              {settings && (
-                <Bar
-                  options={monthlyGrowthBarOptions(settings.currency)}
-                  data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-                />
-              )}
-            </div>
-          </div>
-        )}
-
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4">
-            <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
-
-            <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
-              {settings && (
-                <Bar
-                  options={yearlyGrowthBarOptions(settings.currency)}
-                  data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-                />
-              )}
+              <div className="w-full h-full">
+                {settings && (
+                  <Bar
+                    options={yearlyGrowthBarOptions(settings.currency)}
+                    data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                  />
+                )}
+              </div>
             </div>
           </div>
         )}
