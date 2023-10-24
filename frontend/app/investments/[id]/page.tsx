@@ -157,23 +157,21 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   return (
     <>
       <Navbar />
-      <div className="p-4">
+      <div className="container mt-4">
         {loading && <p>Loading...</p>}
         {error && <p>Error: ${error}</p>}
         {investment && (
           <>
             <div className="mb-4">
-              <h1 className="text-2xl sm:text-3xl font-bold">
-                {investment.name}
+              <h1 className="text-3xl sm:text-3xl font-bold">
+                Investment: {investment.name}
               </h1>
             </div>
 
-            {investment.locked && (
-              <InvestmentIsLockedMessage />
-            )}
+            {investment.locked && <InvestmentIsLockedMessage />}
 
             <div className="mb-4">
-              <label className="font-bold">Date range:</label>
+              <label className="">Date range:</label>
               <select
                 value={selectedDateRange}
                 onChange={(e) => setSelectedDateRange(e.target.value)}
@@ -217,18 +215,18 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               )}
 
               <div>
-                <button className="w-full mb-2 border px-3 py-2 mr-4">
+                <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
                   <Link href={`/investments/${params.id}/updates`}>
                     View updates
                   </Link>
                 </button>
-                <button className="w-full mb-2 border px-3 py-2 mr-4">
+                <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
                   <Link href={`/investments/${params.id}/transactions`}>
                     View transactions
                   </Link>
                 </button>
                 <button
-                  className="w-full border mb-2 px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
+                  className="w-full lg:w-auto border mb-2 px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
                   onClick={() => setShowDeleteInvestmentModal(true)}
                 >
                   Delete investment
@@ -258,13 +256,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
             </div>
 
+            <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
             {updateDataPoints.length > 0 && (
-              <>
-                <div className="mb-4">
+              <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
+                <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">
                     Principal and value
                   </h1>
-                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                  <div className="w-full h-full">
                     {settings && (
                       <Line
                         options={principalAndValueLineOptions(
@@ -276,9 +276,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">Return</h1>
-                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                  <div className="w-full h-full">
                     {settings && (
                       <Line
                         options={returnLineOptions(settings.currency)}
@@ -288,9 +288,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">ROI</h1>
-                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                  <div className="w-full h-full">
                     <Line
                       options={roiLineOptions}
                       data={buildROILineData(updateDataPoints)}
@@ -298,9 +298,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
-                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                  <div className="w-full h-full">
                     {settings && (
                       <Bar
                         options={monthlyGrowthBarOptions(settings.currency)}
@@ -312,9 +312,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
-                  <div className="relative aspect-square sm:h-auto sm:aspect-[16/9]">
+                  <div className="w-full h-full">
                     {settings && (
                       <Bar
                         options={yearlyGrowthBarOptions(settings.currency)}
@@ -323,7 +323,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     )}
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </>
         )}

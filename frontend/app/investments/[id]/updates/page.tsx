@@ -85,9 +85,9 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <>
       <Navbar />
-      <div className="p-4">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">
-          {investment.name} updates
+      <div className="container mt-4">
+        <h1 className="text-3xl sm:text-3xl font-bold mb-4">
+          Updates: {investment.name}
         </h1>
 
         {investment.locked && (
@@ -138,7 +138,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         <div>
           <button
-            className="border w-full mb-2 px-3 py-2 disabled:opacity-40"
+            className="border w-full lg:w-auto mb-2 mr-4 px-3 py-2 disabled:opacity-40"
             type="submit"
             onClick={() => setShowUpdateInvestmentModal(true)}
             disabled={investment.locked}
@@ -161,7 +161,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             </Modal>
           )}
           <button
-            className="border w-full px-3 py-2 disabled:opacity-40"
+            className="border w-full lg:w-auto px-3 py-2 mr-4 disabled:opacity-40"
             type="submit"
             onClick={() => setShowImportUpdatesModal(true)}
             disabled={investment.locked}
