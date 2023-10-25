@@ -184,6 +184,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 ))}
               </select>
             </div>
+
+            <h2 className="text-2xl font-bold mb-4">Value</h2>
+
             <div className="mb-4">
               <div className="mb-4">
                 Last update: {findLastUpdate()?.date ?? "-"}
@@ -405,9 +408,6 @@ const returnLineOptions = (currency: string) => ({
     intersect: false,
   },
   plugins: {
-    legend: {
-      display: false,
-    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -527,9 +527,6 @@ const roiLineOptions: ChartOptions<"line"> = {
     intersect: false,
   },
   plugins: {
-    legend: {
-      display: false,
-    },
     tooltip: {
       callbacks: {
         label: function (context) {

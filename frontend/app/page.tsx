@@ -649,9 +649,6 @@ export const returnLineOptions = (currency: string) => ({
     intersect: false,
   },
   plugins: {
-    legend: {
-      display: false
-    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -693,9 +690,6 @@ export const roiLineOptions: ChartOptions = {
     intersect: false,
   },
   plugins: {
-    legend: {
-      display: false
-    },
     tooltip: {
       callbacks: {
         label: function (context) {
