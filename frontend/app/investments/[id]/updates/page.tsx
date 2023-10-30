@@ -1,13 +1,13 @@
 "use client"
 
 import Modal from "@/app/modal";
-import { Investment, InvestmentUpdate } from "@/app/page";
+import { Investment, InvestmentUpdate } from "@/app/overview-page";
 import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import AddUpdateForm from "../../add-update-form";
-import { Navbar } from "@/app/navbar";
+import { AppNavbar } from "@/app/nav/app-navbar";
 import { api } from "@/app/axios";
 import ImportUpdatesForm from "../../import-updates-form";
 import { Settings } from "@/app/settings/settings";
@@ -37,13 +37,13 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }, []);
 
   const fetchSettings = async () => {
-    api.get(`/v1/settings`).then((res) => {
+    api.get(`/settings`).then((res) => {
       setSettings(res.data);
     });
   };
 
   const fetchInvestment = () => {
-    api.get(`/v1/investments/${params.id}`)
+    api.get(`/investments/${params.id}`)
       .then((res) => setInvestment(res.data))
       .catch((error) => {
         console.error(`Error fetching investment: ${error}`);
@@ -53,7 +53,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
     }
 
   const fetchUpdates = () => {
-    api.get(`/v1/investment-updates?investmentId=${params.id}`)
+    api.get(`/investment-updates?investmentId=${params.id}`)
       .then((res) => setUpdates(res.data))
       .catch((error) => {
         console.error(`Error fetching updates: ${error}`);
@@ -63,7 +63,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }
 
   const deleteUpdate = async (id: string) => {
-    await api.delete(`/v1/investment-updates/${id}`);
+    await api.delete(`/investment-updates/${id}`);
   }
 
   if (loadingInvestment || loadingUpdates) {
@@ -84,7 +84,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
   return (
     <>
-      <Navbar />
+      <AppNavbar />
       <div className="container mt-4">
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">
           Updates: {investment.name}

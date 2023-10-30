@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import { Investment } from '../page';
+import { Investment } from '../overview-page';
 import DatePicker from "react-datepicker";
 import CurrencyInput from 'react-currency-input-field';
 
@@ -38,7 +38,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
       value: value! * 100,
     };
 
-    await api.post("/v1/investment-updates", req, {
+    await api.post("/investment-updates", req, {
       headers: {
         'Content-Type': 'application/json',
       },

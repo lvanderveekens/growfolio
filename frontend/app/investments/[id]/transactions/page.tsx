@@ -2,8 +2,8 @@
 
 import { api } from "@/app/axios";
 import Modal from "@/app/modal";
-import { Navbar } from "@/app/navbar";
-import { Investment } from "@/app/page";
+import { AppNavbar } from "@/app/nav/app-navbar";
+import { Investment } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
@@ -37,13 +37,13 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }, []);
 
   const fetchSettings = async () => {
-    api.get(`/v1/settings`).then((res) => {
+    api.get(`/settings`).then((res) => {
       setSettings(res.data);
     });
   };
 
   const fetchInvestment = () => {
-    api.get(`/v1/investments/${params.id}`)
+    api.get(`/investments/${params.id}`)
       .then((res) => setInvestment(res.data))
       .catch((error) => {
         console.error(`Error fetching investment: ${error}`);
@@ -53,7 +53,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
     }
 
   const fetchTransactions = () => {
-    api.get(`/v1/transactions?investmentId=${params.id}`)
+    api.get(`/transactions?investmentId=${params.id}`)
       .then((res) => setTransactions(res.data))
       .catch((error) => {
         console.error(`Error fetching transactions: ${error}`);
@@ -63,7 +63,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }
 
   const deleteTransaction = async (id: string) => {
-    await api.delete(`/v1/transactions/${id}`);
+    await api.delete(`/transactions/${id}`);
   }
 
   if (loadingInvestment || loadingTransactions) {
@@ -84,7 +84,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
 
   return (
     <>
-      <Navbar />
+      <AppNavbar />
       <div className="container mt-4">
         <h1 className="text-3xl font-bold mb-4">
           Transactions: {investment.name}

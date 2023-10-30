@@ -1,5 +1,5 @@
 import { Transaction, TransactionType } from "./investments/transaction";
-import { InvestmentUpdate } from "./page";
+import { InvestmentUpdate } from "./overview-page";
 
 export const calculateTotalPrincipalForDate = (
   date: string,

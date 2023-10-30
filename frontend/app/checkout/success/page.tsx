@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Navbar } from "@/app/navbar";
+import { AppNavbar } from "@/app/nav/app-navbar";
 import "chartjs-adapter-moment";
 import Link from "next/link";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
@@ -10,7 +10,7 @@ export default function CheckoutSuccessPage() {
 
   return (
     <>
-      <Navbar />
+      <AppNavbar />
       <div className="container mt-4">
         <div className="mt-8 mb-12 flex justify-center lg:justify-start">
           <IoCheckmarkCircleOutline className="text-green-400" size={96} />

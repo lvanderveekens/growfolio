@@ -42,7 +42,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       amount: amount! * 100,
     };
 
-    await api.post("/v1/transactions", req, {
+    await api.post("/transactions", req, {
       headers: {
         'Content-Type': 'application/json',
       },

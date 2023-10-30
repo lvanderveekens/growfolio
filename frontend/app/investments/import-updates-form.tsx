@@ -26,7 +26,7 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
     formData.append('csvFile', csvFile);
 
     // Make a POST request using Axios
-    const response = await api.post(`/v1/investments/${investmentId}/updates`, formData, {
+    const response = await api.post(`/investments/${investmentId}/updates`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

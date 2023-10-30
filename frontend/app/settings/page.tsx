@@ -1,7 +1,7 @@
 "use client"
 
 import { api } from "@/app/axios";
-import { Navbar } from "@/app/navbar";
+import { AppNavbar } from "@/app/nav/app-navbar";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { Currency, Settings } from "./settings";
@@ -24,7 +24,7 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     api
-      .get(`/v1/settings`)
+      .get(`/settings`)
       .then((res) => setSettings(res.data))
   };
 
@@ -32,7 +32,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setSuccessMessage(undefined);
     setErrorMessage(undefined);
-    api.put(`/v1/settings`, settings).then((res) => {
+    api.put(`/settings`, settings).then((res) => {
       if (res.status === 200) {
         setSuccessMessage("Settings saved.");
       } else {
@@ -47,7 +47,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Navbar />
+      <AppNavbar />
       <div className="container mt-4">
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">Settings</h1>
         {loading && (

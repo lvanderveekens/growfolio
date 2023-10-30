@@ -3,7 +3,7 @@ import { api } from "../axios";
 export const createCheckoutSession = () => {
   console.log();
   return api
-    .post(`/v1/stripe/checkout-sessions`, {
+    .post(`/stripe/checkout-sessions`, {
       cancelUrl: window.location.href,
     })
     .then((res) => {
@@ -15,7 +15,7 @@ export const createCheckoutSession = () => {
 
 export const createPortalSession = () => {
   return api
-    .post(`/v1/stripe/portal-sessions`, {
+    .post(`/stripe/portal-sessions`, {
       returnUrl: window.location.href,
     })
     .then((res) => {

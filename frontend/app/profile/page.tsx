@@ -1,11 +1,11 @@
 "use client"
 
 import { api } from "@/app/axios";
-import { Navbar } from "@/app/navbar";
+import { AppNavbar } from "@/app/nav/app-navbar";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
-import { AccountType, User, getAccountTypeLabel } from "../page";
+import { AccountType, User, getAccountTypeLabel } from "../overview-page";
 import { createCheckoutSession, createPortalSession } from "../stripe/client";
 
 export default function ProfilePage() {
@@ -21,7 +21,7 @@ export default function ProfilePage() {
   }, []);
 
   const fetchUser = async () => {
-    api.get("/v1/user")
+    api.get("/user")
       .then((res) => {
         if (res.status === 200) {
           setUser(res.data);
@@ -31,7 +31,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Navbar />
+      <AppNavbar />
       <div className="container mt-4">
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">Profile</h1>
         {loading && (

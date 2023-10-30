@@ -11,7 +11,7 @@ export default function AuthProviderCallbackPage({ params, }: { params: { provid
   const router = useRouter();
 
   useEffect(() => {
-    const baseUrl = `/v1/auth/${params.provider}/callback`;
+    const baseUrl = `/auth/${params.provider}/callback`;
     const urlWithQuery = `${baseUrl}${queryString}`;
 
     api.get(urlWithQuery)

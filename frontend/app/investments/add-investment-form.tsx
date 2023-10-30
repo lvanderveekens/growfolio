@@ -23,7 +23,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
       name: name!,
     };
 
-    api.post("/v1/investments", req, {
+    api.post("/investments", req, {
       headers: {
         'Content-Type': 'application/json',
       },

@@ -20,7 +20,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
           <button
             className="border border-black p-4 rounded-md w-full"
             onClick={() => {
-              router.push("/api/v1/auth/google");
+              router.push("/api/auth/google");
             }}
           >
             <div className="flex">

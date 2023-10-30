@@ -7,14 +7,14 @@ import { AiOutlineBarChart, AiOutlineStock, AiOutlineUser } from "react-icons/ai
 import { IoSettingsOutline } from "react-icons/io5";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { TbLogout } from 'react-icons/tb';
-import { api } from "./axios";
-import { FeedbackButton } from "./feedback/feedback-button";
-import { User } from "./page";
+import { api } from "../axios";
+import { FeedbackButton } from "../feedback/feedback-button";
+import { User } from "../overview-page";
 
-interface NavbarProps {
+interface AppNavbarProps {
 }
 
-export const Navbar: React.FC<NavbarProps> = () => {
+export const AppNavbar: React.FC<AppNavbarProps> = () => {
   const [user, setUser] = useState<User>();
   const [isLoadingUser, setLoadingUser] = useState<boolean>(true);
   const [isUserDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const fetchUser = async () => {
     setLoadingUser(true);
-    api.get("/v1/user")
+    api.get("/user")
       .then((res) => {
         if (res.status === 200) {
           setUser(res.data);
@@ -112,9 +112,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
             <button
               className={`hover:text-green-400`}
               onClick={() => {
-                api.post(`/v1/auth/logout`).then((res) => {
+                api.post(`/auth/logout`).then((res) => {
                   if (res.status === 200) {
-                    router.push("/login");
+                    router.push("/");
                   }
                 });
               }}
@@ -165,9 +165,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <button
                 className={`hover:text-green-400`}
                 onClick={() => {
-                  api.post(`/v1/auth/logout`).then((res) => {
+                  api.post(`/auth/logout`).then((res) => {
                     if (res.status === 200) {
-                      router.push("/login");
+                      router.push("/");
                     }
                   });
                 }}
