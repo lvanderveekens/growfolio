@@ -8,7 +8,6 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { TbLogout } from 'react-icons/tb';
 import { api } from "../axios";
-import { FeedbackButton } from "../feedback/feedback-button";
 
 interface LandingPageNavbarProps {
 }
@@ -23,8 +22,8 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
   };
 
   return (
-    <div className="pt-[80px]">
-      <nav className="fixed top-0 z-50 bg-white px-12 py-4 w-full sm:flex sm:items-center font-bold gap-12">
+    // <div className="pt-[80px]">
+      <nav className="sticky top-0 z-50 bg-white px-12 py-4 w-full sm:flex sm:items-center font-bold gap-12">
         <div className="flex justify-between items-center w-full sm:w-auto">
           <div className="text-3xl sm:text-4xl text-green-400">
             <Link href="/">
@@ -110,6 +109,6 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
           </div>
         </div>
       </nav>
-    </div>
+    // </div>
   );
 };
