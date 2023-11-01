@@ -4,6 +4,7 @@ import "chartjs-adapter-moment";
 import { LandingPageNavbar } from "./nav/landing-page-navbar";
 import { useState } from "react";
 import { api } from "./axios";
+import { useRouter } from "next/navigation";
 
 export interface SendContactMessageRequest {
   name: string;
@@ -12,6 +13,8 @@ export interface SendContactMessageRequest {
 }
 
 export default function LandingPage() {
+  const router = useRouter()
+
   const [contactName, setContactName] = useState<string>();
   const [contactEmail, setContactEmail] = useState<string>();
   const [contactMessage, setContactMessage] = useState<string>();
@@ -49,6 +52,10 @@ export default function LandingPage() {
       });
   };
 
+  const redirectToLogin = () => {
+    router.push("/login")
+  }
+
   return (
     <div>
       <LandingPageNavbar />
@@ -66,7 +73,7 @@ export default function LandingPage() {
                 Growfolio is an investment tracking app that helps you monitor
                 and manage your portfolio's growth and performance.
               </div>
-              <button className="px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl">
+              <button className="px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
                 Get Started for Free
               </button>
               <div>No credit card required.</div>
@@ -179,7 +186,7 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center">
-                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl">
+                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
                   Sign up
                 </button>
               </div>
@@ -200,7 +207,7 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center mt-auto">
-                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl">
+                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
                   Sign up
                 </button>
               </div>

@@ -113,7 +113,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               className={`hover:text-green-400`}
               onClick={() => {
                 api.post(`/auth/logout`).then((res) => {
-                  if (res.status === 200) {
+                  if (window.location.pathname === "/") {
+                    window.location.reload();
+                  } else {
                     router.push("/");
                   }
                 });
@@ -128,11 +130,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         </div>
 
         {/* mobile */}
-        <div
-          className={`${
-            isOpen ? "block" : "hidden"
-          } text-lg md:hidden`}
-        >
+        <div className={`${isOpen ? "block" : "hidden"} text-lg md:hidden`}>
           <div className="flex flex-col gap-2">
             {!isLoadingUser && user && (
               <div className="font-normal">{user.email}</div>
@@ -166,7 +164,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 className={`hover:text-green-400`}
                 onClick={() => {
                   api.post(`/auth/logout`).then((res) => {
-                    if (res.status === 200) {
+                    if (window.location.pathname === "/") {
+                      window.location.reload();
+                    } else {
                       router.push("/");
                     }
                   });
