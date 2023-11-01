@@ -62,18 +62,18 @@ export default function LandingPage() {
 
       {/* hero */}
       <div className="w-full">
-        <div className="mx-auto py-[177px] relative">
+        <div className="mx-auto py-[100px] lg:py-[150px] relative">
           <div className="absolute z-[-1] top-0 left-0 w-full h-full bg-[url('/hero-background.png')] bg-center blur-md"></div>
-          <div className="container grid">
-            <div className="w-2/4 mx-auto">
-              <div className="text-6xl font-bold mb-8">
+          <div className="container">
+            <div className="w-full lg:w-2/4 mx-auto">
+              <div className="text-5xl lg:text-6xl font-bold mb-8">
                 Watch your investment portfolio grow.
               </div>
               <div className="text-2xl mb-8">
                 Growfolio is an investment tracking app that helps you monitor
                 and manage your portfolio's growth and performance.
               </div>
-              <button className="px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
+              <button className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
                 Get Started for Free
               </button>
               <div>No credit card required.</div>
@@ -88,8 +88,8 @@ export default function LandingPage() {
           Why Growfolio?
         </h2>
 
-        <div className="grid grid-cols-12 items-center">
-          <div className="col-span-5">
+        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
+          <div className="lg:col-span-5">
             <div className="text-4xl font-bold mb-8">
               All investments in one place.
             </div>
@@ -99,7 +99,7 @@ export default function LandingPage() {
               between apps to get the big picture.
             </div>
           </div>
-          <div className="col-start-7 col-span-6">
+          <div className="lg:col-start-7 lg:col-span-6">
             <img
               src="/why-1.png"
               className="mx-auto w-auto max-w-full max-h-[550px]"
@@ -107,14 +107,14 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 mt-[100px] items-center">
-          <div className="col-span-6">
+        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+          <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-2.png"
               className="mx-auto w-auto max-w-full max-h-[550px]"
             />
           </div>
-          <div className="col-span-5 col-start-8">
+          <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
             <div className="text-4xl font-bold mb-8">
               Visualize your portfolio growth.
             </div>
@@ -126,8 +126,8 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 mt-[100px] items-center">
-          <div className="col-span-5">
+        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+          <div className="lg:col-span-5">
             <div className="text-4xl font-bold mb-8">Mobile-friendly.</div>
             <div className="text-2xl">
               Access your investment data anytime, anywhere, right from your
@@ -135,7 +135,7 @@ export default function LandingPage() {
               when you're on the move.
             </div>
           </div>
-          <div className="col-start-7 col-span-6">
+          <div className="lg:col-start-7 lg:col-span-6">
             <img
               src="/why-3.png"
               className="mx-auto w-auto max-w-full max-h-[550px]"
@@ -143,14 +143,14 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 mt-[100px] items-center">
-          <div className="col-span-6">
+        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+          <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-4.jpeg"
               className="mx-auto w-auto max-w-full max-h-[550px]"
             />
           </div>
-          <div className="col-span-5 col-start-8">
+          <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
             <div className="text-4xl font-bold mb-8">
               By an investor, for investors.
             </div>
@@ -167,7 +167,7 @@ export default function LandingPage() {
         <div className="container">
           <h2 className="text-4xl font-bold text-center mb-[100px]">Pricing</h2>
 
-          <div className="grid grid-cols-2 gap-[100px] text-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[100px] text-2xl">
             <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[100px]">
               <div className="text-4xl font-bold text-center mb-[50px]">
                 Basic
@@ -220,11 +220,11 @@ export default function LandingPage() {
       <div id="contact" className="py-[100px]">
         <h2 className="text-4xl font-bold text-center mb-[100px]">Contact</h2>
         <div className="container text-2xl ">
-          <div className="grid grid-cols-2 gap-[100px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[100px]">
             <div className="relative">
               <img
                 src="/contact.jpeg"
-                className="absolute w-full h-full object-cover"
+                className="aspect-square lg:aspect-auto lg:absolute lg:w-full lg:h-full object-cover"
               />
             </div>
             <div>
