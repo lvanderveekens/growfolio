@@ -3,11 +3,51 @@
 import "chartjs-adapter-moment";
 import { LandingPageNavbar } from "./nav/landing-page-navbar";
 import { useState } from "react";
+import { api } from "./axios";
+
+export interface SendContactMessageRequest {
+  name: string;
+  email: string;
+  message: string;
+}
 
 export default function LandingPage() {
   const [contactName, setContactName] = useState<string>();
   const [contactEmail, setContactEmail] = useState<string>();
   const [contactMessage, setContactMessage] = useState<string>();
+
+  const [contactSuccessMessage, setContactSuccessMessage] = useState<string>();
+  const [contactErrorMessage, setContactErrorMessage] = useState<string>();
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSuccessMessage(undefined);
+    setContactErrorMessage(undefined);
+
+    const req: SendContactMessageRequest = {
+      name: contactName!,
+      email: contactEmail!,
+      message: contactMessage!,
+    };
+
+    api
+      .post("/contact", req, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((res) => {
+        setContactSuccessMessage("Your message has been received!");
+      })
+      .catch((err) => {
+        setContactErrorMessage("Something went wrong... Please try again later.");
+      })
+      .finally(() => {
+        setContactName(undefined);
+        setContactEmail(undefined);
+        setContactMessage(undefined);
+      });
+  };
 
   return (
     <div>
@@ -172,15 +212,18 @@ export default function LandingPage() {
       {/* contact section */}
       <div id="contact" className="py-[100px]">
         <h2 className="text-4xl font-bold text-center mb-[100px]">Contact</h2>
-        <div className="container">
+        <div className="container text-2xl ">
           <div className="grid grid-cols-2 gap-[100px]">
             <div className="relative">
-              <img src="/contact.jpeg" className="absolute w-full h-full object-cover" />
+              <img
+                src="/contact.jpeg"
+                className="absolute w-full h-full object-cover"
+              />
             </div>
             <div>
               <form
-                className="h-full text-2xl flex flex-col"
-                onSubmit={() => console.log("submitting...")}
+                className="flex flex-col"
+                onSubmit={handleFormSubmit}
               >
                 <label className="">
                   <div className="mb-4">Name</div>
@@ -219,6 +262,16 @@ export default function LandingPage() {
                   Send
                 </button>
               </form>
+              {contactSuccessMessage && (
+                <div className="mt-[50px] ">
+                  {contactSuccessMessage}
+                </div>
+              )}
+              {contactErrorMessage && (
+                <div className="mt-[50px] text-red-500">
+                  {contactErrorMessage}
+                </div>
+              )}
             </div>
           </div>
         </div>
