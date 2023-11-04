@@ -32,13 +32,17 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = () => {
 
   return (
     <div>
-      {showModal && <FeedbackModal onClose={() => setShowModal(false)} onSubmit={handleSubmit} />}
-      <button
-        className="fixed bottom-4 right-4 bg-green-400 text-white py-2 px-4 rounded-full shadow-lg z-50"
-        onClick={handleClick}
-      >
-        <RiFeedbackLine size={32} />
-      </button>
+      {showModal && (
+        <FeedbackModal
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSubmit}
+        />
+      )}
+      <div className="fixed top-3/4 right-0 transform origin-bottom-left translate-x-full -rotate-90 z-10">
+        <button className="text-white font-bold bg-green-400 rounded-t-lg px-4 py-2 " onClick={handleClick}>
+          Feedback
+        </button>
+      </div>
     </div>
   );
 };
