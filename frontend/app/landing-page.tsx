@@ -67,15 +67,15 @@ export default function LandingPage() {
           <div className="absolute z-[-1] top-0 left-0 w-full h-full bg-[url('/hero-background.png')] bg-center blur-md"></div>
           <div className="container">
             <div className="w-full lg:w-2/4 mx-auto">
-              <div className="text-5xl lg:text-6xl font-bold mb-8">
+              <div className="text-4xl lg:text-6xl font-bold mb-8">
                 Watch your investment portfolio grow.
               </div>
-              <div className="text-2xl mb-8">
+              <div className="text-xl lg:text-2xl mb-8">
                 Growfolio is an investment tracking app that helps you monitor
                 and manage your portfolio's growth and performance.
               </div>
               <button
-                className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl"
+                className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-lg lg:text-2xl"
                 onClick={redirectToLogin}
               >
                 Get Started for Free
@@ -87,17 +87,17 @@ export default function LandingPage() {
       </div>
 
       {/* why section */}
-      <div id="why" className="container py-[100px]">
-        <h2 className="text-4xl font-bold text-center mb-[100px]">
+      <div id="why" className="container py-[50px] lg:py-[100px]">
+        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
           Why Growfolio?
         </h2>
 
-        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
           <div className="lg:col-span-5">
-            <div className="text-4xl font-bold mb-8">
+            <div className="text-xl lg:text-4xl font-bold mb-8">
               All investments in one place.
             </div>
-            <div className="text-2xl">
+            <div className="text-lg lg:text-2xl">
               Have all your investments, be it stocks, bonds, cryptocurrencies,
               or any asset, neatly organized in one place. No more flipping
               between apps to get the big picture.
@@ -111,7 +111,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
           <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-2.png"
@@ -119,10 +119,10 @@ export default function LandingPage() {
             />
           </div>
           <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-4xl font-bold mb-8">
+            <div className="text-2xl lg:text-4xl font-bold mb-8">
               Visualize your portfolio growth.
             </div>
-            <div className="text-2xl">
+            <div className="text-lg lg:text-2xl">
               Charts and graphs make it easy to understand your portfolio's
               performance at a glance. No more deciphering endless rows and
               columns of numbers.
@@ -130,10 +130,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
           <div className="lg:col-span-5">
-            <div className="text-4xl font-bold mb-8">Mobile-friendly.</div>
-            <div className="text-2xl">
+            <div className="text-xl lg:text-4xl font-bold mb-8">Mobile-friendly.</div>
+            <div className="text-lg lg:text-2xl">
               Access your investment data anytime, anywhere, right from your
               smartphone. Stay informed about your portfolio's performance, even
               when you're on the move.
@@ -147,7 +147,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
           <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-4.jpeg"
@@ -155,10 +155,10 @@ export default function LandingPage() {
             />
           </div>
           <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-4xl font-bold mb-8">
+            <div className="text-2xl lg:text-4xl font-bold mb-8">
               By an investor, for investors.
             </div>
-            <div className="text-2xl">
+            <div className="text-lg lg:text-2xl">
               Benefit from a platform developed by an active investor who
               understands your needs and priorities firsthand.
             </div>
@@ -167,16 +167,16 @@ export default function LandingPage() {
       </div>
 
       {/* pricing section */}
-      <div id="pricing" className="py-[100px] bg-[#F7F7F7]">
+      <div id="pricing" className="py-[50px] lg:py-[100px] bg-[#F7F7F7]">
         <div className="container">
-          <h2 className="text-4xl font-bold text-center mb-[100px]">Pricing</h2>
+          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Pricing</h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[100px] text-2xl">
-            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[100px]">
-              <div className="text-4xl font-bold text-center mb-[50px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
+            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+              <div className="text-2xl lg:text-4xl font-bold text-center mb-[50px]">
                 Basic
               </div>
-              <div className="text-6xl font-bold text-center mb-[100px]">
+              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
                 $0
               </div>
               <div className="mb-[50px]">
@@ -191,7 +191,7 @@ export default function LandingPage() {
               </div>
               <div className="text-center">
                 <button
-                  className="px-8 py-4 bg-green-400 font-bold text-white text-2xl"
+                  className="px-8 py-4 bg-green-400 font-bold text-white lg:text-2xl"
                   onClick={redirectToLogin}
                 >
                   Sign up
@@ -199,11 +199,11 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[100px]">
-              <div className="text-4xl font-bold text-center mb-[50px]">
+            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+              <div className="text-2xl lg:text-4xl font-bold text-center mb-[50px]">
                 Premium
               </div>
-              <div className="text-6xl font-bold text-center mb-[100px]">
+              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
                 $4.99/mo
               </div>
               <div className="mb-[50px]">
@@ -215,7 +215,7 @@ export default function LandingPage() {
               </div>
               <div className="text-center mt-auto">
                 <button
-                  className="px-8 py-4 bg-green-400 font-bold text-white text-2xl"
+                  className="px-8 py-4 bg-green-400 font-bold text-white lg:text-2xl"
                   onClick={redirectToLogin}
                 >
                   Sign up
@@ -227,10 +227,10 @@ export default function LandingPage() {
       </div>
 
       {/* contact section */}
-      <div id="contact" className="py-[100px]">
-        <h2 className="text-4xl font-bold text-center mb-[100px]">Contact</h2>
-        <div className="container text-2xl ">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[100px]">
+      <div id="contact" className="py-[50px] lg:py-[100px]">
+        <h2 className="text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
+        <div className="container lg:text-2xl ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px]">
             <div className="relative">
               <img
                 src="/contact.jpeg"
@@ -242,7 +242,7 @@ export default function LandingPage() {
                 <label className="">
                   <div className="mb-4">Name</div>
                   <input
-                    className="border border-black w-full mb-[50px]"
+                    className="border border-black w-full mb-4 lg:mb-[50px]"
                     type="text"
                     value={contactName || ""}
                     onChange={(e) => setContactName(e.target.value)}
@@ -252,7 +252,7 @@ export default function LandingPage() {
                 <label className="">
                   <div className="mb-4">Email</div>
                   <input
-                    className="border border-black w-full mb-[50px]"
+                    className="border border-black w-full mb-4 lg:mb-[50px]"
                     type="text"
                     value={contactEmail || ""}
                     onChange={(e) => setContactEmail(e.target.value)}
@@ -262,7 +262,7 @@ export default function LandingPage() {
                 <label className="">
                   <div className="mb-4">Message</div>
                   <textarea
-                    className="border border-black w-full mb-[50px] resize-none"
+                    className="border border-black w-full mb-4 lg:mb-[50px] resize-none"
                     rows={8}
                     value={contactMessage || ""}
                     onChange={(e) => setContactMessage(e.target.value)}
@@ -277,10 +277,10 @@ export default function LandingPage() {
                 </button>
               </form>
               {contactSuccessMessage && (
-                <div className="mt-[50px] ">{contactSuccessMessage}</div>
+                <div className="mt-4 lg:mt-[50px] ">{contactSuccessMessage}</div>
               )}
               {contactErrorMessage && (
-                <div className="mt-[50px] text-red-500">
+                <div className="mt-4 lg:mt-[50px] text-red-500">
                   {contactErrorMessage}
                 </div>
               )}

@@ -1,11 +1,11 @@
 "use client"
 
 import { api } from "@/app/axios";
-import { AppNavbar } from "@/app/nav/app-navbar";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { Currency, Settings } from "./settings";
 import ClipLoader from "react-spinners/ClipLoader";
+import AppLayout from "../app-layout";
 
 export default function SettingsPage() {
 
@@ -46,9 +46,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
-      <AppNavbar />
-      <div className="container mt-4">
+    <AppLayout>
+      <div className="container my-4">
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">Settings</h1>
         {loading && (
           <div className="mb-4">
@@ -92,6 +91,6 @@ export default function SettingsPage() {
           </form>
         )}
       </div>
-    </>
+    </AppLayout>
   );
 }

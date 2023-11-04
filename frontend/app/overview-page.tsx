@@ -5,8 +5,8 @@ import { InvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
 
 import {
-  CategoryScale,
   ArcElement,
+  CategoryScale,
   ChartData,
   Chart as ChartJS,
   ChartOptions,
@@ -23,17 +23,17 @@ import "chartjs-adapter-moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bar, Line, Pie } from "react-chartjs-2";
+import { BiLockAlt } from 'react-icons/bi';
 import ClipLoader from "react-spinners/ClipLoader";
+import AppLayout from "./app-layout";
 import { api } from "./axios";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
 import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
-import { AppNavbar } from "./nav/app-navbar";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
-import { BiLockAlt } from 'react-icons/bi'
 import { createCheckoutSession } from "./stripe/client";
 
 ChartJS.register(
@@ -392,219 +392,220 @@ export default function OverviewPage() {
     );
   }
   return (
-    <main>
-      <AppNavbar />
-      <div className="container mt-4">
-        <div className="mb-4">
-          <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
-
+    <AppLayout>
+      <main>
+        <div className="container my-4">
           <div className="mb-4">
-            <label className="">Date range</label>
-            <select
-              value={selectedDateRange}
-              onChange={(e) => setSelectedDateRange(e.target.value)}
-              className="w-full sm:w-auto border border-1 block"
-            >
-              {Object.values(DateRange).map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
+            <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-          <h2 className="text-2xl font-bold mb-4">Value</h2>
-
-          <div className="border p-12 text-center mb-4">
-            <div className="font-bold text-3xl">
-              {settings &&
-                formatAmountInCentsAsCurrencyString(
-                  totalValue,
-                  settings.currency
-                )}
-            </div>
-            <div className={`${getAmountTextColor(totalReturn)}`}>
-              {formatAsROIPercentage(totalRoi)} (
-              {settings &&
-                formatAmountInCentsAsCurrencyString(
-                  totalReturn,
-                  settings.currency
-                )}
-              )
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-bold mb-4">Investments</h2>
-
-          {loading && (
             <div className="mb-4">
-              <ClipLoader
-                size={28}
-                aria-label="Loading Spinner"
-                data-testid="loader"
-              />
+              <label className="">Date range</label>
+              <select
+                value={selectedDateRange}
+                onChange={(e) => setSelectedDateRange(e.target.value)}
+                className="w-full sm:w-auto border border-1 block"
+              >
+                {Object.values(DateRange).map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
-          {!loading && investmentRows.length === 0 && (
-            <div className="mb-4">There are no investments yet.</div>
-          )}
-          {!loading && investmentRows.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-              {investmentRows.map((investmentRow) => {
-                return (
-                  <Link
-                    key={investmentRow.id}
-                    href={`/investments/${investmentRow.id}`}
-                  >
-                    {investmentRow.locked ? (
-                      <div key={investmentRow.id} className="relative">
-                        <div className="absolute w-full h-full bg-white opacity-60"></div>
-                        <div className="absolute w-full h-full flex items-center justify-center">
-                          <BiLockAlt size={32} />
+
+            <h2 className="text-2xl font-bold mb-4">Value</h2>
+
+            <div className="border p-12 text-center mb-4">
+              <div className="font-bold text-3xl">
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    totalValue,
+                    settings.currency
+                  )}
+              </div>
+              <div className={`${getAmountTextColor(totalReturn)}`}>
+                {formatAsROIPercentage(totalRoi)} (
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    totalReturn,
+                    settings.currency
+                  )}
+                )
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold mb-4">Investments</h2>
+
+            {loading && (
+              <div className="mb-4">
+                <ClipLoader
+                  size={28}
+                  aria-label="Loading Spinner"
+                  data-testid="loader"
+                />
+              </div>
+            )}
+            {!loading && investmentRows.length === 0 && (
+              <div className="mb-4">There are no investments yet.</div>
+            )}
+            {!loading && investmentRows.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                {investmentRows.map((investmentRow) => {
+                  return (
+                    <Link
+                      key={investmentRow.id}
+                      href={`/investments/${investmentRow.id}`}
+                    >
+                      {investmentRow.locked ? (
+                        <div key={investmentRow.id} className="relative">
+                          <div className="absolute w-full h-full bg-white opacity-60"></div>
+                          <div className="absolute w-full h-full flex items-center justify-center">
+                            <BiLockAlt size={32} />
+                          </div>
+                          {renderInvestment(investmentRow)}
                         </div>
-                        {renderInvestment(investmentRow)}
+                      ) : (
+                        renderInvestment(investmentRow)
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            <button
+              className="border px-3 py-2 mb-4 w-full sm:w-auto"
+              type="submit"
+              onClick={() => setShowAddInvestmentModal(true)}
+            >
+              Add investment
+            </button>
+            {showAddInvestmentModal && (
+              <Modal
+                title="Add investment"
+                onClose={() => setShowAddInvestmentModal(false)}
+              >
+                {user?.accountType === AccountType.BASIC &&
+                investments.length >= 2 ? (
+                  <div>
+                    <div>
+                      You've reached the limit of 2 investments for a Basic
+                      account. Upgrade to Premium to track more.
+                    </div>
+                    {user && user.accountType == AccountType.BASIC && (
+                      <div className="mt-4">
+                        <button
+                          className="border w-full sm:w-auto px-3 py-2"
+                          onClick={createCheckoutSession}
+                        >
+                          Upgrade to Premium
+                        </button>
                       </div>
-                    ) : (
-                      renderInvestment(investmentRow)
                     )}
-                  </Link>
-                );
-              })}
+                  </div>
+                ) : (
+                  <AddInvestmentForm
+                    onAdd={(investmentId) => {
+                      router.push(`/investments/${investmentId}`);
+                    }}
+                  />
+                )}
+              </Modal>
+            )}
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
+          {updateDataPoints.length === 0 && (
+            <div>
+              <p className="mb-4">There are no updates yet.</p>
+              <p>Navigate to an investment to add updates.</p>
             </div>
           )}
 
-          <button
-            className="border px-3 py-2 mb-4 w-full sm:w-auto"
-            type="submit"
-            onClick={() => setShowAddInvestmentModal(true)}
-          >
-            Add investment
-          </button>
-          {showAddInvestmentModal && (
-            <Modal
-              title="Add investment"
-              onClose={() => setShowAddInvestmentModal(false)}
-            >
-              {user?.accountType === AccountType.BASIC &&
-              investments.length >= 2 ? (
-                <div>
-                  <div>
-                    You've reached the limit of 2 investments for a Basic
-                    account. Upgrade to Premium to track more.
-                  </div>
-                  {user && user.accountType == AccountType.BASIC && (
-                    <div className="mt-4">
-                      <button
-                        className="border w-full sm:w-auto px-3 py-2"
-                        onClick={createCheckoutSession}
-                      >
-                        Upgrade to Premium
-                      </button>
-                    </div>
+          {updateDataPoints.length > 0 && (
+            <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Allocation</h3>
+                <div className="w-full h-full">
+                  <Pie
+                    options={allocationPieOptions}
+                    data={calculateAllocationPieData(investments)}
+                  />
+                </div>
+              </div>
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Allocation by type</h3>
+                <div className="w-full h-full">
+                  <Pie
+                    options={allocationPieOptions}
+                    data={calculateAllocationByTypePieData(investments)}
+                  />
+                </div>
+              </div>
+
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Principal and value</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Line
+                      options={principalAndValueLineOptions(settings.currency)}
+                      data={buildPrincipalAndValueLineData(updateDataPoints)}
+                    />
                   )}
                 </div>
-              ) : (
-                <AddInvestmentForm
-                  onAdd={(investmentId) => {
-                    router.push(`/investments/${investmentId}`);
-                  }}
-                />
-              )}
-            </Modal>
+              </div>
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">ROI</h3>
+
+                <div className="w-full h-full">
+                  <Line
+                    options={roiLineOptions}
+                    data={buildROILineData(updateDataPoints)}
+                  />
+                </div>
+              </div>
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Return</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Line
+                      options={returnLineOptions(settings.currency)}
+                      data={buildReturnLineData(updateDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Monthly growth</h3>
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={monthlyGrowthBarOptions(settings.currency)}
+                      data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="aspect-square">
+                <h3 className="font-bold mb-4">Yearly growth</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={yearlyGrowthBarOptions(settings.currency)}
+                      data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
-
-        <h2 className="text-2xl font-bold mb-4">Performance</h2>
-
-        {updateDataPoints.length === 0 && (
-          <div>
-            <p className="mb-4">There are no updates yet.</p>
-            <p>Navigate to an investment to add updates.</p>
-          </div>
-        )}
-
-        {updateDataPoints.length > 0 && (
-          <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Allocation</h3>
-              <div className="w-full h-full">
-                <Pie
-                  options={allocationPieOptions}
-                  data={calculateAllocationPieData(investments)}
-                />
-              </div>
-            </div>
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Allocation by type</h3>
-              <div className="w-full h-full">
-                <Pie
-                  options={allocationPieOptions}
-                  data={calculateAllocationByTypePieData(investments)}
-                />
-              </div>
-            </div>
-
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Principal and value</h3>
-
-              <div className="w-full h-full">
-                {settings && (
-                  <Line
-                    options={principalAndValueLineOptions(settings.currency)}
-                    data={buildPrincipalAndValueLineData(updateDataPoints)}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">ROI</h3>
-
-              <div className="w-full h-full">
-                <Line
-                  options={roiLineOptions}
-                  data={buildROILineData(updateDataPoints)}
-                />
-              </div>
-            </div>
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Return</h3>
-
-              <div className="w-full h-full">
-                {settings && (
-                  <Line
-                    options={returnLineOptions(settings.currency)}
-                    data={buildReturnLineData(updateDataPoints)}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Monthly growth</h3>
-              <div className="w-full h-full">
-                {settings && (
-                  <Bar
-                    options={monthlyGrowthBarOptions(settings.currency)}
-                    data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="aspect-square">
-              <h3 className="font-bold mb-4">Yearly growth</h3>
-
-              <div className="w-full h-full">
-                {settings && (
-                  <Bar
-                    options={yearlyGrowthBarOptions(settings.currency)}
-                    data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+      </main>
+    </AppLayout>
   );
 }
 

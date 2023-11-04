@@ -2,7 +2,6 @@
 
 import { api } from "@/app/axios";
 import Modal from "@/app/modal";
-import { AppNavbar } from "@/app/nav/app-navbar";
 import { Investment } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
@@ -13,6 +12,7 @@ import AddTransactionForm from "../../add-transaction-form";
 import ImportTransactionsForm from "../../import-transactions-form";
 import { Transaction } from "../../transaction";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
+import AppLayout from "@/app/app-layout";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -83,9 +83,8 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }
 
   return (
-    <>
-      <AppNavbar />
-      <div className="container mt-4">
+    <AppLayout>
+      <div className="container my-4">
         <h1 className="text-3xl font-bold mb-4">
           Transactions: {investment.name}
         </h1>
@@ -184,6 +183,6 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
           )}
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }

@@ -1,17 +1,16 @@
 "use client"
 
+import AppLayout from "@/app/app-layout";
+import { api } from "@/app/axios";
 import Modal from "@/app/modal";
 import { Investment, InvestmentUpdate } from "@/app/overview-page";
+import { Settings } from "@/app/settings/settings";
 import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import AddUpdateForm from "../../add-update-form";
-import { AppNavbar } from "@/app/nav/app-navbar";
-import { api } from "@/app/axios";
 import ImportUpdatesForm from "../../import-updates-form";
-import { Settings } from "@/app/settings/settings";
-import { BiLockAlt } from "react-icons/bi";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
@@ -83,9 +82,8 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   }
 
   return (
-    <>
-      <AppNavbar />
-      <div className="container mt-4">
+    <AppLayout>
+      <div className="container my-4">
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">
           Updates: {investment.name}
         </h1>
@@ -184,6 +182,6 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
           )}
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }

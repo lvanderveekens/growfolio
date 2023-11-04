@@ -5,7 +5,6 @@ import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
-import { AppNavbar } from "@/app/nav/app-navbar";
 import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
@@ -29,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
+import AppLayout from "@/app/app-layout";
 
 ChartJS.register(
   ArcElement,
@@ -154,9 +154,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <>
-      <AppNavbar />
-      <div className="container mt-4">
+    <AppLayout>
+      <div className="container my-4">
         {loading && <p>Loading...</p>}
         {error && <p>Error: ${error}</p>}
         {investment && (
@@ -333,7 +332,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           </>
         )}
       </div>
-    </>
+    </AppLayout>
   );
 }
 
