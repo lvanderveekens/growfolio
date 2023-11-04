@@ -17,6 +17,10 @@ export const formatAmountInCentsAsReturnString = (amountInCents: number, currenc
 }
 
 export const formatAmountAsCurrencyString = (amount: number, currency: string) => {
+  if (isNaN(amount)) {
+    amount = 0;
+  }
+
   const locale = localesByCurrency[currency]
 
   return amount.toLocaleString(locale, {
@@ -28,16 +32,19 @@ export const formatAmountAsCurrencyString = (amount: number, currency: string) =
 };
 
 export function formatAsROIPercentage(number: number) {
+  if (isNaN(number)) {
+    number = 0;
+  }
   const percentageString = number.toLocaleString("nl-NL", {
     style: "percent",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })
+  });
 
   if (number > 0) {
     return `+${percentageString}`;
   } else {
-    return percentageString; 
+    return percentageString;
   }
 }
 

@@ -174,7 +174,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <select
                 value={selectedDateRange}
                 onChange={(e) => setSelectedDateRange(e.target.value)}
-                className="border border-1 block"
+                className="border border-1 block w-full lg:w-auto"
               >
                 {Object.values(DateRange).map((status) => (
                   <option key={status} value={status}>
@@ -191,30 +191,26 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 Last update: {findLastUpdate()?.date ?? "-"}
               </div>
 
-              {findLastUpdate() && (
-                <div className="border p-12 text-center mb-4">
-                  <div className="font-bold text-3xl">
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        findLastUpdate()!!.value,
-                        settings.currency
-                      )}
-                  </div>
-                  <div
-                    className={`${getAmountTextColor(
-                      findLastUpdate()!!.return
-                    )}`}
-                  >
-                    {formatAsROIPercentage(findLastUpdate()!!.roi)} (
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        findLastUpdate()!!.return,
-                        settings.currency
-                      )}
-                    )
-                  </div>
+              <div className="border p-12 text-center mb-4">
+                <div className="font-bold text-3xl">
+                  {settings &&
+                    formatAmountInCentsAsCurrencyString(
+                      findLastUpdate()?.value ?? 0,
+                      settings.currency
+                    )}
                 </div>
-              )}
+                <div
+                  className={`${getAmountTextColor(findLastUpdate()?.return ?? 0)}`}
+                >
+                  {formatAsROIPercentage(findLastUpdate()?.roi ?? 0)} (
+                  {settings &&
+                    formatAmountInCentsAsCurrencyString(
+                      findLastUpdate()?.return ?? 0,
+                      settings.currency
+                    )}
+                  )
+                </div>
+              </div>
 
               <div>
                 <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
@@ -259,6 +255,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
+            {updateDataPoints.length === 0 && (
+              <div>
+                <p className="mb-4">There are no updates yet.</p>
+                <p>Go to 'View updates' and click on 'Add update'.</p>
+              </div>
+            )}
 
             {updateDataPoints.length > 0 && (
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">

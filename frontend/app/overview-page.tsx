@@ -371,7 +371,7 @@ export default function OverviewPage() {
         <div className="flex justify-between">
           <div>ROI</div>
           <div className={`${getAmountTextColor(investmentRow.roi)}`}>
-            {formatAsROIPercentage(investmentRow.roi)}
+            {settings && formatAsROIPercentage(investmentRow.roi)}
           </div>
         </div>
         <div className="flex justify-between">
@@ -515,6 +515,13 @@ export default function OverviewPage() {
         </div>
 
         <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
+        {updateDataPoints.length === 0 && (
+          <div>
+            <p className="mb-4">There are no updates yet.</p>
+            <p>Navigate to an investment to add updates.</p>
+          </div>
+        )}
 
         {updateDataPoints.length > 0 && (
           <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
