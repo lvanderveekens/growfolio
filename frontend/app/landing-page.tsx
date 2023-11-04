@@ -5,6 +5,7 @@ import { LandingPageNavbar } from "./nav/landing-page-navbar";
 import { useState } from "react";
 import { api } from "./axios";
 import { useRouter } from "next/navigation";
+import Footer from "./footer";
 
 export interface SendContactMessageRequest {
   name: string;
@@ -73,7 +74,10 @@ export default function LandingPage() {
                 Growfolio is an investment tracking app that helps you monitor
                 and manage your portfolio's growth and performance.
               </div>
-              <button className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
+              <button
+                className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-2xl"
+                onClick={redirectToLogin}
+              >
                 Get Started for Free
               </button>
               <div>No credit card required.</div>
@@ -186,7 +190,10 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center">
-                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
+                <button
+                  className="px-8 py-4 bg-green-400 font-bold text-white text-2xl"
+                  onClick={redirectToLogin}
+                >
                   Sign up
                 </button>
               </div>
@@ -207,7 +214,10 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center mt-auto">
-                <button className="px-8 py-4 bg-green-400 font-bold text-white text-2xl" onClick={redirectToLogin}>
+                <button
+                  className="px-8 py-4 bg-green-400 font-bold text-white text-2xl"
+                  onClick={redirectToLogin}
+                >
                   Sign up
                 </button>
               </div>
@@ -228,10 +238,7 @@ export default function LandingPage() {
               />
             </div>
             <div>
-              <form
-                className="flex flex-col"
-                onSubmit={handleFormSubmit}
-              >
+              <form className="flex flex-col" onSubmit={handleFormSubmit}>
                 <label className="">
                   <div className="mb-4">Name</div>
                   <input
@@ -270,9 +277,7 @@ export default function LandingPage() {
                 </button>
               </form>
               {contactSuccessMessage && (
-                <div className="mt-[50px] ">
-                  {contactSuccessMessage}
-                </div>
+                <div className="mt-[50px] ">{contactSuccessMessage}</div>
               )}
               {contactErrorMessage && (
                 <div className="mt-[50px] text-red-500">
@@ -283,11 +288,7 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-
-      {/* footer */}
-      <div className="bg-black text-white text-2xl py-8 text-center">
-        © 2023 Growfolio
-      </div>
+      <Footer />
     </div>
   );
 }
