@@ -1984,6 +1984,11 @@
   "resolved" "https://registry.npmjs.org/pirates/-/pirates-4.0.6.tgz"
   "version" "4.0.6"
 
+"postcss-100vh-fix@^1.0.2":
+  "integrity" "sha512-t7vqk9AfjI4fXmWlQCEiMZFFhi1hro4WlECINI1TV6Qh1XapUJE++gCmNr95F5Hen/+bz1OmO+SiSB9TZmFmSg=="
+  "resolved" "https://registry.npmjs.org/postcss-100vh-fix/-/postcss-100vh-fix-1.0.2.tgz"
+  "version" "1.0.2"
+
 "postcss-import@^15.1.0":
   "integrity" "sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew=="
   "resolved" "https://registry.npmjs.org/postcss-import/-/postcss-import-15.1.0.tgz"

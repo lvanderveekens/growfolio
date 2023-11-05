@@ -23,6 +23,7 @@
     "moment": "^2.29.4",
     "next": "13.4.7",
     "postcss": "8.4.24",
+    "postcss-100vh-fix": "^1.0.2",
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-currency-input-field": "^3.6.11",

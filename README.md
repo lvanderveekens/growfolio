@@ -30,6 +30,8 @@ Track your investment portfolio 💰.
     (local) frontend $ make scp-build
     (server) frontend $ npm run start
 
+Build runs locally, because it's killed when done on the server due to lack of resources...
+
 ### Backend
 
     (local) backend $ make build-production
