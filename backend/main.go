@@ -73,6 +73,7 @@ func main() {
 	stripeHandler := api.NewStripeHandler(
 		os.Getenv("STRIPE_KEY"),
 		os.Getenv("STRIPE_WEBHOOK_SECRET"),
+		os.Getenv("STRIPE_PRICE_ID"),
 		userService,
 		os.Getenv("FRONTEND_HOST"),
 	)

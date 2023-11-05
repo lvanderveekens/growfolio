@@ -15,6 +15,6 @@ func NewSettings(userID string, currency Currency) Settings {
 func DefaultSettings(userID string) Settings {
 	return Settings{
 		UserID:   userID,
-		Currency: CurrencyEuro,
+		Currency: CurrencyUSDollar,
 	}
 }
