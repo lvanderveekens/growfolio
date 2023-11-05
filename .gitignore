@@ -23,5 +23,6 @@ go.work
 main
 
 backend/.env
+backend/.env.prd
 
 .DS_Store
