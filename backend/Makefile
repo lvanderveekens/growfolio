@@ -14,6 +14,6 @@ build-production:
 run-production:
 	./${BINARY_NAME} 2>&1 > output.log &
 
-scp-to-server:
+scp-build:
 	scp .env.prd root@${SERVER_IP}:/root/growfolio/backend/.env
 	scp ${BINARY_NAME} root@${SERVER_IP}:/root/growfolio/backend
