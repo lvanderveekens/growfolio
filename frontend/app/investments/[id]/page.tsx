@@ -5,7 +5,7 @@ import { calculateTotalPrincipalForDate } from "@/app/calculator";
 import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
-import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
+import { DateRange, Investment, InvestmentUpdate, MonthlyDataPoint, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
 import {
@@ -53,7 +53,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
-  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
+  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyDataPoint[]>([])
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
 
   const [showDeleteInvestmentModal, setShowDeleteInvestmentModal] = useState<boolean>(false);
@@ -571,13 +571,6 @@ interface UpdateDataPoint {
   roi: number;
 }
 
-interface MonthlyChangeDataPoint {
-  yearMonth: string;
-  value: number;
-  principal: number;
-  return: number;
-}
-
 const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
   return {
     datasets: [
@@ -595,7 +588,7 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
 };
 
 export const buildMonthlyGrowthBarData = (
-  monthlyChangeDataPoints: MonthlyChangeDataPoint[]
+  monthlyChangeDataPoints: MonthlyDataPoint[]
 ): ChartData<"bar"> => {
   return {
     datasets: [

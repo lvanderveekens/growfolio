@@ -60,7 +60,7 @@ export default function OverviewPage() {
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
   
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
-  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
+  const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
   
   const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
@@ -788,7 +788,7 @@ export interface UpdateDataPoint {
   roi: number;
 }
 
-export interface MonthlyChangeDataPoint {
+export interface MonthlyDataPoint {
   yearMonth: string;
   value: number;
   principal: number;
@@ -912,67 +912,154 @@ export function convertToDate(range: DateRange): Date | null {
   return date
 }
 
-export const calculateMonthlyChangeDataPoints = (
+// export const calculateMonthlyChangeDataPointsOld = (
+//   updateDataPoints: UpdateDataPoint[]
+// ) => {
+//   const firstAndLastUpdatesByYearMonth = new Map<
+//     string,
+//     [UpdateDataPoint, UpdateDataPoint]
+//   >();
+
+//   let currentYearMonth: string | null = null;
+//   let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
+
+//   for (const updateDataPoint of updateDataPoints) {
+//     const yearMonth = updateDataPoint.date.substr(0, 7);
+//     if (yearMonth !== currentYearMonth) {
+//       currentYearMonth = yearMonth;
+//       firstUpdateOfYearMonth = updateDataPoint;
+
+//       firstAndLastUpdatesByYearMonth.set(yearMonth, [
+//         firstUpdateOfYearMonth!!,
+//         firstUpdateOfYearMonth!!,
+//       ]);
+//     } else {
+//       firstAndLastUpdatesByYearMonth.set(yearMonth, [
+//         firstUpdateOfYearMonth!!,
+//         updateDataPoint,
+//       ]);
+//     }
+//   }
+
+//   const dataPoints: MonthlyChangeDataPoint[] = [];
+//   const firstAndLastUpdatesByYearMonthEntries = Array.from(
+//     firstAndLastUpdatesByYearMonth.entries()
+//   );
+
+//   for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
+//     const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
+
+//     if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
+//       dataPoints.push({
+//         yearMonth: currentYearMonth[0],
+//         value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
+//         principal:
+//           currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
+//         return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
+//       });
+//       break;
+//     }
+
+//     const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
+
+//     dataPoints.push({
+//       yearMonth: currentYearMonth[0],
+//       value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
+//       principal:
+//         nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
+//       return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
+//     });
+//   }
+
+//   return dataPoints;
+// }; 
+
+// Function to interpolate monthly data
+export function calculateMonthlyChangeDataPoints(
   updateDataPoints: UpdateDataPoint[]
-) => {
-  const firstAndLastUpdatesByYearMonth = new Map<
-    string,
-    [UpdateDataPoint, UpdateDataPoint]
-  >();
+): MonthlyDataPoint[] {
+  console.log("updateDataPoints") 
+  console.log(updateDataPoints) 
 
-  let currentYearMonth: string | null = null;
-  let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
+  const monthlyChangeDataPoints: MonthlyDataPoint[] = [];
+  const monthlyDataPoints = interpolateMissingMonths(updateDataPoints)
+  console.log("monthly data points") 
+  console.log(monthlyDataPoints)
 
-  for (const updateDataPoint of updateDataPoints) {
-    const yearMonth = updateDataPoint.date.substr(0, 7);
-    if (yearMonth !== currentYearMonth) {
-      currentYearMonth = yearMonth;
-      firstUpdateOfYearMonth = updateDataPoint;
-
-      firstAndLastUpdatesByYearMonth.set(yearMonth, [
-        firstUpdateOfYearMonth!!,
-        firstUpdateOfYearMonth!!,
-      ]);
-    } else {
-      firstAndLastUpdatesByYearMonth.set(yearMonth, [
-        firstUpdateOfYearMonth!!,
-        updateDataPoint,
-      ]);
-    }
-  }
-
-  const dataPoints: MonthlyChangeDataPoint[] = [];
-  const firstAndLastUpdatesByYearMonthEntries = Array.from(
-    firstAndLastUpdatesByYearMonth.entries()
-  );
-
-  for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
-    const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
-
-    if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
-      dataPoints.push({
-        yearMonth: currentYearMonth[0],
-        value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
-        principal:
-          currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
-        return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
-      });
-      break;
-    }
-
-    const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
-
-    dataPoints.push({
-      yearMonth: currentYearMonth[0],
-      value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
-      principal:
-        nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
-      return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
+  if (monthlyDataPoints.length > 0) {
+    monthlyChangeDataPoints.push({
+      yearMonth: monthlyDataPoints[0].yearMonth,
+      value: monthlyDataPoints[0].value,
+      principal: 0,
+      return: 0,
     });
   }
 
-  return dataPoints;
-}; 
+  for (let i = 1; i < monthlyDataPoints.length; i++) {
+    monthlyChangeDataPoints.push({
+      yearMonth: monthlyDataPoints[i].yearMonth,
+      value: monthlyDataPoints[i].value - monthlyDataPoints[i - 1].value,
+      principal:
+        monthlyDataPoints[i].principal - monthlyDataPoints[i - 1].principal,
+      return: monthlyDataPoints[i].return - monthlyDataPoints[i - 1].return,
+    });
+  }
+
+  return monthlyChangeDataPoints;
+}
+
+export function interpolateMissingMonths(updateDataPoints: UpdateDataPoint[]): MonthlyDataPoint[] {
+  const monthlyDataPoints: MonthlyDataPoint[] = [];
+
+  for (let i = 0; i < updateDataPoints.length - 1; i++) {
+    const currentUpdate = updateDataPoints[i];
+    const nextUpdate = updateDataPoints[i + 1];
+
+    const startDate = new Date(currentUpdate.date);
+    const endDate = new Date(nextUpdate.date);
+
+    // Calculate number of months between two updates
+    const monthsDiff =
+      (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+      (endDate.getMonth() - startDate.getMonth());
+
+    // Interpolate monthly values
+    for (let j = 0; j < monthsDiff; j++) {
+      const newDate = new Date(startDate);
+      newDate.setMonth(startDate.getMonth() + j, 1);
+
+      const interpolatedValue =
+        currentUpdate.value +
+        ((nextUpdate.value - currentUpdate.value) / monthsDiff) * j;
+
+      const interpolatedPrincipal =
+        currentUpdate.principal +
+        ((nextUpdate.principal - currentUpdate.principal) / monthsDiff) * j;
+
+      monthlyDataPoints.push({
+        yearMonth: newDate.toISOString().slice(0, 7),
+        value: interpolatedValue,
+        principal: interpolatedPrincipal,
+        return: interpolatedValue - interpolatedPrincipal,
+      });
+    }
+  }
+
+  // add last point
+
+  const lastUpdate = updateDataPoints[updateDataPoints.length - 1];
+  if (lastUpdate) {
+    monthlyDataPoints.push({
+      yearMonth: lastUpdate.date.slice(0, 7),
+      value: lastUpdate.value,
+      principal: lastUpdate.principal,
+      return: lastUpdate.value - lastUpdate.principal,
+    });
+  }
+
+  return monthlyDataPoints;
+
+}
 
 export const getAmountTextColor = (amount: number) => {
   if (amount > 0) {
@@ -983,3 +1070,14 @@ export const getAmountTextColor = (amount: number) => {
   }
   return ""
 }
+
+// console.log(
+//   calculateMonthlyChangeDataPoints([
+//     { date: "2022-01-01", value: 100, principal: 100, return: 0, roi: 0 },
+//     { date: "2022-05-01", value: 1000, principal: 200, return: 0, roi: 0 },
+//     { date: "2022-06-15", value: 1100, principal: 100, return: 0, roi: 0 },
+//     { date: "2022-06-20", value: 1200, principal: 100, return: 0, roi: 0 },
+//     { date: "2022-07-01", value: 1200, principal: 350, return: 0, roi: 0 },
+//     { date: "2022-09-05", value: 1400, principal: 700, return: 0, roi: 0 },
+//   ])
+// );
