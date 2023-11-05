@@ -18,19 +18,22 @@ import (
 
 type StripeHandler struct {
 	stripeWebhookSecret string
+	stripePriceID       string
 	userService         services.UserService
 	frontendHost        string
 }
 
 func NewStripeHandler(
 	stripeKey,
-	stripeWebhookSecret string,
+	stripeWebhookSecret,
+	stripePriceID string,
 	userService services.UserService,
 	frontendHost string,
 ) StripeHandler {
 	stripe.Key = stripeKey
 	return StripeHandler{
 		stripeWebhookSecret: stripeWebhookSecret,
+		stripePriceID:       stripePriceID,
 		userService:         userService,
 		frontendHost:        frontendHost,
 	}
@@ -66,7 +69,7 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 	params := &stripe.CheckoutSessionParams{
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Price:    stripe.String("price_1O1CwUAyXSBS0v1N9WDxsPBd"),
+				Price:    stripe.String(h.stripePriceID),
 				Quantity: stripe.Int64(1),
 			},
 		},
