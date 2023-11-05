@@ -14,12 +14,17 @@ type Server struct {
 
 	gorillaSessionsSecret string
 
+	frontendHost string
+
 	handlers    Handlers
 	middlewares Middlewares
 }
 
 func NewServer(
-	googleClientId, googleClientSecret, gorillaSessionsSecret string,
+	googleClientId,
+	googleClientSecret,
+	gorillaSessionsSecret,
+	frontendHost string,
 	handlers Handlers,
 	middlewares Middlewares,
 ) Server {
@@ -27,6 +32,7 @@ func NewServer(
 		googleClientId:        googleClientId,
 		googleClientSecret:    googleClientSecret,
 		gorillaSessionsSecret: gorillaSessionsSecret,
+		frontendHost:          frontendHost,
 		handlers:              handlers,
 		middlewares:           middlewares,
 	}

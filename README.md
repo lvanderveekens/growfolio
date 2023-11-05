@@ -26,22 +26,8 @@ Track your investment portfolio 💰.
 
 ### Frontend
 
-#### Run production build
-
     (local) frontend $ npm run build
-
-Verify there are no errors...
-
-#### Copy build to server
-
     (local) frontend $ make scp-build
-
-#### Log in to server
-
-    (local) $ ssh root@161.35.247.132
-
-#### Start frontend
-
     (server) frontend $ npm run start
 
 ### Backend

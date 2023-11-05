@@ -14,13 +14,14 @@ import (
 type AuthHandler struct {
 	userRepository services.UserRepository
 	tokenService   TokenService
+	domain         string
 }
 
-func NewAuthHandler(userRepository services.UserRepository, tokenService TokenService) AuthHandler {
-	return AuthHandler{userRepository: userRepository, tokenService: tokenService}
+func NewAuthHandler(userRepository services.UserRepository, tokenService TokenService, domain string) AuthHandler {
+	return AuthHandler{userRepository: userRepository, tokenService: tokenService, domain: domain}
 }
 
-func (h *AuthHandler) Begin(c *gin.Context) (response[empty], error) {
+func (h AuthHandler) Begin(c *gin.Context) (response[empty], error) {
 	gothic.GetProviderName = getProviderName(c)
 	if user, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
 		fmt.Printf("Hi, %#v\n", user)
@@ -31,7 +32,7 @@ func (h *AuthHandler) Begin(c *gin.Context) (response[empty], error) {
 	return newEmptyResponse(http.StatusOK), nil
 }
 
-func (h *AuthHandler) Callback(c *gin.Context) (response[empty], error) {
+func (h AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 	gothic.GetProviderName = getProviderName(c)
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
@@ -49,16 +50,16 @@ func (h *AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 	}
 
 	// TODO: get exp from token?
-	c.SetCookie("token", jwt, 60*60*2, "/", "localhost", false, true)
+	c.SetCookie("token", jwt, 60*60*2, "/", h.domain, false, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
-func (h *AuthHandler) LogOut(c *gin.Context) (response[empty], error) {
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+func (h AuthHandler) LogOut(c *gin.Context) (response[empty], error) {
+	c.SetCookie("token", "", -1, "/", h.domain, false, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
-func (h *AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) {
+func (h AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) {
 	user, err := h.userRepository.FindByID(gothUser.UserID)
 	if err != nil {
 		if err == domain.ErrUserNotFound {

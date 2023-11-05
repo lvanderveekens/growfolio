@@ -16,7 +16,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	gothic.Store = store
 
 	goth.UseProviders(
-		google.New(s.googleClientId, s.googleClientSecret, "http://localhost:8080/auth/google/callback"),
+		google.New(s.googleClientId, s.googleClientSecret, s.frontendHost+"/auth/google/callback"),
 	)
 
 	public := r.Group("")

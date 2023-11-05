@@ -16,20 +16,23 @@ import (
 	"github.com/stripe/stripe-go/v75/webhook"
 )
 
-const (
-	frontendHost = "http://localhost:8080"
-)
-
 type StripeHandler struct {
 	stripeWebhookSecret string
 	userService         services.UserService
+	frontendHost        string
 }
 
-func NewStripeHandler(stripeKey, stripeWebhookSecret string, userService services.UserService) StripeHandler {
+func NewStripeHandler(
+	stripeKey,
+	stripeWebhookSecret string,
+	userService services.UserService,
+	frontendHost string,
+) StripeHandler {
 	stripe.Key = stripeKey
 	return StripeHandler{
 		stripeWebhookSecret: stripeWebhookSecret,
 		userService:         userService,
+		frontendHost:        frontendHost,
 	}
 }
 
@@ -68,7 +71,7 @@ func (h StripeHandler) CreateCheckoutSession(c *gin.Context) (response[sessionDt
 			},
 		},
 		Mode:          stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-		SuccessURL:    stripe.String(frontendHost + "/checkout/success"),
+		SuccessURL:    stripe.String(h.frontendHost + "/checkout/success"),
 		CancelURL:     stripe.String(request.CancelURL),
 		CustomerEmail: stripe.String(user.Email),
 	}

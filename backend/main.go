@@ -66,11 +66,16 @@ func main() {
 	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(transactionService, investmentService)
-	authHandler := api.NewAuthHandler(&userRepository, tokenService)
+	authHandler := api.NewAuthHandler(&userRepository, tokenService, os.Getenv("DOMAIN"))
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
-	stripeHandler := api.NewStripeHandler(os.Getenv("STRIPE_KEY"), os.Getenv("STRIPE_WEBHOOK_SECRET"), userService)
+	stripeHandler := api.NewStripeHandler(
+		os.Getenv("STRIPE_KEY"),
+		os.Getenv("STRIPE_WEBHOOK_SECRET"),
+		userService,
+		os.Getenv("FRONTEND_HOST"),
+	)
 	contactHandler := api.NewContactHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_CONTACT_CHANNEL_ID"))
 
 	handlers := api.NewHandlers(
@@ -89,6 +94,7 @@ func main() {
 		os.Getenv("GOOGLE_CLIENT_ID"),
 		os.Getenv("GOOGLE_CLIENT_SECRET"),
 		os.Getenv("GORILLA_SESSIONS_SECRET"),
+		os.Getenv("FRONTEND_HOST"),
 		handlers,
 		middlewares,
 	)
