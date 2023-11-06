@@ -28,7 +28,8 @@ Track your investment portfolio 💰.
 
     (local) frontend $ npm run build
     (local) frontend $ make scp-build
-    (server) frontend $ npm run start
+
+TODO: how to start new deploy using pm2?
 
 Build runs locally, because it's killed when done on the server due to lack of resources...
 
