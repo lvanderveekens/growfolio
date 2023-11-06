@@ -9,26 +9,27 @@ import (
 )
 
 type TokenService struct {
-	jwtSecret string
+	jwtSecret          string
+	JwtExireAfterHours int
 }
 
-func NewTokenService(jwtSecret string) TokenService {
+func NewTokenService(jwtSecret string, jwtExpireAfterHours int) TokenService {
 	return TokenService{
-		jwtSecret: jwtSecret,
+		jwtSecret:          jwtSecret,
+		JwtExireAfterHours: jwtExpireAfterHours,
 	}
 }
 
-func (s *TokenService) generateToken(userID string) (string, error) {
-	// TODO: move exp to .env
+func (s TokenService) generateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":    time.Now().Add(2 * time.Hour).Unix(),
+		"exp":    time.Now().Add(time.Duration(s.JwtExireAfterHours) * time.Hour).Unix(),
 		"userId": userID,
 	})
 
 	return token.SignedString([]byte(s.jwtSecret))
 }
 
-func (s *TokenService) validateToken(tokenString string) (*jwt.Token, error) {
+func (s TokenService) validateToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

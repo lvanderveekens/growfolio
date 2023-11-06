@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"growfolio/api"
@@ -57,7 +58,7 @@ func main() {
 	userRepository := postgres.NewUserRepository(db)
 	settingsRepository := postgres.NewSettingsRepository(db)
 
-	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"))
+	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"), mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")))
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository)
 	transactionService := services.NewTransactionService(transactionRepository)
@@ -101,4 +102,12 @@ func main() {
 	)
 
 	log.Fatal(server.Start(8888))
+}
+
+func mustParseInt(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }

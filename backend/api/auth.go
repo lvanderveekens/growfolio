@@ -49,8 +49,7 @@ func (h AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 		return response[empty]{}, fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	// TODO: get exp from token?
-	c.SetCookie("token", jwt, 60*60*2, "/", h.domain, false, true)
+	c.SetCookie("token", jwt, h.tokenService.JwtExireAfterHours*60*60, "/", h.domain, true, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 
