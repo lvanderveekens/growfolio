@@ -946,28 +946,15 @@ export const calculateMonthlyChangeDataPoints = (
     firstAndLastUpdatesByYearMonth.entries()
   );
 
-  for (let i = 0; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
+  for (let i = 1; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
+    const previousYearMonth = firstAndLastUpdatesByYearMonthEntries[i - 1];
     const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
-
-    if (i === firstAndLastUpdatesByYearMonthEntries.length - 1) {
-      dataPoints.push({
-        yearMonth: currentYearMonth[0],
-        value: currentYearMonth[1][1].value - currentYearMonth[1][0].value,
-        principal:
-          currentYearMonth[1][1].principal - currentYearMonth[1][0].principal,
-        return: currentYearMonth[1][1].return - currentYearMonth[1][0].return,
-      });
-      break;
-    }
-
-    const nextYearMonth = firstAndLastUpdatesByYearMonthEntries[i + 1];
 
     dataPoints.push({
       yearMonth: currentYearMonth[0],
-      value: nextYearMonth[1][0].value - currentYearMonth[1][0].value,
-      principal:
-        nextYearMonth[1][0].principal - currentYearMonth[1][0].principal,
-      return: nextYearMonth[1][0].return - currentYearMonth[1][0].return,
+      value: currentYearMonth[1][1].value - previousYearMonth[1][1].value,
+      principal: currentYearMonth[1][1].principal - previousYearMonth[1][1].principal,
+      return: currentYearMonth[1][1].return - previousYearMonth[1][1].return,
     });
   }
 
