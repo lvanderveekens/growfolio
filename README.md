@@ -28,8 +28,11 @@ Track your investment portfolio 💰.
 
     (local) frontend $ npm run build
     (local) frontend $ make scp-build
-    (server) frontend $ pm2 stop nextjs
-    (server) frontend $ pm2 start npm --name "nextjs" -- start
+
+TODO:
+    (server) frontend $ pm2 reload nextjs???
+    (server) frontend $ pm2 stop nextjs???
+    (server) frontend $ pm2 start npm --name "nextjs" -- start???
 
 Build runs locally, because it's killed when done on the server due to lack of resources...
 
