@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { api } from "@/app/axios";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export default function AuthProviderCallbackPage({ params, }: { params: { provider: string } }) {
   const queryString = window.location.search;
@@ -23,5 +24,9 @@ export default function AuthProviderCallbackPage({ params, }: { params: { provid
       });
   }, []);
 
-  return <div>Processing callback</div>;
+  return (
+    <div className="w-screen h-screen flex items-center justify-center">
+      <ClipLoader size={64} aria-label="Loading Spinner" data-testid="loader" />
+    </div>
+  );
 }
