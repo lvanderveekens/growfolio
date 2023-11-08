@@ -839,26 +839,25 @@ export const calculateYearlyChangeDataPoints = (
     firstAndLastUpdatesByYear.entries()
   );
 
-  for (let i = 0; i < firstAndLastUpdatesByYearEntries.length; i++) {
+  for (let i = 1; i < firstAndLastUpdatesByYearEntries.length; i++) {
+    const previousYear = firstAndLastUpdatesByYearEntries[i - 1];
     const currentYear = firstAndLastUpdatesByYearEntries[i];
 
-    if (i === firstAndLastUpdatesByYearEntries.length - 1) {
+    if (i == 1) {
+      // add first year
       dataPoints.push({
-        year: currentYear[0],
-        value: currentYear[1][1].value - currentYear[1][0].value,
-        principal: currentYear[1][1].principal - currentYear[1][0].principal,
-        return: currentYear[1][1].return - currentYear[1][0].return,
+        year: previousYear[0],
+        value: previousYear[1][1].value - previousYear[1][0].value,
+        principal: previousYear[1][1].principal - previousYear[1][0].principal,
+        return: previousYear[1][1].return - previousYear[1][0].return,
       });
-      break;
     }
-
-    const nextYear = firstAndLastUpdatesByYearEntries[i + 1];
 
     dataPoints.push({
       year: currentYear[0],
-      value: nextYear[1][0].value - currentYear[1][0].value,
-      principal: nextYear[1][0].principal - currentYear[1][0].principal,
-      return: nextYear[1][0].return - currentYear[1][0].return,
+      value: currentYear[1][1].value - previousYear[1][1].value,
+      principal: currentYear[1][1].principal - previousYear[1][1].principal,
+      return: currentYear[1][1].return - previousYear[1][1].return,
     });
   }
   return dataPoints;
@@ -949,6 +948,16 @@ export const calculateMonthlyChangeDataPoints = (
   for (let i = 1; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
     const previousYearMonth = firstAndLastUpdatesByYearMonthEntries[i - 1];
     const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
+
+    if (i == 1) {
+      // add first year
+      dataPoints.push({
+        yearMonth: previousYearMonth[0],
+        value: previousYearMonth[1][1].value - previousYearMonth[1][0].value,
+        principal: previousYearMonth[1][1].principal - previousYearMonth[1][0].principal,
+        return: previousYearMonth[1][1].return - previousYearMonth[1][0].return,
+      });
+    }
 
     dataPoints.push({
       yearMonth: currentYearMonth[0],
