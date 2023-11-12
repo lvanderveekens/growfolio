@@ -25,12 +25,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
         setSubmitted(true);
       })
       .catch((err) => {
-        console.error(err)
+        console.error(err);
         setErrorMessage("Something went wrong...");
+      })
+      .finally(() => {
+        setText("");
+        setSubmitting(false);
       });
-
-    setText("")
-    setSubmitting(false);
   };
 
   return (
@@ -49,8 +50,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
             />
           </label>
         </div>
-        <button type="submit" className="border" disabled={submitting}>
-          Submit
+        <button
+          type="submit"
+          className="px-8 py-2 bg-green-400 disabled:opacity-50 font-bold text-white"
+          disabled={submitting}
+        >
+          {submitting ? <span>Submitting...</span> : <span>Submit</span>}
         </button>
       </form>
       {submitted && <div className="mt-4">Thanks for your feedback! 😀</div>}

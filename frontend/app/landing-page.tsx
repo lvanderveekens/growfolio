@@ -19,12 +19,14 @@ export default function LandingPage() {
   const [contactName, setContactName] = useState<string>();
   const [contactEmail, setContactEmail] = useState<string>();
   const [contactMessage, setContactMessage] = useState<string>();
+  const [contactSubmitting, setContactSubmitting] = useState<boolean>(false);
 
   const [contactSuccessMessage, setContactSuccessMessage] = useState<string>();
   const [contactErrorMessage, setContactErrorMessage] = useState<string>();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setContactSubmitting(true)
     setContactSuccessMessage(undefined);
     setContactErrorMessage(undefined);
 
@@ -50,6 +52,7 @@ export default function LandingPage() {
         setContactName(undefined);
         setContactEmail(undefined);
         setContactMessage(undefined);
+        setContactSubmitting(false);
       });
   };
 
@@ -132,7 +135,9 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
           <div className="lg:col-span-5">
-            <div className="text-xl lg:text-3xl font-bold mb-8">Mobile-friendly.</div>
+            <div className="text-xl lg:text-3xl font-bold mb-8">
+              Mobile-friendly.
+            </div>
             <div className="text-lg lg:text-2xl">
               Access your investment data anytime, anywhere, right from your
               smartphone. Stay informed about your portfolio's performance, even
@@ -169,7 +174,9 @@ export default function LandingPage() {
       {/* pricing section */}
       <div id="pricing" className="py-[50px] lg:py-[100px] bg-[#F7F7F7]">
         <div className="container">
-          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Pricing</h2>
+          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
+            Pricing
+          </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
             <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
@@ -228,7 +235,9 @@ export default function LandingPage() {
 
       {/* contact section */}
       <div id="contact" className="py-[50px] lg:py-[100px]">
-        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
+        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
+          Contact
+        </h2>
         <div className="container lg:text-2xl ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px]">
             <div className="relative">
@@ -253,7 +262,7 @@ export default function LandingPage() {
                   <div className="mb-4">Email</div>
                   <input
                     className="border border-black w-full mb-4 lg:mb-[50px]"
-                    type="text"
+                    type="email"
                     value={contactEmail || ""}
                     onChange={(e) => setContactEmail(e.target.value)}
                     required
@@ -271,21 +280,26 @@ export default function LandingPage() {
                 </label>
                 <button
                   type="submit"
-                  className="px-8 py-4 bg-green-400 font-bold text-white"
+                  className="px-8 py-4 bg-green-400 disabled:opacity-50 font-bold text-white"
+                  disabled={contactSubmitting}
                 >
-                  Send
+                  {contactSubmitting ? (
+                    <span>Sending...</span>
+                  ) : (
+                    <span>Send</span>
+                  )}
                 </button>
               </form>
-              {contactSuccessMessage && (
-                <div className="mt-4 lg:mt-[50px] ">{contactSuccessMessage}</div>
-              )}
-              {contactErrorMessage && (
-                <div className="mt-4 lg:mt-[50px] text-red-500">
-                  {contactErrorMessage}
-                </div>
-              )}
             </div>
           </div>
+          {contactSuccessMessage && (
+            <div className="text-center mt-[50px] lg:mt-[100px] ">{contactSuccessMessage}</div>
+          )}
+          {contactErrorMessage && (
+            <div className="text-center mt-[50px] lg:mt-[100px] text-red-500">
+              {contactErrorMessage}
+            </div>
+          )}
         </div>
       </div>
       <Footer />
