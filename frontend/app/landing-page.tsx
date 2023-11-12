@@ -63,11 +63,11 @@ export default function LandingPage() {
 
       {/* hero */}
       <div className="w-full">
-        <div className="mx-auto py-[100px] lg:py-[150px] relative">
+        <div className="mx-auto py-[120px] lg:py-[150px] relative">
           <div className="absolute z-[-1] top-0 left-0 w-full h-full bg-[url('/hero-background.png')] bg-center blur-md"></div>
           <div className="container">
             <div className="w-full lg:w-2/4 mx-auto">
-              <div className="text-4xl lg:text-6xl font-bold mb-8">
+              <div className="text-4xl lg:text-5xl font-bold mb-8">
                 Watch your investment portfolio grow.
               </div>
               <div className="text-xl lg:text-2xl mb-8">
@@ -94,7 +94,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
           <div className="lg:col-span-5">
-            <div className="text-xl lg:text-4xl font-bold mb-8">
+            <div className="text-xl lg:text-3xl font-bold mb-8">
               All investments in one place.
             </div>
             <div className="text-lg lg:text-2xl">
@@ -111,7 +111,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
           <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-2.png"
@@ -119,7 +119,7 @@ export default function LandingPage() {
             />
           </div>
           <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-2xl lg:text-4xl font-bold mb-8">
+            <div className="text-xl lg:text-3xl font-bold mb-8">
               Visualize your portfolio growth.
             </div>
             <div className="text-lg lg:text-2xl">
@@ -130,9 +130,9 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
           <div className="lg:col-span-5">
-            <div className="text-xl lg:text-4xl font-bold mb-8">Mobile-friendly.</div>
+            <div className="text-xl lg:text-3xl font-bold mb-8">Mobile-friendly.</div>
             <div className="text-lg lg:text-2xl">
               Access your investment data anytime, anywhere, right from your
               smartphone. Stay informed about your portfolio's performance, even
@@ -147,7 +147,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[100px]">
+        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
           <div className="order-2 lg:order-none lg:col-span-6">
             <img
               src="/why-4.jpeg"
@@ -155,7 +155,7 @@ export default function LandingPage() {
             />
           </div>
           <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-2xl lg:text-4xl font-bold mb-8">
+            <div className="text-xl lg:text-3xl font-bold mb-8">
               By an investor, for investors.
             </div>
             <div className="text-lg lg:text-2xl">
@@ -173,7 +173,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
             <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
-              <div className="text-2xl lg:text-4xl font-bold text-center mb-[50px]">
+              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Basic
               </div>
               <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
@@ -200,7 +200,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
-              <div className="text-2xl lg:text-4xl font-bold text-center mb-[50px]">
+              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Premium
               </div>
               <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
@@ -228,7 +228,7 @@ export default function LandingPage() {
 
       {/* contact section */}
       <div id="contact" className="py-[50px] lg:py-[100px]">
-        <h2 className="text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
+        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
         <div className="container lg:text-2xl ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px]">
             <div className="relative">

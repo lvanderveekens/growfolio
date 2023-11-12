@@ -80,9 +80,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         </div>
 
         {/* desktop */}
-        <div className="hidden md:flex flex-grow justify-between items-center">
-          <div className="flex">
-            <div className="mr-4">
+        <div className="hidden md:flex flex-grow text-xl justify-between items-center">
+          <div className="flex gap-8">
+            <div className="">
               <Link className={`hover:text-green-400`} href="/">
                 <div className="flex items-center">
                   <AiOutlineBarChart className="mr-2" size={24} />
@@ -90,7 +90,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 </div>
               </Link>
             </div>
-            <div className="mr-4">
+            <div className="">
               <Link className={`hover:text-green-400`} href="/profile">
                 <div className="flex items-center">
                   <AiOutlineUser className="mr-2" size={24} />
@@ -98,7 +98,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 </div>
               </Link>
             </div>
-            <div className="mr-4">
+            <div className="">
               <Link className={`hover:text-green-400`} href="/settings">
                 <div className="flex items-center">
                   <IoSettingsOutline className="mr-2" size={24} />
