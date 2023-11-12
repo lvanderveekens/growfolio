@@ -11,7 +11,7 @@ export const calculateTotalPrincipalForDate = (
     if (new Date(transaction.date) > new Date(date)) {
       break;
     }
-    if (transaction.type == TransactionType.Buy) {
+    if (transaction.type == TransactionType.BUY) {
       sum += transaction.amount;
     } else {
       sum -= transaction.amount;

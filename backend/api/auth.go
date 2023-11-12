@@ -12,13 +12,24 @@ import (
 )
 
 type AuthHandler struct {
-	userRepository services.UserRepository
-	tokenService   TokenService
-	domain         string
+	userRepository   services.UserRepository
+	tokenService     TokenService
+	domain           string
+	useSecureCookies bool
 }
 
-func NewAuthHandler(userRepository services.UserRepository, tokenService TokenService, domain string) AuthHandler {
-	return AuthHandler{userRepository: userRepository, tokenService: tokenService, domain: domain}
+func NewAuthHandler(
+	userRepository services.UserRepository,
+	tokenService TokenService,
+	domain string,
+	useSecureCookies bool,
+) AuthHandler {
+	return AuthHandler{
+		userRepository:   userRepository,
+		tokenService:     tokenService,
+		domain:           domain,
+		useSecureCookies: useSecureCookies,
+	}
 }
 
 func (h AuthHandler) Begin(c *gin.Context) (response[empty], error) {
@@ -49,7 +60,7 @@ func (h AuthHandler) Callback(c *gin.Context) (response[empty], error) {
 		return response[empty]{}, fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	c.SetCookie("token", jwt, h.tokenService.JwtExireAfterHours*60*60, "/", h.domain, true, true)
+	c.SetCookie("token", jwt, h.tokenService.JwtExireAfterHours*60*60, "/", h.domain, h.useSecureCookies, true)
 	return newEmptyResponse(http.StatusOK), nil
 }
 

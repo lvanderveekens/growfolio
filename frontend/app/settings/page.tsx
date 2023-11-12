@@ -3,12 +3,12 @@
 import { api } from "@/app/axios";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
-import { Currency, Settings } from "./settings";
 import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "../app-layout";
+import Dropdown from "../dropdown";
+import { Currency, Settings, labelsByCurrency } from "./settings";
 
 export default function SettingsPage() {
-
   const [settings, setSettings] = useState<Settings>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -61,24 +61,23 @@ export default function SettingsPage() {
         {!loading && (
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label>
-                <div>Currency</div>
-                <select
-                  className="border w-full"
-                  value={settings?.currency ?? ""}
-                  onChange={(e) => setCurrency(e.target.value as Currency)}
-                  required
-                >
-                  <option value="" disabled>
-                    Select currency
-                  </option>
-                  {Object.entries(Currency).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <label>Currency</label>
+              <div>
+                <Dropdown
+                  className="w-full lg:w-[150px]"
+                  selected={
+                    settings && {
+                      label: labelsByCurrency[settings.currency],
+                      value: settings.currency,
+                    }
+                  }
+                  onChange={(option) => setCurrency(option.value)}
+                  options={Object.values(Currency).map((currency) => ({
+                    label: labelsByCurrency[currency],
+                    value: currency,
+                  }))}
+                />
+              </div>
             </div>
 
             <button className="border px-3 py-2" type="submit">

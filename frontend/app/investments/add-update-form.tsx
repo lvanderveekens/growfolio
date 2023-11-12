@@ -29,8 +29,38 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   const [date, setDate] = useState<Date>();
   const [value, setValue] = useState<number>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [errors, setErrors] = useState({
+    date: '',
+    value: '',
+  });
+
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { date: "", value: "" };
+
+    if (!date) {
+      newErrors.date = 'Date is required';
+      isValid = false;
+    }
+    if (!value) {
+      newErrors.value = 'Value is required';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitting(true);
 
     const req: CreateInvestmentUpdateRequest = {
       date: moment(date).format("YYYY-MM-DD"),
@@ -38,15 +68,21 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
       value: value! * 100,
     };
 
-    await api.post("/investment-updates", req, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    setDate(undefined);
-    setValue(undefined)
-    onAdd();
+    api
+      .post("/investment-updates", req, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(() => {
+        onAdd();
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   const handleValueChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
@@ -58,33 +94,35 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <div>Date</div>
+        <label>Date</label>
         <DatePicker
-          className="border w-full"
-          wrapperClassName='w-full'
+          className="border w-full px-4 py-2"
+          wrapperClassName="w-full"
           selected={date}
           onChange={(date) => date && setDate(date)}
           dateFormat="yyyy-MM-dd"
-          required
         />
+        <div className="text-red-500">{errors.date}</div>
       </div>
       <div className="mb-4">
-        <label>
-          <div>Value</div>
-          <CurrencyInput
-            className='border w-full'
-            prefix={signPrefixesByCurrency[currency]}
-            placeholder={signPrefixesByCurrency[currency]}
-            decimalsLimit={2}
-            onValueChange={handleValueChange}
-            groupSeparator={groupSeparatorsByCurrency[currency]}
-            decimalSeparator={decimalSeparatorsByCurrency[currency]}
-            required
-          />
-        </label>
+        <label>Value</label>
+        <CurrencyInput
+          className="border w-full px-4 py-2"
+          prefix={signPrefixesByCurrency[currency]}
+          placeholder={signPrefixesByCurrency[currency]}
+          decimalsLimit={2}
+          onValueChange={handleValueChange}
+          groupSeparator={groupSeparatorsByCurrency[currency]}
+          decimalSeparator={decimalSeparatorsByCurrency[currency]}
+        />
+        <div className="text-red-500">{errors.value}</div>
       </div>
-      <button className="border w-full sm:w-auto px-3 py-2" type="submit">
-        Submit
+      <button
+        className="border px-3 py-2 disabled:opacity-50"
+        type="submit"
+        disabled={submitting}
+      >
+        {submitting ? <span>Submitting...</span> : <span>Submit</span>}
       </button>
     </form>
   );

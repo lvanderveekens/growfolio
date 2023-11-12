@@ -29,6 +29,8 @@ import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
 import AppLayout from "@/app/app-layout";
+import { labelsByInvestmentType } from "@/app/investment-type";
+import Dropdown from "@/app/dropdown";
 
 ChartJS.register(
   ArcElement,
@@ -112,7 +114,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const fetchTransactions = () => {
     api.get(`/transactions?investmentId=${params.id}`)
-      .then((res) => setTransactions(res.data));
+      .then((res) => {
+        setTransactions(res.data)
+      });
   }
 
   const fetchSettings = async () => {
@@ -170,26 +174,29 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <div className="mb-4">
               <label className="">Date range:</label>
-              <select
-                value={selectedDateRange}
-                onChange={(e) => setSelectedDateRange(e.target.value)}
-                className="border border-1 block w-full lg:w-auto"
-              >
-                {Object.values(DateRange).map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <Dropdown
+                className="w-full lg:w-[180px]"
+                selected={{
+                  label: selectedDateRange,
+                  value: selectedDateRange,
+                }}
+                onChange={(option) => setSelectedDateRange(option.value)}
+                options={Object.values(DateRange).map((dateRange) => ({
+                  label: dateRange,
+                  value: dateRange,
+                }))}
+              />
+            </div>
+
+            <div className="mb-4">
+              Type: {labelsByInvestmentType[investment.type]}
+            </div>
+            <div className="mb-4">
+              Last update: {findLastUpdate()?.date ?? "-"}
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Value</h2>
-
             <div className="mb-4">
-              <div className="mb-4">
-                Last update: {findLastUpdate()?.date ?? "-"}
-              </div>
-
               <div className="border p-12 text-center mb-4">
                 <div className="font-bold text-3xl">
                   {settings &&
@@ -199,7 +206,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     )}
                 </div>
                 <div
-                  className={`${getAmountTextColor(findLastUpdate()?.return ?? 0)}`}
+                  className={`${getAmountTextColor(
+                    findLastUpdate()?.return ?? 0
+                  )}`}
                 >
                   {formatAsROIPercentage(findLastUpdate()?.roi ?? 0)} (
                   {settings &&

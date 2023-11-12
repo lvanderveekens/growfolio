@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { InvestmentType } from '../investment-type';
+import { InvestmentType, labelsByInvestmentType } from '../investment-type';
 import { api } from '../axios';
+import Dropdown from '../dropdown';
+import { useRouter } from "next/navigation";
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
@@ -8,62 +10,93 @@ export interface CreateInvestmentRequest {
 }
 
 type AddInvestmentFormProps = {
-  onAdd: (investmentId: string) => void
 };
 
-const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
+const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
+  const router = useRouter()
+
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [errors, setErrors] = useState({
+    type: '',
+    name: '',
+  });
+
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  const validateForm = () => {
+    let valid = true;
+    const newErrors = { type: '', name: '' };
+
+    if (!type) {
+      newErrors.type = 'Type is required';
+      valid = false;
+    }
+    if (!name || name.trim() === '') {
+      newErrors.name = 'Name is required';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitting(true);
 
     const req: CreateInvestmentRequest = {
       type: type!,
       name: name!,
     };
 
-    api.post("/investments", req, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((res) => {
-      if (res.status !== 201) {
-        console.error(`unexpected response ${res.status}`)
-        return
-      }
-      onAdd(res.data.id);
-    })
-    .catch((err) => console.error(err))
-    .finally(() => {
-      setType(undefined);
-      setName(undefined);
-    })
+    api
+      .post("/investments", req, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((res) => {
+        if (res.status !== 201) {
+          console.error(`unexpected response ${res.status}`);
+          return;
+        }
+        router.push(`/investments/${res.data.id}`);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSubmitting(false);
+      })
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-2">
-        <label>
-          <div>Type</div>
-          <select
-            className="border"
-            value={type || ""}
-            onChange={(e) => setType(e.target.value as InvestmentType)}
-            required 
-          >
-            <option value="" disabled>
-              Select type
-            </option>
-            {Object.entries(InvestmentType).map(([key, value]) => (
-              <option key={key} value={value}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="mb-4">
+        <label>Type</label>
+        <Dropdown
+          className="w-full lg:w-[180px]"
+          placeholder="Select a type"
+          selected={
+            type && {
+              label: labelsByInvestmentType[type],
+              value: type,
+            }
+          }
+          onChange={(option) => setType(option.value)}
+          options={Object.values(InvestmentType).map((value) => ({
+            label: labelsByInvestmentType[value],
+            value: value,
+          }))}
+        />
+        <div className="text-red-500">{errors.type}</div>
       </div>
-      <div className="mb-2">
+      <div className="mb-4">
         <label>
           <div>Name</div>
           <input
@@ -71,13 +104,13 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ onAdd }) => {
             type="text"
             value={name || ""}
             onChange={(e) => setName(e.target.value)}
-            required
           />
         </label>
+        <div className="text-red-500">{errors.name}</div>
       </div>
 
-      <button className="border px-3 py-2" type="submit">
-        Submit
+      <button className="border px-3 py-2 disabled:opacity-50" type="submit" disabled={submitting}>
+        {submitting ? <span>Submitting...</span> : <span>Submit</span>}
       </button>
     </form>
   );

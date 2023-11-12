@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InvestmentType } from "./investment-type";
+import { InvestmentType, labelsByInvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
 
 import {
@@ -35,6 +35,8 @@ import Modal from "./modal";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 import { createCheckoutSession } from "./stripe/client";
+import Dropdown from "./dropdown";
+
 
 ChartJS.register(
   CategoryScale,
@@ -64,8 +66,6 @@ export default function OverviewPage() {
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
   
   const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
-  
-  const router = useRouter()
   
   const [loading, setLoading] = useState(true); 
 
@@ -123,6 +123,7 @@ export default function OverviewPage() {
         return {
           id: i.id,
           name: i.name,
+          type: i.type,
           lastUpdateDate: lastUpdate?.date ?? "-",
           principal: principal,
           value: value,
@@ -369,6 +370,10 @@ export default function OverviewPage() {
           </div>
         </div>
         <div className="flex justify-between">
+          <div>Type</div>
+          <div>{labelsByInvestmentType[investmentRow.type]}</div>
+        </div>
+        <div className="flex justify-between">
           <div>ROI</div>
           <div className={`${getAmountTextColor(investmentRow.roi)}`}>
             {settings && formatAsROIPercentage(investmentRow.roi)}
@@ -400,17 +405,18 @@ export default function OverviewPage() {
 
             <div className="mb-4">
               <label className="">Date range</label>
-              <select
-                value={selectedDateRange}
-                onChange={(e) => setSelectedDateRange(e.target.value)}
-                className="w-full sm:w-auto border border-1 block"
-              >
-                {Object.values(DateRange).map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <Dropdown
+                className="w-full lg:w-[180px]"
+                selected={{
+                  label: selectedDateRange,
+                  value: selectedDateRange,
+                }}
+                onChange={(option) => setSelectedDateRange(option.value)}
+                options={Object.values(DateRange).map((dateRange) => ({
+                  label: dateRange,
+                  value: dateRange,
+                }))}
+              />
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Value</h2>
@@ -504,11 +510,7 @@ export default function OverviewPage() {
                     )}
                   </div>
                 ) : (
-                  <AddInvestmentForm
-                    onAdd={(investmentId) => {
-                      router.push(`/investments/${investmentId}`);
-                    }}
-                  />
+                  <AddInvestmentForm />
                 )}
               </Modal>
             )}
@@ -772,6 +774,7 @@ export interface InvestmentUpdate {
 export interface InvestmentRow {
   id: string;
   name: string;
+  type: InvestmentType;
   lastUpdateDate: string;
   principal: number;
   value: number;

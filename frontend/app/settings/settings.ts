@@ -3,9 +3,14 @@ export interface Settings {
 }
 
 export enum Currency {
-  EUR = "Euro",
-  USD = "US Dollar",
+  EUR = "EUR",
+  USD = "USD",
 }
+
+export const labelsByCurrency: { [currency: string]: string } = {
+  "EUR": "Euro",
+  "USD": "US Dollar",
+};
 
 export const localesByCurrency: { [currency: string]: string } = {
   "EUR": "nl-NL",

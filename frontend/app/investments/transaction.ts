@@ -7,6 +7,11 @@ export interface Transaction {
 }
 
 export enum TransactionType {
-  Buy = "buy",
-  Sell = "sell",
+  BUY = "buy",
+  SELL = "sell",
 }
+
+export const labelsByTransactionType: { [type: string]: string } = {
+  [TransactionType.BUY]: "Buy",
+  [TransactionType.SELL]: "Sell",
+};

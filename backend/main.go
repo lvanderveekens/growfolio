@@ -67,7 +67,7 @@ func main() {
 	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(transactionService, investmentService)
-	authHandler := api.NewAuthHandler(&userRepository, tokenService, os.Getenv("DOMAIN"))
+	authHandler := api.NewAuthHandler(&userRepository, tokenService, os.Getenv("DOMAIN"), mustParseBool(os.Getenv("USE_SECURE_COOKIES")))
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
@@ -110,4 +110,12 @@ func mustParseInt(s string) int {
 		panic(err)
 	}
 	return i
+}
+
+func mustParseBool(s string) bool {
+	b, err := strconv.ParseBool(s)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
