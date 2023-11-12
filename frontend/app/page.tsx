@@ -12,20 +12,19 @@ export default function Home() {
   const [user, setUser] = useState<User>();
 
   useEffect(() => {
-    Promise.all([
-      fetchUser(),
-    ]).finally(() => setLoading(false));
+    Promise.all([fetchUser()]).finally(() => setLoading(false));
   }, []);
 
-  const fetchUser = async () => {
-    axios
+  const fetchUser = () => {
+    return axios
       .get("/api/user")
-      .then((res) => setUser(res.data))
+      .then((res) => {
+        setUser(res.data)
+      })
       .catch(() => {
         // ignore
       });
   };
-
 
   if (loading) {
     return
