@@ -221,18 +221,20 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
 
               <div>
-                <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
-                  <Link href={`/investments/${params.id}/updates`}>
-                    View updates
-                  </Link>
-                </button>
-                <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
-                  <Link href={`/investments/${params.id}/transactions`}>
-                    View transactions
-                  </Link>
-                </button>
+                <Link
+                  className="w-full lg:w-auto mb-2 border px-4 py-2 mr-4 inline-block"
+                  href={`/investments/${params.id}/updates`}
+                >
+                  View updates
+                </Link>
+                <Link
+                  className="w-full lg:w-auto mb-2 border px-4 py-2 mr-4 inline-block"
+                  href={`/investments/${params.id}/transactions`}
+                >
+                  View transactions
+                </Link>
                 <button
-                  className="w-full lg:w-auto border mb-2 px-3 py-2 mr-4 text-white bg-red-500 border-red-500"
+                  className="w-full lg:w-auto border mb-2 px-4 py-2 mr-4 text-white bg-red-500 border-red-500"
                   onClick={() => setShowDeleteInvestmentModal(true)}
                 >
                   Delete investment
@@ -245,13 +247,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     Are you sure?
                     <div className="flex justify-end">
                       <button
-                        className="border px-3 py-2 mr-4"
+                        className="border px-4 py-2 mr-4"
                         onClick={() => setShowDeleteInvestmentModal(false)}
                       >
                         Cancel
                       </button>
                       <button
-                        className="border px-3 py-2 text-white bg-red-500 border-red-500"
+                        className="border px-4 py-2 text-white bg-red-500 border-red-500"
                         onClick={deleteInvestment}
                       >
                         Delete

@@ -482,7 +482,9 @@ export default function OverviewPage() {
             <button
               className="border px-3 py-2 mb-4 w-full sm:w-auto"
               type="submit"
-              onClick={() => setShowAddInvestmentModal(true)}
+              onClick={() => {
+                setShowAddInvestmentModal(true);
+              }}
             >
               Add investment
             </button>
