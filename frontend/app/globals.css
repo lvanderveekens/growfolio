@@ -1,4 +1,13 @@
 @tailwind base;
+
+@layer base {
+    input {
+      @apply border;
+      @apply px-4;
+      @apply py-2;
+    }
+  }
+
 @tailwind components;
 @tailwind utilities;
 

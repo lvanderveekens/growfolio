@@ -80,7 +80,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
       <div className="mb-4">
         <label>Type</label>
         <Dropdown
-          className="w-full lg:w-[180px]"
+          className="w-full"
           placeholder="Select a type"
           selected={
             type && {
@@ -100,7 +100,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
         <label>
           <div>Name</div>
           <input
-            className="border"
+            className="w-full"
             type="text"
             value={name || ""}
             onChange={(e) => setName(e.target.value)}
@@ -109,7 +109,11 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
         <div className="text-red-500">{errors.name}</div>
       </div>
 
-      <button className="border px-3 py-2 disabled:opacity-50" type="submit" disabled={submitting}>
+      <button
+        className="border px-3 py-2 disabled:opacity-50"
+        type="submit"
+        disabled={submitting}
+      >
         {submitting ? <span>Submitting...</span> : <span>Submit</span>}
       </button>
     </form>
