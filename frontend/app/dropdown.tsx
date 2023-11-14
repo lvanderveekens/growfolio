@@ -72,7 +72,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           {selected ? (
             <span>{selected.label}</span>
           ) : (
-            <span className="text-gray-500">{placeholder ?? "Select an option"}</span>
+            <span className="text-gray-400">{placeholder ?? "Select an option"}</span>
           )}
           {isOpen ? <FaChevronUp /> : <FaChevronDown />}
         </button>

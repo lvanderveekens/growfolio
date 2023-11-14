@@ -98,6 +98,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         <DatePicker
           className="border w-full px-4 py-2"
           wrapperClassName="w-full"
+          placeholderText='YYYY-MM-DD'
           selected={date}
           onChange={(date) => date && setDate(date)}
           dateFormat="yyyy-MM-dd"
