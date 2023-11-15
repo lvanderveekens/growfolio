@@ -65,8 +65,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
   };
 
   return (
-    <div className="">
-      <nav className="border-b z-50 px-4 py-2 lg:py-4 w-full bg-white sm:flex sm:items-center font-bold gap-8">
+    <>
+      <nav className="sticky top-0 z-50 border-b px-4 py-2 lg:py-4 w-full bg-white lg:flex lg:items-center font-bold gap-8">
         <div className="flex justify-between items-center w-full sm:w-auto">
           <div className="text-3xl sm:text-4xl text-green-400">
             <Link href="/">
@@ -182,6 +182,6 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         </div>
       </nav>
       <FeedbackButton />
-    </div>
+    </>
   );
 };

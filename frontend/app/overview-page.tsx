@@ -28,7 +28,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "./app-layout";
 import { api } from "./axios";
 import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
-import { buildMonthlyGrowthBarData, buildYearlyGrowthBarData, monthlyGrowthBarOptions, yearlyGrowthBarOptions } from "./investments/[id]/page";
+import { buildMonthlyChangeBarData as buildMonthlyChangeBarData, buildYearlyChangeBarData as buildYearlyChangeBarData, monthlyChangeBarOptions as monthlyChangeBarOptions, yearlyChangeBarOptions as yearlyChangeBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
@@ -179,7 +179,7 @@ export default function OverviewPage() {
     });
   };
 
-  const buildPrincipalAndValueLineData = (
+  const buildPrincipalVsValueLineData = (
     updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
@@ -549,13 +549,13 @@ export default function OverviewPage() {
               </div>
 
               <div className="aspect-square">
-                <h3 className="font-bold mb-4">Principal and value</h3>
+                <h3 className="font-bold mb-4">Principal vs value</h3>
 
                 <div className="w-full h-full">
                   {settings && (
                     <Line
-                      options={principalAndValueLineOptions(settings.currency)}
-                      data={buildPrincipalAndValueLineData(updateDataPoints)}
+                      options={principalVsValueLineOptions(settings.currency)}
+                      data={buildPrincipalVsValueLineData(updateDataPoints)}
                     />
                   )}
                 </div>
@@ -583,24 +583,24 @@ export default function OverviewPage() {
                 </div>
               </div>
               <div className="aspect-square">
-                <h3 className="font-bold mb-4">Monthly growth</h3>
+                <h3 className="font-bold mb-4">Monthly change</h3>
                 <div className="w-full h-full">
                   {settings && (
                     <Bar
-                      options={monthlyGrowthBarOptions(settings.currency)}
-                      data={buildMonthlyGrowthBarData(monthlyChangeDataPoints)}
+                      options={monthlyChangeBarOptions(settings.currency)}
+                      data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
                     />
                   )}
                 </div>
               </div>
               <div className="aspect-square">
-                <h3 className="font-bold mb-4">Yearly growth</h3>
+                <h3 className="font-bold mb-4">Yearly change</h3>
 
                 <div className="w-full h-full">
                   {settings && (
                     <Bar
-                      options={yearlyGrowthBarOptions(settings.currency)}
-                      data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                      options={yearlyChangeBarOptions(settings.currency)}
+                      data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
                     />
                   )}
                 </div>
@@ -613,7 +613,7 @@ export default function OverviewPage() {
   );
 }
 
-export const principalAndValueLineOptions = (currency: string) => ({
+export const principalVsValueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",

@@ -6,6 +6,12 @@
       @apply px-4;
       @apply py-2;
     }
+
+    textarea {
+      @apply border;
+      @apply px-4;
+      @apply py-2;
+    }
   }
 
 @tailwind components;

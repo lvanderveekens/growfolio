@@ -277,15 +277,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                 <div className="aspect-square">
                   <h1 className="text-xl font-bold mb-4">
-                    Principal and value
+                    Principal vs value
                   </h1>
                   <div className="w-full h-full">
                     {settings && (
                       <Line
-                        options={principalAndValueLineOptions(
+                        options={principalVsValueLineOptions(
                           settings.currency
                         )}
-                        data={buildPrincipalAndValueLineData(updateDataPoints)}
+                        data={buildPrincipalVsValueLineData(updateDataPoints)}
                       />
                     )}
                   </div>
@@ -314,12 +314,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <div className="aspect-square">
-                  <h1 className="text-xl font-bold mb-4">Monthly growth</h1>
+                  <h1 className="text-xl font-bold mb-4">Monthly change</h1>
                   <div className="w-full h-full">
                     {settings && (
                       <Bar
-                        options={monthlyGrowthBarOptions(settings.currency)}
-                        data={buildMonthlyGrowthBarData(
+                        options={monthlyChangeBarOptions(settings.currency)}
+                        data={buildMonthlyChangeBarData(
                           monthlyChangeDataPoints
                         )}
                       />
@@ -328,12 +328,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <div className="aspect-square">
-                  <h1 className="text-xl font-bold mb-4">Yearly growth</h1>
+                  <h1 className="text-xl font-bold mb-4">Yearly change</h1>
                   <div className="w-full h-full">
                     {settings && (
                       <Bar
-                        options={yearlyGrowthBarOptions(settings.currency)}
-                        data={buildYearlyGrowthBarData(yearlyChangeDataPoints)}
+                        options={yearlyChangeBarOptions(settings.currency)}
+                        data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
                       />
                     )}
                   </div>
@@ -347,7 +347,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   );
 }
 
-const buildPrincipalAndValueLineData = (updateRows: UpdateDataPoint[]) => {
+const buildPrincipalVsValueLineData = (updateRows: UpdateDataPoint[]) => {
   return {
     datasets: [
       {
@@ -372,7 +372,7 @@ const buildPrincipalAndValueLineData = (updateRows: UpdateDataPoint[]) => {
   };
 };
 
-const principalAndValueLineOptions = (currency: string) => ({
+const principalVsValueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",
@@ -454,7 +454,7 @@ const returnLineOptions = (currency: string) => ({
   },
 });
 
-export const monthlyGrowthBarOptions = (currency: string) => ({
+export const monthlyChangeBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
   plugins: {
     tooltip: {
@@ -493,7 +493,7 @@ export const monthlyGrowthBarOptions = (currency: string) => ({
   },
 });
 
-export const yearlyGrowthBarOptions = (currency: string) => ({
+export const yearlyChangeBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
   plugins: {
     tooltip: {
@@ -605,7 +605,7 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
   };
 };
 
-export const buildMonthlyGrowthBarData = (
+export const buildMonthlyChangeBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
   return {
@@ -632,7 +632,7 @@ export const buildMonthlyGrowthBarData = (
   };
 };
 
-export const buildYearlyGrowthBarData = (
+export const buildYearlyChangeBarData = (
   yearlyChangeDataPoints: YearlyChangeDataPoint[]
 ): ChartData<"bar"> => {
   return {
