@@ -36,6 +36,7 @@ import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 import { createCheckoutSession } from "./stripe/client";
 import Dropdown from "./dropdown";
+import { Button } from "./button";
 
 
 ChartJS.register(
@@ -358,7 +359,7 @@ export default function OverviewPage() {
 
   const renderInvestment = (investmentRow: InvestmentRow) => {
     return (
-      <div className="border p-4">
+      <div className="border hover:border-green-400 p-4">
         <div className="font-bold flex justify-between">
           <div>{investmentRow.name}</div>
           <div>
@@ -479,15 +480,16 @@ export default function OverviewPage() {
               </div>
             )}
 
-            <button
-              className="border px-3 py-2 mb-4 w-full sm:w-auto"
+            <Button
+              className="mb-4 w-full sm:w-auto"
+              variant="primary"
               type="submit"
               onClick={() => {
                 setShowAddInvestmentModal(true);
               }}
             >
               Add investment
-            </button>
+            </Button>
             {showAddInvestmentModal && (
               <Modal
                 title="Add investment"
@@ -498,16 +500,17 @@ export default function OverviewPage() {
                   <div>
                     <div>
                       You've reached the limit of 2 investments for a Basic
-                      account. Upgrade to Premium to track more.
+                      account. Upgrade to Premium to track unlimited investments.
                     </div>
                     {user && user.accountType == AccountType.BASIC && (
                       <div className="mt-4">
-                        <button
-                          className="border w-full sm:w-auto px-3 py-2"
+                        <Button
+                          className="w-full sm:w-auto"
+                          variant="primary"
                           onClick={createCheckoutSession}
                         >
                           Upgrade to Premium
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

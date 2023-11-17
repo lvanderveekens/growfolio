@@ -13,6 +13,7 @@ import ImportTransactionsForm from "../../import-transactions-form";
 import { Transaction } from "../../transaction";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 import AppLayout from "@/app/app-layout";
+import { Button } from "@/app/button";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -136,14 +137,15 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
         )}
 
         <div>
-          <button
-            className="border w-full lg:w-auto mb-2 px-3 py-2 mr-4 disabled:opacity-40"
+          <Button
+            className="w-full lg:w-auto mb-2 mr-4"
+            variant="secondary"
             type="submit"
             onClick={() => setShowAddTransactionModal(true)}
             disabled={investment?.locked}
           >
             Add transaction
-          </button>
+          </Button>
           {showAddTransactionModal && settings &&(
             <Modal
               title="Add transaction"
@@ -159,14 +161,15 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
               />
             </Modal>
           )}
-          <button
-            className="border w-full lg:w-auto px-3 py-2 disabled:opacity-40"
+          <Button
+            className="w-full lg:w-auto"
+            variant="secondary"
             type="submit"
             onClick={() => setShowImportTransactionsModal(true)}
             disabled={investment?.locked}
           >
             Import transactions
-          </button>
+          </Button>
           {showImportTransactionsModal && (
             <Modal
               title="Import transactions"

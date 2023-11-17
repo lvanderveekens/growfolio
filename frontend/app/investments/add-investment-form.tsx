@@ -3,6 +3,7 @@ import { InvestmentType, labelsByInvestmentType } from '../investment-type';
 import { api } from '../axios';
 import Dropdown from '../dropdown';
 import { useRouter } from "next/navigation";
+import { Button } from '../button';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
@@ -108,14 +109,13 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
         </label>
         <div className="text-red-500">{errors.name}</div>
       </div>
-
-      <button
-        className="border px-3 py-2 disabled:opacity-50"
+      <Button
         type="submit"
+        variant='primary'
         disabled={submitting}
       >
         {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-      </button>
+      </Button>
     </form>
   );
 };

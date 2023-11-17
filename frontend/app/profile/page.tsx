@@ -7,6 +7,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { AccountType, User, getAccountTypeLabel } from "../overview-page";
 import { createCheckoutSession, createPortalSession } from "../stripe/client";
 import AppLayout from "../app-layout";
+import { Button } from "../button";
 
 export default function ProfilePage() {
 
@@ -68,22 +69,24 @@ export default function ProfilePage() {
             </div>
             {user && user.accountType == AccountType.BASIC && (
               <div>
-                <button
-                  className="border w-full sm:w-auto px-3 py-2"
+                <Button
+                  className="w-full sm:w-auto"
+                  variant="primary"
                   onClick={createCheckoutSession}
                 >
                   Upgrade to Premium
-                </button>
+                </Button>
               </div>
             )}
             {user && user.accountType == AccountType.PREMIUM && (
               <div>
-                <button
-                  className="border w-full sm:w-auto px-3 py-2"
+                <Button
+                  className="w-full sm:w-auto"
+                  variant="primary"
                   onClick={createPortalSession}
                 >
                   Manage subscription
-                </button>
+                </Button>
               </div>
             )}
           </>

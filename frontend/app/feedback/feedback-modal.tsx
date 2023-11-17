@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Modal from "../modal";
+import { Button } from "../button";
 
 interface FeedbackModalProps {
   onSubmit: (text: any) => Promise<any>
@@ -50,13 +51,16 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
             />
           </label>
         </div>
-        <button
-          type="submit"
-          className="px-8 py-2 bg-green-400 disabled:opacity-50 font-bold text-white"
-          disabled={submitting}
-        >
-          {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-        </button>
+        <div>
+          <Button
+            className="w-full lg:w-auto"
+            variant="primary"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? <span>Submitting...</span> : <span>Submit</span>}
+          </Button>
+        </div>
       </form>
       {submitted && <div className="mt-4">Thanks for your feedback! 😀</div>}
       {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}

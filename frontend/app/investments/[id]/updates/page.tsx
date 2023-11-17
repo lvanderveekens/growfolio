@@ -12,6 +12,7 @@ import { FaXmark } from "react-icons/fa6";
 import AddUpdateForm from "../../add-update-form";
 import ImportUpdatesForm from "../../import-updates-form";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
+import { Button } from "@/app/button";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -135,14 +136,15 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
         )}
 
         <div>
-          <button
-            className="border w-full lg:w-auto mb-2 mr-4 px-3 py-2 disabled:opacity-40"
+          <Button
+            className="w-full lg:w-auto mb-2 mr-4"
+            variant="secondary"
             type="submit"
             onClick={() => setShowUpdateInvestmentModal(true)}
             disabled={investment.locked}
           >
             Add update
-          </button>
+          </Button>
           {showUpdateInvestmentModal && settings && (
             <Modal
               title="Add update"
@@ -158,14 +160,15 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               />
             </Modal>
           )}
-          <button
-            className="border w-full lg:w-auto px-3 py-2 mr-4 disabled:opacity-40"
+          <Button
+            className="w-full lg:w-auto mr-4"
+            variant="secondary"
             type="submit"
             onClick={() => setShowImportUpdatesModal(true)}
             disabled={investment.locked}
           >
             Import updates
-          </button>
+          </Button>
           {showImportUpdatesModal && (
             <Modal
               title="Import updates"

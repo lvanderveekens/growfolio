@@ -7,6 +7,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "../app-layout";
 import Dropdown from "../dropdown";
 import { Currency, Settings, labelsByCurrency } from "./settings";
+import { Button } from "../button";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>();
@@ -80,9 +81,9 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <button className="border px-3 py-2" type="submit">
+            <Button variant="primary" type="submit">
               Save
-            </button>
+            </Button>
             {successMessage && <div className="mt-4">{successMessage}</div>}
             {errorMessage && (
               <div className="mt-4 text-red-500">{errorMessage}</div>

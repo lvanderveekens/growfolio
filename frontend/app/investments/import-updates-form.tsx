@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from '../axios';
+import { Button } from '../button';
 
 type ImportUpdatesFormProps = {
   onImport: () => void
@@ -58,9 +59,9 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
           required
         />
       </div>
-      <button className="border w-full sm:w-auto px-3 py-2" type="submit">
+      <Button className="w-full sm:w-auto" variant="primary" type="submit">
         Import
-      </button>
+      </Button>
     </form>
   );
 };

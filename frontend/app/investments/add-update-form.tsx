@@ -8,6 +8,7 @@ import moment from 'moment';
 import { api } from '../axios';
 import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
 import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
+import { Button } from '../button';
 
 export interface CreateInvestmentUpdateRequest {
   date: string
@@ -118,13 +119,13 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         />
         <div className="text-red-500">{errors.value}</div>
       </div>
-      <button
-        className="border px-3 py-2 disabled:opacity-50"
+      <Button
+        variant="primary"
         type="submit"
         disabled={submitting}
       >
         {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-      </button>
+      </Button>
     </form>
   );
 };

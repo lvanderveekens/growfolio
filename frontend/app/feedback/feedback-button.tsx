@@ -39,7 +39,7 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = () => {
         />
       )}
       <div className="fixed top-3/4 right-0 transform origin-bottom-left translate-x-full -rotate-90 z-10">
-        <button className="text-white font-bold bg-green-400 rounded-t-lg px-4 py-2 " onClick={handleClick}>
+        <button className="text-white font-bold bg-green-400 hover:bg-green-500 rounded-t-lg px-4 py-2 " onClick={handleClick}>
           Feedback
         </button>
       </div>

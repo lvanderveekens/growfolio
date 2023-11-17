@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineStock } from "react-icons/ai";
 import { RxHamburgerMenu } from "react-icons/rx";
+import { Button } from "../button";
 
 interface LandingPageNavbarProps {
 }
@@ -47,14 +48,15 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
         </div>
 
         <div>
-          <button
-            className={`text-white px-8 py-2 bg-green-400`}
+          <Button
+            className={`font-bold px-8`}
+            variant="primary"
             onClick={() => {
               router.push("/login");
             }}
           >
             Log in
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -62,29 +64,42 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       <div className={`${isOpen ? "block" : "hidden"} py-4 text-lg md:hidden`}>
         <div className="flex flex-col gap-2">
           <div className="px-4 ">
-            <Link className={`hover:text-green-400`} href="#why" onClick={toggleNavbar}>
+            <Link
+              className={`hover:text-green-400`}
+              href="#why"
+              onClick={toggleNavbar}
+            >
               Why
             </Link>
           </div>
           <div className="px-4 ">
-            <Link className={`hover:text-green-400`} href="#pricing" onClick={toggleNavbar}>
+            <Link
+              className={`hover:text-green-400`}
+              href="#pricing"
+              onClick={toggleNavbar}
+            >
               Pricing
             </Link>
           </div>
           <div className="px-4 ">
-            <Link className={`hover:text-green-400`} href="#contact" onClick={toggleNavbar}>
+            <Link
+              className={`hover:text-green-400`}
+              href="#contact"
+              onClick={toggleNavbar}
+            >
               Contact
             </Link>
           </div>
           <div className={`px-4`}>
-            <button
-              className={`w-full text-white px-8 py-2 bg-green-400`}
+            <Button
+              className={`w-full`}
+              variant="primary"
               onClick={() => {
                 router.push("/login");
               }}
             >
               Log in
-            </button>
+            </Button>
           </div>
         </div>
       </div>

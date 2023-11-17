@@ -6,6 +6,7 @@ import { useState } from "react";
 import { api } from "./axios";
 import { useRouter } from "next/navigation";
 import Footer from "./footer";
+import { Button } from "./button";
 
 export interface SendContactMessageRequest {
   name: string;
@@ -77,12 +78,13 @@ export default function LandingPage() {
                 Growfolio is an investment tracking app that helps you monitor
                 and manage your portfolio's growth and performance.
               </div>
-              <button
-                className="w-full lg:w-auto px-8 py-4 mb-8 bg-green-400 font-bold text-white text-lg lg:text-2xl"
+              <Button
+                className="w-full lg:w-auto px-8 py-4 mb-8 font-bold text-lg lg:text-2xl"
+                variant="primary"
                 onClick={redirectToLogin}
               >
                 Get Started for Free
-              </button>
+              </Button>
               <div>No credit card required.</div>
             </div>
           </div>
@@ -197,12 +199,13 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center">
-                <button
-                  className="px-8 py-4 bg-green-400 font-bold text-white lg:text-2xl"
+                <Button
+                  className="px-8 py-4 font-bold lg:text-2xl"
+                  variant="primary"
                   onClick={redirectToLogin}
                 >
                   Sign up
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -221,12 +224,13 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="text-center mt-auto">
-                <button
-                  className="px-8 py-4 bg-green-400 font-bold text-white lg:text-2xl"
+                <Button
+                  className="px-8 py-4 font-bold lg:text-2xl"
+                  variant="primary"
                   onClick={redirectToLogin}
                 >
                   Sign up
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -278,9 +282,10 @@ export default function LandingPage() {
                     required
                   />
                 </label>
-                <button
+                <Button
                   type="submit"
-                  className="px-8 py-4 bg-green-400 disabled:opacity-50 font-bold text-white"
+                  variant="primary"
+                  className="px-8 py-4 font-bold"
                   disabled={contactSubmitting}
                 >
                   {contactSubmitting ? (
@@ -288,7 +293,7 @@ export default function LandingPage() {
                   ) : (
                     <span>Send</span>
                   )}
-                </button>
+                </Button>
               </form>
             </div>
           </div>

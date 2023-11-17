@@ -9,6 +9,7 @@ import { api } from '../axios';
 import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
 import { TransactionType, labelsByTransactionType } from './transaction';
 import Dropdown from '../dropdown';
+import { Button } from '../button';
 
 
 export interface CreateTransactionRequest {
@@ -147,13 +148,13 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
         <div className="text-red-500">{errors.amount}</div>
       </div>
 
-      <button
-        className="border px-3 py-2 disabled:opacity-50"
+      <Button
+        variant='primary'
         type="submit"
         disabled={submitting}
       >
         {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-      </button>
+      </Button>
     </form>
   );
 };

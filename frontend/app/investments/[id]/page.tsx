@@ -31,6 +31,7 @@ import { InvestmentIsLockedMessage } from "../investment-locked-message";
 import AppLayout from "@/app/app-layout";
 import { labelsByInvestmentType } from "@/app/investment-type";
 import Dropdown from "@/app/dropdown";
+import { Button } from "@/app/button";
 
 ChartJS.register(
   ArcElement,
@@ -221,24 +222,31 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
 
               <div>
-                <Link
-                  className="w-full lg:w-auto mb-2 border px-4 py-2 mr-4 inline-block"
-                  href={`/investments/${params.id}/updates`}
+                <Button
+                  className="w-full lg:w-auto mb-2 mr-4"
+                  variant="secondary"
+                  onClick={() =>
+                    router.push(`/investments/${params.id}/updates`)
+                  }
                 >
                   View updates
-                </Link>
-                <Link
-                  className="w-full lg:w-auto mb-2 border px-4 py-2 mr-4 inline-block"
-                  href={`/investments/${params.id}/transactions`}
+                </Button>
+                <Button
+                  className="w-full lg:w-auto mb-2 mr-4"
+                  variant="secondary"
+                  onClick={() =>
+                    router.push(`/investments/${params.id}/transactions`)
+                  }
                 >
                   View transactions
-                </Link>
-                <button
-                  className="w-full lg:w-auto border mb-2 px-4 py-2 mr-4 text-white bg-red-500 border-red-500"
+                </Button>
+                <Button
+                  className="w-full lg:w-auto mb-2 mr-4"
+                  variant="danger"
                   onClick={() => setShowDeleteInvestmentModal(true)}
                 >
                   Delete investment
-                </button>
+                </Button>
                 {showDeleteInvestmentModal && (
                   <Modal
                     title="Delete investment"
@@ -246,18 +254,19 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   >
                     Are you sure?
                     <div className="flex justify-end">
-                      <button
-                        className="border px-4 py-2 mr-4"
+                      <Button
+                        className="mr-4"
+                        variant="secondary"
                         onClick={() => setShowDeleteInvestmentModal(false)}
                       >
                         Cancel
-                      </button>
-                      <button
-                        className="border px-4 py-2 text-white bg-red-500 border-red-500"
+                      </Button>
+                      <Button
+                        variant="danger"
                         onClick={deleteInvestment}
                       >
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </Modal>
                 )}
@@ -276,15 +285,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {updateDataPoints.length > 0 && (
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                 <div className="aspect-square">
-                  <h1 className="text-xl font-bold mb-4">
-                    Principal vs value
-                  </h1>
+                  <h1 className="text-xl font-bold mb-4">Principal vs value</h1>
                   <div className="w-full h-full">
                     {settings && (
                       <Line
-                        options={principalVsValueLineOptions(
-                          settings.currency
-                        )}
+                        options={principalVsValueLineOptions(settings.currency)}
                         data={buildPrincipalVsValueLineData(updateDataPoints)}
                       />
                     )}
