@@ -27,7 +27,7 @@ import { BiLockAlt } from 'react-icons/bi';
 import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "./app-layout";
 import { api } from "./axios";
-import { calculateTotalPrincipalForDate, calculateTotalValueForDate } from "./calculator";
+import { calculatePrincipal, calculatePrincipalForDate, calculateValueForDate } from "./calculator";
 import { buildMonthlyChangeBarData as buildMonthlyChangeBarData, buildYearlyChangeBarData as buildYearlyChangeBarData, monthlyChangeBarOptions as monthlyChangeBarOptions, yearlyChangeBarOptions as yearlyChangeBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
 import { useLocalStorage } from "./localstorage";
@@ -90,8 +90,8 @@ export default function OverviewPage() {
     );
 
     const updateDataPoints = uniqueUpdateDates.map((date) => {
-      const value = calculateTotalValueForDate(date, updates);
-      const principal = calculateTotalPrincipalForDate(date, transactons);
+      const value = calculateValueForDate(date, updates);
+      const principal = calculatePrincipalForDate(date, transactons);
       const returnValue = value - principal;
       const roi = returnValue / principal;
 
@@ -116,10 +116,10 @@ export default function OverviewPage() {
       const investmentRows = investments.map((i) => {
         const lastUpdate = updates.findLast((u) => u.investmentId == i.id)!;
 
-        const value = lastUpdate?.value ?? 0;
-        const principal = getInvestmentPrincipal(i);
-        const returnValue = value - principal;
-        const roi = returnValue / principal;
+        const value = lastUpdate?.value;
+        const principal = calculatePrincipalForInvestment(i);
+        const returnValue = (lastUpdate && principal) && value - principal;
+        const roi = (returnValue && principal) && returnValue / principal;
 
         return {
           id: i.id,
@@ -246,11 +246,14 @@ export default function OverviewPage() {
     };
   };
 
-  const getInvestmentPrincipal = (investment: Investment) => {
-    const investmentTransactions = transactons.filter(
+  const calculatePrincipalForInvestment = (investment: Investment): number | undefined => {
+    const transactionsForInvestment = transactons.filter(
       (transaction) => transaction.investmentId == investment.id
     );
-    return investmentTransactions.reduce((acc, tx) => acc + tx.amount, 0);
+    if (transactionsForInvestment.length == 0) {
+      return 
+    }
+    return calculatePrincipal(transactionsForInvestment);
   };
 
   const getLatestInvestmentValue = (investment: Investment) => {
@@ -347,10 +350,10 @@ export default function OverviewPage() {
   };
 
   const totalPrincipal = investmentRows.reduce(
-    (acc, row) => acc + row.principal,
+    (acc, row) => acc + (row.principal ?? 0),
     0
   );
-  const totalValue = investmentRows.reduce((acc, row) => acc + row.value, 0);
+  const totalValue = investmentRows.reduce((acc, row) => acc + (row.value ?? 0), 0);
   const totalReturn = totalValue - totalPrincipal;
   const totalRoi = totalReturn / totalPrincipal;
 
@@ -358,36 +361,34 @@ export default function OverviewPage() {
     useState<boolean>(false);
 
   const renderInvestment = (investmentRow: InvestmentRow) => {
+    if (!settings) {
+      return 
+    }
+
     return (
-      <div className="border hover:border-green-400 p-4">
+      <div className="border hover:border-black p-4">
         <div className="font-bold flex justify-between">
           <div>{investmentRow.name}</div>
           <div>
-            {settings &&
-              formatAmountInCentsAsCurrencyString(
-                investmentRow.value,
-                settings.currency
-              )}
+            {formatAmountInCentsAsCurrencyString(
+              investmentRow.value,
+              settings.currency
+            )}
           </div>
         </div>
         <div className="flex justify-between">
-          <div>Type</div>
-          <div>{labelsByInvestmentType[investmentRow.type]}</div>
-        </div>
-        <div className="flex justify-between">
           <div>ROI</div>
-          <div className={`${getAmountTextColor(investmentRow.roi)}`}>
-            {settings && formatAsROIPercentage(investmentRow.roi)}
+          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)}`}>
+            {formatAsROIPercentage(investmentRow.roi)}
           </div>
         </div>
         <div className="flex justify-between">
           <div>Return</div>
-          <div className={`${getAmountTextColor(investmentRow.roi)}`}>
-            {settings &&
-              formatAmountInCentsAsCurrencyString(
-                investmentRow.return,
-                settings.currency
-              )}
+          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)}`}>
+            {formatAmountInCentsAsCurrencyString(
+              investmentRow.return,
+              settings.currency
+            )}
           </div>
         </div>
         <div className="flex justify-between">
@@ -781,10 +782,10 @@ export interface InvestmentRow {
   name: string;
   type: InvestmentType;
   lastUpdateDate: string;
-  principal: number;
-  value: number;
-  return: number;
-  roi: number;
+  principal?: number;
+  value?: number;
+  return?: number;
+  roi?: number;
   locked: boolean;
 }
 

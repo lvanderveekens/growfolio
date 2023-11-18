@@ -1,12 +1,25 @@
 import { Transaction, TransactionType } from "./investments/transaction";
 import { InvestmentUpdate } from "./overview-page";
 
-export const calculateTotalPrincipalForDate = (
-  date: string,
+export const calculatePrincipal = (
   transactions: Transaction[]
 ) => {
   let sum = 0;
+  for (const transaction of transactions) {
+    if (transaction.type == TransactionType.BUY) {
+      sum += transaction.amount;
+    } else {
+      sum -= transaction.amount;
+    }
+  }
+  return Math.max(0, sum);
+};
 
+export const calculatePrincipalForDate = (
+  date: string,
+  transactions: Transaction[]
+): number => {
+  let sum = 0;
   for (const transaction of transactions) {
     if (new Date(transaction.date) > new Date(date)) {
       break;
@@ -20,7 +33,7 @@ export const calculateTotalPrincipalForDate = (
   return Math.max(0, sum);
 };
 
-export const calculateTotalValueForDate = (
+export const calculateValueForDate = (
   date: string,
   updates: InvestmentUpdate[]
 ) => {

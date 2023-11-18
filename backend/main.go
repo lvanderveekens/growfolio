@@ -60,8 +60,8 @@ func main() {
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"), mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")))
 	settingsService := services.NewSettingsService(settingsRepository)
-	investmentService := services.NewInvestmentService(investmentRepository)
 	transactionService := services.NewTransactionService(transactionRepository)
+	investmentService := services.NewInvestmentService(investmentRepository, transactionService, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository)
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)

@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"growfolio/domain"
+	"time"
 )
 
 type InvestmentRepository interface {
@@ -15,12 +16,20 @@ type InvestmentRepository interface {
 }
 
 type InvestmentService struct {
-	investmentRepository InvestmentRepository
+	investmentRepository    InvestmentRepository
+	transactionService      TransactionService
+	investmentUpdateService InvestmentUpdateService
 }
 
-func NewInvestmentService(investmentRepository InvestmentRepository) InvestmentService {
+func NewInvestmentService(
+	investmentRepository InvestmentRepository,
+	transactionService TransactionService,
+	investmentUpdateService InvestmentUpdateService,
+) InvestmentService {
 	return InvestmentService{
-		investmentRepository: investmentRepository,
+		investmentRepository:    investmentRepository,
+		transactionService:      transactionService,
+		investmentUpdateService: investmentUpdateService,
 	}
 }
 
@@ -32,6 +41,7 @@ func (s InvestmentService) FindByID(id string) (domain.Investment, error) {
 	return s.investmentRepository.FindByID(id)
 }
 
+// TODO: Move part of this to the infra layer and use a DB transaction
 func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domain.Investment, error) {
 	investments, err := s.investmentRepository.FindByUserID(command.User.ID)
 	if err != nil {
@@ -41,7 +51,34 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 		return domain.Investment{}, domain.ErrMaxInvestmentsReached
 	}
 
-	return s.investmentRepository.Create(command)
+	investment, err := s.investmentRepository.Create(command)
+	if err != nil {
+		return domain.Investment{}, fmt.Errorf("failed to create investment: %w", err)
+	}
+
+	if command.InitialValue != nil {
+		_, err := s.investmentUpdateService.Create(domain.NewCreateInvestmentUpdateCommand(
+			time.Now(),
+			investment,
+			*command.InitialValue,
+		))
+		if err != nil {
+			return domain.Investment{}, fmt.Errorf("failed to create update: %w", err)
+		}
+	}
+	if command.InitialPrincipal != nil {
+		_, err := s.transactionService.Create(domain.NewCreateTransactionCommand(
+			time.Now(),
+			domain.TransactionTypeBuy,
+			investment,
+			*command.InitialPrincipal,
+		))
+		if err != nil {
+			return domain.Investment{}, fmt.Errorf("failed to create transaction: %w", err)
+		}
+	}
+
+	return investment, nil
 }
 
 func (s InvestmentService) DeleteByID(id string) error {

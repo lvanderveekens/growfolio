@@ -1,11 +1,15 @@
 "use client"
 
+import AppLayout from "@/app/app-layout";
 import { api } from "@/app/axios";
-import { calculateTotalPrincipalForDate } from "@/app/calculator";
+import { Button } from "@/app/button";
+import { calculatePrincipalForDate } from "@/app/calculator";
+import Dropdown from "@/app/dropdown";
+import { labelsByInvestmentType } from "@/app/investment-type";
 import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
-import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
+import { DateRange, Investment, InvestmentUpdate, UpdateDataPoint, UpdateDataPoint, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
 import {
@@ -23,15 +27,10 @@ import {
   Tooltip
 } from "chart.js";
 import "chartjs-adapter-moment";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
-import AppLayout from "@/app/app-layout";
-import { labelsByInvestmentType } from "@/app/investment-type";
-import Dropdown from "@/app/dropdown";
-import { Button } from "@/app/button";
 
 ChartJS.register(
   ArcElement,
@@ -75,8 +74,23 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, [selectedDateRange]);
 
   useEffect(() => {
+    setUpdateDataPoints(calculateUpdateDataPoints());
+
+    setMonthlyChangeDataPoints(
+      calculateMonthlyChangeDataPoints(updateDataPoints)
+    );
+    setYearlyChangeDataPoints(
+      calculateYearlyChangeDataPoints(updateDataPoints)
+    );
+  }, [transactions, updates]);
+
+
+  const calculateUpdateDataPoints = () => {
+    if (transactions.length == 0) {
+      return []
+    }
     const updateDataPoints = updates.map((update) => {
-      const principal = calculateTotalPrincipalForDate(
+      const principal = calculatePrincipalForDate(
         update.date,
         transactions
       );
@@ -91,17 +105,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
         value: value,
         return: returnValue,
         roi: roi,
-      };
+      } as UpdateDataPoint;
     });
-
-    setUpdateDataPoints(updateDataPoints);
-    setMonthlyChangeDataPoints(
-      calculateMonthlyChangeDataPoints(updateDataPoints)
-    );
-    setYearlyChangeDataPoints(
-      calculateYearlyChangeDataPoints(updateDataPoints)
-    );
-  }, [transactions, updates]);
+    return updateDataPoints
+  }
 
   const fetchInvestment = () => {
     api.get(`/investments/${params.id}`)
@@ -202,7 +209,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 <div className="font-bold text-3xl">
                   {settings &&
                     formatAmountInCentsAsCurrencyString(
-                      findLastUpdate()?.value ?? 0,
+                      findLastUpdate()?.value,
                       settings.currency
                     )}
                 </div>
@@ -211,10 +218,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     findLastUpdate()?.return ?? 0
                   )}`}
                 >
-                  {formatAsROIPercentage(findLastUpdate()?.roi ?? 0)} (
+                  {formatAsROIPercentage(findLastUpdate()?.roi)} (
                   {settings &&
                     formatAmountInCentsAsCurrencyString(
-                      findLastUpdate()?.return ?? 0,
+                      findLastUpdate()?.return,
                       settings.currency
                     )}
                   )
@@ -276,12 +283,22 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-            {updateDataPoints.length === 0 && (
-              <div>
-                <p className="mb-4">There are no updates yet.</p>
-                <p>Go to 'View updates' and click on 'Add update'.</p>
-              </div>
-            )}
+            <div>
+              {updates.length === 0 && (
+                <div className="mb-4">
+                  <p className="mb-4">There are no updates yet.</p>
+                  <p>Go to 'View updates' and click on 'Add update'.</p>
+                </div>
+              )}
+              {transactions.length === 0 && (
+                <div className="mb-4">
+                  <p className="mb-4">There are no transactions yet.</p>
+                  <p>
+                    Go to 'View transactions' and click on 'Add transaction'.
+                  </p>
+                </div>
+              )}
+            </div>
 
             {updateDataPoints.length > 0 && (
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">

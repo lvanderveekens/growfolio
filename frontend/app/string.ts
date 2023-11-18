@@ -1,6 +1,9 @@
 import { localesByCurrency } from "./settings/settings";
 
-export const formatAmountInCentsAsCurrencyString = (amountInCents: number, currency: string) => {
+export const formatAmountInCentsAsCurrencyString = (amountInCents?: number, currency: string) => {
+  if (amountInCents == undefined) {
+    return "-"
+  }
   return formatAmountAsCurrencyString(amountInCents / 100, currency)
 }
 
@@ -16,7 +19,10 @@ export const formatAmountInCentsAsReturnString = (amountInCents: number, currenc
   }
 }
 
-export const formatAmountAsCurrencyString = (amount: number, currency: string) => {
+export const formatAmountAsCurrencyString = (amount?: number, currency: string) => {
+  if (amount == undefined) {
+    return "-"
+  }
   if (isNaN(amount)) {
     amount = 0;
   }
@@ -31,7 +37,10 @@ export const formatAmountAsCurrencyString = (amount: number, currency: string) =
   });
 };
 
-export function formatAsROIPercentage(number: number) {
+export function formatAsROIPercentage(number?: number) {
+  if (number == undefined) {
+    return "-"
+  }
   if (isNaN(number)) {
     number = 0;
   }

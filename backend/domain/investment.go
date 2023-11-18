@@ -12,18 +12,29 @@ const (
 )
 
 type CreateInvestmentCommand struct {
-	Type   InvestmentType
-	Name   string
-	User   User
-	Locked bool
+	Type             InvestmentType
+	Name             string
+	User             User
+	Locked           bool
+	InitialPrincipal *int64
+	InitialValue     *int64
 }
 
-func NewCreateInvestmentCommand(t InvestmentType, name string, user User, locked bool) CreateInvestmentCommand {
+func NewCreateInvestmentCommand(
+	t InvestmentType,
+	name string,
+	user User,
+	locked bool,
+	initialPrincipal,
+	initialValue *int64,
+) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
-		Type:   t,
-		Name:   name,
-		User:   user,
-		Locked: locked,
+		Type:             t,
+		Name:             name,
+		User:             user,
+		Locked:           locked,
+		InitialPrincipal: initialPrincipal,
+		InitialValue:     initialValue,
 	}
 }
 
