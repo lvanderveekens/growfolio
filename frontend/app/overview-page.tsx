@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InvestmentType, labelsByInvestmentType } from "./investment-type";
+import { InvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
 
 import {
@@ -21,22 +21,21 @@ import {
 } from "chart.js";
 import "chartjs-adapter-moment";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { BiLockAlt } from 'react-icons/bi';
 import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "./app-layout";
 import { api } from "./axios";
+import { Button } from "./button";
 import { calculatePrincipal, calculatePrincipalForDate, calculateValueForDate } from "./calculator";
-import { buildMonthlyChangeBarData as buildMonthlyChangeBarData, buildYearlyChangeBarData as buildYearlyChangeBarData, monthlyChangeBarOptions as monthlyChangeBarOptions, yearlyChangeBarOptions as yearlyChangeBarOptions } from "./investments/[id]/page";
+import Dropdown from "./dropdown";
+import { buildMonthlyChangeBarData, buildYearlyChangeBarData, monthlyChangeBarOptions, yearlyChangeBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 import { createCheckoutSession } from "./stripe/client";
-import Dropdown from "./dropdown";
-import { Button } from "./button";
 
 
 ChartJS.register(

@@ -74,7 +74,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, [selectedDateRange]);
 
   useEffect(() => {
-    setUpdateDataPoints(calculateUpdateDataPoints());
+    const updateDataPoints = calculateUpdateDataPoints()
+    setUpdateDataPoints(updateDataPoints);
 
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
@@ -633,6 +634,7 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
 export const buildMonthlyChangeBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
+  console.log("building monthly change bar data")
   return {
     datasets: [
       {
