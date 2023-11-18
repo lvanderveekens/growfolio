@@ -482,6 +482,10 @@ const returnLineOptions = (currency: string) => ({
 
 export const monthlyChangeBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
   plugins: {
     tooltip: {
       callbacks: {
@@ -521,6 +525,10 @@ export const monthlyChangeBarOptions = (currency: string) => ({
 
 export const yearlyChangeBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
   plugins: {
     tooltip: {
       callbacks: {
