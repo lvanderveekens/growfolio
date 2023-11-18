@@ -99,7 +99,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         <DatePicker
           className="border w-full px-4 py-2"
           wrapperClassName="w-full"
-          placeholderText='YYYY-MM-DD'
+          placeholderText="YYYY-MM-DD"
           selected={date}
           onChange={(date) => date && setDate(date)}
           dateFormat="yyyy-MM-dd"
@@ -119,13 +119,11 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         />
         <div className="text-red-500">{errors.value}</div>
       </div>
-      <Button
-        variant="primary"
-        type="submit"
-        disabled={submitting}
-      >
-        {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-      </Button>
+      <div>
+        <Button className="w-full lg:w-auto ml-auto block" variant="primary" type="submit" disabled={submitting}>
+          {submitting ? <span>Submitting...</span> : <span>Submit</span>}
+        </Button>
+      </div>
     </form>
   );
 };

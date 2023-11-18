@@ -40,7 +40,7 @@ const ImportTransactionsForm: React.FC<ImportTransactionsFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <div className="">
+        <div className="mb-4">
           Provide a CSV that complies with the following format:
         </div>
         <div className="p-4 text-white bg-black">
@@ -63,9 +63,15 @@ const ImportTransactionsForm: React.FC<ImportTransactionsFormProps> = ({
           required
         />
       </div>
-      <Button className="w-full sm:w-auto" variant='primary' type="submit">
-        Import
-      </Button>
+      <div>
+        <Button
+          className="w-full lg:w-auto ml-auto block"
+          variant="primary"
+          type="submit"
+        >
+          Import
+        </Button>
+      </div>
     </form>
   );
 };

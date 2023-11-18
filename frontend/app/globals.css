@@ -5,12 +5,15 @@
       @apply border;
       @apply px-4;
       @apply py-2;
+      @apply disabled:bg-gray-100;
+      @apply w-full;
     }
 
     textarea {
       @apply border;
       @apply px-4;
       @apply py-2;
+      @apply w-full;
     }
   }
 

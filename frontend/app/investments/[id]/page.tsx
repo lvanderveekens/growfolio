@@ -253,15 +253,16 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     onClose={() => setShowDeleteInvestmentModal(false)}
                   >
                     Are you sure?
-                    <div className="flex justify-end">
+                    <div className="mt-4 flex gap-4 justify-between lg:justify-end">
                       <Button
-                        className="mr-4"
+                        className="w-full lg:w-auto"
                         variant="secondary"
                         onClick={() => setShowDeleteInvestmentModal(false)}
                       >
                         Cancel
                       </Button>
                       <Button
+                        className="w-full lg:w-auto"
                         variant="danger"
                         onClick={deleteInvestment}
                       >

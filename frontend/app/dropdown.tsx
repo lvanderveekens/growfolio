@@ -61,7 +61,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   return (
-    <div className={`relative block ${className}`} ref={dropdownRef}>
+    <div className={`${className} relative block w-full`} ref={dropdownRef}>
       <div>
         <button
           type="button"

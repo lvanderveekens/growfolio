@@ -40,7 +40,9 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <div className=''>Provide a CSV that complies with the following format:</div>
+        <div className="mb-4">
+          Provide a CSV that complies with the following format:
+        </div>
         <div className="p-4 text-white bg-black">
           <div>Date,ValueInCents</div>
           <div>2023-08-01,2000</div>
@@ -49,7 +51,9 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
         </div>
       </div>
       <div className="mb-4">
-        <label className="block" htmlFor="csvFile">CSV file</label>
+        <label className="block" htmlFor="csvFile">
+          CSV file
+        </label>
         <input
           type="file"
           id="csvFile"
@@ -59,9 +63,15 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
           required
         />
       </div>
-      <Button className="w-full sm:w-auto" variant="primary" type="submit">
-        Import
-      </Button>
+      <div>
+        <Button
+          className="w-full lg:w-auto block ml-auto"
+          variant="primary"
+          type="submit"
+        >
+          Import
+        </Button>
+      </div>
     </form>
   );
 };

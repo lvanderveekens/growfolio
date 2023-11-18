@@ -53,7 +53,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
         </div>
         <div>
           <Button
-            className="w-full lg:w-auto"
+            className="w-full lg:w-auto ml-auto block"
             variant="primary"
             type="submit"
             disabled={submitting}

@@ -60,12 +60,11 @@ export default function SettingsPage() {
           </div>
         )}
         {!loading && (
-          <form onSubmit={handleSubmit}>
+          <form className="w-full lg:w-[400px]" onSubmit={handleSubmit}>
             <div className="mb-4">
               <label>Currency</label>
               <div>
                 <Dropdown
-                  className="w-full lg:w-[150px]"
                   selected={
                     settings && {
                       label: labelsByCurrency[settings.currency],

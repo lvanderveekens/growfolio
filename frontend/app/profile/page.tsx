@@ -44,12 +44,11 @@ export default function ProfilePage() {
           </div>
         )}
         {!loading && (
-          <>
+          <div className="w-full lg:w-[500px]">
             <div className="mb-4">
               <label>
                 <div>Email</div>
                 <input
-                  className="border w-full"
                   type="text"
                   value={user?.email || ""}
                   disabled
@@ -60,7 +59,6 @@ export default function ProfilePage() {
               <label>
                 <div>Account type</div>
                 <input
-                  className="border w-full"
                   type="text"
                   value={(user && getAccountTypeLabel(user.accountType)) || ""}
                   disabled
@@ -89,7 +87,7 @@ export default function ProfilePage() {
                 </Button>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </AppLayout>

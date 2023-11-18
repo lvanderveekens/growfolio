@@ -109,13 +109,11 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
         </label>
         <div className="text-red-500">{errors.name}</div>
       </div>
-      <Button
-        type="submit"
-        variant='primary'
-        disabled={submitting}
-      >
-        {submitting ? <span>Submitting...</span> : <span>Submit</span>}
-      </Button>
+      <div>
+        <Button className="w-full lg:w-auto ml-auto block" type="submit" variant="primary" disabled={submitting}>
+          {submitting ? <span>Adding...</span> : <span>Add</span>}
+        </Button>
+      </div>
     </form>
   );
 };
