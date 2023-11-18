@@ -516,7 +516,7 @@ export default function OverviewPage() {
                     )}
                   </div>
                 ) : (
-                  <AddInvestmentForm />
+                  <AddInvestmentForm currency={settings!!.currency} />
                 )}
               </Modal>
             )}

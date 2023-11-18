@@ -4,40 +4,57 @@ import { api } from '../axios';
 import Dropdown from '../dropdown';
 import { useRouter } from "next/navigation";
 import { Button } from '../button';
+import CurrencyInput from 'react-currency-input-field';
+import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
   name: string;
+  initialPrincipal?: number
+  initialValue?: number
 }
 
 type AddInvestmentFormProps = {
+  currency: string
 };
 
-const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
-  const router = useRouter()
+const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
+  const router = useRouter();
 
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
+  const [initialPrincipal, setInitialPrincipal] = useState<number>();
+  const [initialValue, setInitialValue] = useState<number>();
 
   const [errors, setErrors] = useState({
-    type: '',
-    name: '',
+    type: "",
+    name: "",
+    initialPrincipal: "",
+    initialValue: "",
   });
 
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = { type: '', name: '' };
+    const newErrors = { type: "", name: "", initialPrincipal: "", initialValue: "" };
 
     if (!type) {
-      newErrors.type = 'Type is required';
+      newErrors.type = "Type is required";
       valid = false;
     }
-    if (!name || name.trim() === '') {
-      newErrors.name = 'Name is required';
+    if (!name || name.trim() === "") {
+      newErrors.name = "Name is required";
       valid = false;
     }
+    // if (!initialPrincipal) {
+    //   newErrors.initialPrincipal = "Initial principal is required";
+    //   valid = false;
+    // }
+    // if (!initialValue) {
+    //   newErrors.initialValue = "Initial value is required";
+    //   valid = false;
+    // }
 
     setErrors(newErrors);
     return valid;
@@ -45,7 +62,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -55,6 +72,8 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
     const req: CreateInvestmentRequest = {
       type: type!,
       name: name!,
+      initialPrincipal: initialPrincipal,
+      initialValue: initialValue,
     };
 
     api
@@ -73,7 +92,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
       .catch((err) => {
         console.error(err);
         setSubmitting(false);
-      })
+      });
   };
 
   return (
@@ -109,8 +128,47 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = () => {
         </label>
         <div className="text-red-500">{errors.name}</div>
       </div>
+      <div className="mb-4">
+        <label>Initial principal (optional)</label>
+        <CurrencyInput
+          className="border w-full px-4 py-2"
+          prefix={signPrefixesByCurrency[currency]}
+          placeholder={signPrefixesByCurrency[currency]}
+          decimalsLimit={2}
+          onValueChange={(value, name, values) => {
+            if (values && values.float) {
+              setInitialPrincipal(values.float * 100);
+            }
+          }}
+          groupSeparator={groupSeparatorsByCurrency[currency]}
+          decimalSeparator={decimalSeparatorsByCurrency[currency]}
+        />
+        <div className="text-red-500">{errors.initialPrincipal}</div>
+      </div>
+      <div className="mb-4">
+        <label>Initial value (optional)</label>
+        <CurrencyInput
+          className="border w-full px-4 py-2"
+          prefix={signPrefixesByCurrency[currency]}
+          placeholder={signPrefixesByCurrency[currency]}
+          decimalsLimit={2}
+          onValueChange={(value, name, values) => {
+            if (values && values.float) {
+              setInitialValue(values.float * 100);
+            }
+          }}
+          groupSeparator={groupSeparatorsByCurrency[currency]}
+          decimalSeparator={decimalSeparatorsByCurrency[currency]}
+        />
+        <div className="text-red-500">{errors.initialValue}</div>
+      </div>
       <div>
-        <Button className="w-full lg:w-auto ml-auto block" type="submit" variant="primary" disabled={submitting}>
+        <Button
+          className="w-full lg:w-auto ml-auto block"
+          type="submit"
+          variant="primary"
+          disabled={submitting}
+        >
           {submitting ? <span>Adding...</span> : <span>Add</span>}
         </Button>
       </div>

@@ -1,14 +1,13 @@
-import { ChangeEvent, useState } from 'react';
-import { Investment } from '../overview-page';
-import DatePicker from "react-datepicker";
+import { useState } from 'react';
 import CurrencyInput from 'react-currency-input-field';
+import DatePicker from "react-datepicker";
 
-import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
-import { api } from '../axios';
 import { CurrencyInputOnChangeValues } from 'react-currency-input-field/dist/components/CurrencyInputProps';
-import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
+import "react-datepicker/dist/react-datepicker.css";
+import { api } from '../axios';
 import { Button } from '../button';
+import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
 
 export interface CreateInvestmentUpdateRequest {
   date: string

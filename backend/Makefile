@@ -1,6 +1,9 @@
 BINARY_NAME=growfolio-backend
 SERVER_IP=161.35.247.132
 
+ssh: 
+	ssh root@161.35.247.132
+
 build: 
 	go build -o ${BINARY_NAME} main.go
 
