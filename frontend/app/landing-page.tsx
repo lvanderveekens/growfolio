@@ -7,6 +7,7 @@ import { api } from "./axios";
 import { useRouter } from "next/navigation";
 import Footer from "./footer";
 import { Button } from "./button";
+import { FcCheckmark } from "react-icons/fc";
 
 export interface SendContactMessageRequest {
   name: string;
@@ -190,13 +191,21 @@ export default function LandingPage() {
               </div>
               <div className="mb-[50px]">
                 This includes:
-                <ul className="list-disc list-inside">
-                  <li>Track 2 investments</li>
-                  <li>Performance charts</li>
-                  <li>Allocation charts</li>
-                  <li>CSV imports</li>
-                  <li>Support</li>
-                </ul>
+                <div>
+                  <FcCheckmark className="inline-block" /> Track 2 investments
+                </div>
+                <div>
+                  <FcCheckmark className="inline-block" /> Performance charts
+                </div>
+                <div>
+                  <FcCheckmark className="inline-block" /> Allocation charts
+                </div>
+                <div>
+                  <FcCheckmark className="inline-block" /> CSV imports
+                </div>
+                <div>
+                  <FcCheckmark className="inline-block" /> Support
+                </div>
               </div>
               <div className="text-center">
                 <Button
@@ -218,10 +227,13 @@ export default function LandingPage() {
               </div>
               <div className="mb-[50px]">
                 This includes:
-                <ul className="list-disc list-inside">
-                  <li>Everything in Basic</li>
-                  <li>Track unlimited investments</li>
-                </ul>
+                <div>
+                  <FcCheckmark className="inline-block" /> Everything in Basic
+                </div>
+                <div>
+                  <FcCheckmark className="inline-block" /> Track unlimited
+                  investments
+                </div>
               </div>
               <div className="text-center mt-auto">
                 <Button
@@ -298,7 +310,9 @@ export default function LandingPage() {
             </div>
           </div>
           {contactSuccessMessage && (
-            <div className="text-center mt-[50px] lg:mt-[100px] ">{contactSuccessMessage}</div>
+            <div className="text-center mt-[50px] lg:mt-[100px] ">
+              {contactSuccessMessage}
+            </div>
           )}
           {contactErrorMessage && (
             <div className="text-center mt-[50px] lg:mt-[100px] text-red-500">
