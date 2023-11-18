@@ -199,13 +199,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             <div className="mb-4">
               Type: {labelsByInvestmentType[investment.type]}
             </div>
+
+            <h2 className="text-2xl font-bold mb-4">Value</h2>
+
             <div className="mb-4">
               Last update: {findLastUpdate()?.date ?? "-"}
             </div>
 
-            <h2 className="text-2xl font-bold mb-4">Value</h2>
             <div className="mb-4">
-              <div className="border p-12 text-center mb-4">
+              <div className="border py-[75px] text-center mb-4">
                 <div className="font-bold text-3xl">
                   {settings &&
                     formatAmountInCentsAsCurrencyString(
@@ -230,7 +232,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
               <div>
                 <Button
-                  className="w-full lg:w-auto mb-2 mr-4"
+                  className="w-full lg:w-auto mb-4 mr-4"
                   variant="secondary"
                   onClick={() =>
                     router.push(`/investments/${params.id}/updates`)
@@ -239,7 +241,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   View updates
                 </Button>
                 <Button
-                  className="w-full lg:w-auto mb-2 mr-4"
+                  className="w-full lg:w-auto mb-4 mr-4"
                   variant="secondary"
                   onClick={() =>
                     router.push(`/investments/${params.id}/transactions`)
@@ -248,7 +250,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   View transactions
                 </Button>
                 <Button
-                  className="w-full lg:w-auto mb-2 mr-4"
+                  className="w-full lg:w-auto mb-4 mr-4"
                   variant="danger"
                   onClick={() => setShowDeleteInvestmentModal(true)}
                 >

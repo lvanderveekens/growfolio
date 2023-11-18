@@ -423,7 +423,11 @@ export default function OverviewPage() {
 
             <h2 className="text-2xl font-bold mb-4">Value</h2>
 
-            <div className="border p-12 text-center mb-4">
+            <div className="mb-4">
+              Last update: {getLastUpdateDate(investmentRows) ?? "-"}
+            </div>
+
+            <div className="border py-[75px] text-center mb-4">
               <div className="font-bold text-3xl">
                 {settings &&
                   formatAmountInCentsAsCurrencyString(
@@ -501,7 +505,8 @@ export default function OverviewPage() {
                   <div>
                     <div>
                       You've reached the limit of 2 investments for a Basic
-                      account. Upgrade to Premium to track unlimited investments.
+                      account. Upgrade to Premium to track unlimited
+                      investments.
                     </div>
                     {user && user.accountType == AccountType.BASIC && (
                       <div className="mt-4">
@@ -988,3 +993,16 @@ export const getAmountTextColor = (amount: number) => {
   }
   return ""
 }
+
+const getLaterDate = (date1: string, date2: string): string => {
+  return new Date(date1) > new Date(date2) ? date1 : date2;
+};
+
+export const getLastUpdateDate = (investmentRows: InvestmentRow[])=> investmentRows.reduce<string | null>(
+  (result, investmentRow) => {
+    return result === null
+      ? investmentRow.lastUpdateDate
+      : getLaterDate(result, investmentRow.lastUpdateDate);
+  },
+  null
+);
