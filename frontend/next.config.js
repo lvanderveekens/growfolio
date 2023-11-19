@@ -11,4 +11,7 @@ module.exports = {
     // your project has type errors.
     ignoreBuildErrors: true,
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production"
+  },
 };

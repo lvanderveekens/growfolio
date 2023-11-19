@@ -18,7 +18,7 @@ export const Button: React.FC<ButtonProps> = ({ className, variant, children, ..
         break;
       case "secondary":
         variantClassName =
-          "border-gray-200 hover:border-gray-500";
+          "text-gray-600 border-gray-200 hover:border-gray-500";
         break;
       case "danger":
         variantClassName =
@@ -27,7 +27,7 @@ export const Button: React.FC<ButtonProps> = ({ className, variant, children, ..
     }
 
     return (
-      <button className={`${variantClassName} ${className} rounded-md border px-4 py-2 disabled:opacity-50 disabled:pointer-events-none`} {...rest}>
+      <button className={`${variantClassName} ${className} font-bold rounded-md border px-4 py-2 disabled:opacity-50 disabled:pointer-events-none`} {...rest}>
         {children}
       </button>
     );

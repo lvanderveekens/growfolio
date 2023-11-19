@@ -57,7 +57,7 @@ export default function OverviewPage() {
   const [updates, setUpdates] = useState<
     InvestmentUpdate[]
   >([]);
-  const [transactons, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
   
@@ -84,26 +84,9 @@ export default function OverviewPage() {
   }, [selectedDateRange]);
 
   useEffect(() => {
-    const uniqueUpdateDates = Array.from(
-      new Set(updates.map((update) => update.date))
-    );
-
-    const updateDataPoints = uniqueUpdateDates.map((date) => {
-      const value = calculateValueForDate(date, updates);
-      const principal = calculatePrincipalForDate(date, transactons);
-      const returnValue = value - principal;
-      const roi = returnValue / principal;
-
-      return {
-        date: date,
-        value: value,
-        principal: principal,
-        return: returnValue,
-        roi: roi,
-      };
-    });
-
+    const updateDataPoints = calculateUpdateDataPoints()
     setUpdateDataPoints(updateDataPoints);
+
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
     );
@@ -135,7 +118,31 @@ export default function OverviewPage() {
 
       setInvestmentRows(investmentRows);
     }
-  }, [investments, transactons, updates]);
+  }, [investments, transactions, updates]);
+
+  const calculateUpdateDataPoints = () => {
+    if (transactions.length === 0) {
+      return []
+    }
+    const uniqueUpdateDates = Array.from(
+      new Set(updates.map((update) => update.date))
+    );
+
+    return uniqueUpdateDates.map((date) => {
+      const value = calculateValueForDate(date, updates);
+      const principal = calculatePrincipalForDate(date, transactions);
+      const returnValue = value - principal;
+      const roi = returnValue / principal;
+
+      return {
+        date: date,
+        value: value,
+        principal: principal,
+        return: returnValue,
+        roi: roi,
+      };
+    });
+  }
 
   const fetchUser = async () => {
     api.get("/user")
@@ -246,7 +253,7 @@ export default function OverviewPage() {
   };
 
   const calculatePrincipalForInvestment = (investment: Investment): number | undefined => {
-    const transactionsForInvestment = transactons.filter(
+    const transactionsForInvestment = transactions.filter(
       (transaction) => transaction.investmentId == investment.id
     );
     if (transactionsForInvestment.length == 0) {
@@ -397,6 +404,9 @@ export default function OverviewPage() {
       </div>
     );
   }
+
+  const lastUpdateDate = getLastUpdateDate(investmentRows)
+
   return (
     <AppLayout>
       <main>
@@ -422,27 +432,37 @@ export default function OverviewPage() {
 
             <h2 className="text-2xl font-bold mb-4">Value</h2>
 
-            <div className="mb-4">
-              Last update: {getLastUpdateDate(investmentRows) ?? "-"}
-            </div>
+            {lastUpdateDate && transactions.length > 0 && (
+              <>
+                <div className="mb-4">Last update: {lastUpdateDate}</div>
+                <div className="border py-[75px] text-center mb-4">
+                  <div className="font-bold text-3xl">
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        totalValue,
+                        settings.currency
+                      )}
+                  </div>
+                  <div className={`${getAmountTextColor(totalReturn)}`}>
+                    {formatAsROIPercentage(totalRoi)} (
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        totalReturn,
+                        settings.currency
+                      )}
+                    )
+                  </div>
+                </div>
+              </>
+            )}
 
-            <div className="border py-[75px] text-center mb-4">
-              <div className="font-bold text-3xl">
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    totalValue,
-                    settings.currency
-                  )}
-              </div>
-              <div className={`${getAmountTextColor(totalReturn)}`}>
-                {formatAsROIPercentage(totalRoi)} (
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    totalReturn,
-                    settings.currency
-                  )}
-                )
-              </div>
+            <div>
+              {updates.length === 0 && (
+                <div className="mb-4">There are no updates yet.</div>
+              )}
+              {transactions.length === 0 && (
+                <div className="mb-4">There are no transactions yet.</div>
+              )}
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Investments</h2>
@@ -528,10 +548,19 @@ export default function OverviewPage() {
 
           <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-          {updateDataPoints.length === 0 && (
-            <div>
-              <p className="mb-4">There are no updates yet.</p>
-              <p>Navigate to an investment to add updates.</p>
+          {investments.length === 0 && (
+            <div className="mb-4">
+              There are no investments yet.
+            </div>
+          )}
+          {investments.length > 0 && updates.length === 0 && (
+            <div className="mb-4">
+              There are no updates yet.
+            </div>
+          )}
+          {investments.length > 0 && transactions.length === 0 && (
+            <div className="mb-4">
+              There are no transactions yet.
             </div>
           )}
 

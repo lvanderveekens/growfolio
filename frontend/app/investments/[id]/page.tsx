@@ -87,7 +87,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
 
   const calculateUpdateDataPoints = () => {
-    if (transactions.length == 0) {
+    if (transactions.length === 0) {
       return []
     }
     const updateDataPoints = updates.map((update) => {
@@ -166,6 +166,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     return undefined
   }
 
+  const lastUpdate = findLastUpdate()
+
   return (
     <AppLayout>
       <div className="container my-4">
@@ -203,103 +205,100 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <h2 className="text-2xl font-bold mb-4">Value</h2>
 
-            <div className="mb-4">
-              Last update: {findLastUpdate()?.date ?? "-"}
+            {lastUpdate && transactions.length > 0 && (
+              <>
+                <div className="mb-4">Last update: {lastUpdate!!.date}</div>
+
+                <div className="border py-[75px] text-center mb-4">
+                  <div className="font-bold text-3xl">
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        lastUpdate?.value,
+                        settings.currency
+                      )}
+                  </div>
+                  <div
+                    className={`${getAmountTextColor(lastUpdate?.return ?? 0)}`}
+                  >
+                    {formatAsROIPercentage(lastUpdate?.roi)} (
+                    {settings &&
+                      formatAmountInCentsAsCurrencyString(
+                        lastUpdate?.return,
+                        settings.currency
+                      )}
+                    )
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div>
+              {updates.length === 0 && (
+                <div className="mb-4">There are no updates yet.</div>
+              )}
+              {transactions.length === 0 && (
+                <div className="mb-4">There are no transactions yet.</div>
+              )}
             </div>
 
-            <div className="mb-4">
-              <div className="border py-[75px] text-center mb-4">
-                <div className="font-bold text-3xl">
-                  {settings &&
-                    formatAmountInCentsAsCurrencyString(
-                      findLastUpdate()?.value,
-                      settings.currency
-                    )}
-                </div>
-                <div
-                  className={`${getAmountTextColor(
-                    findLastUpdate()?.return ?? 0
-                  )}`}
+            <div>
+              <Button
+                className="w-full lg:w-auto mb-4 mr-4"
+                variant="secondary"
+                onClick={() => router.push(`/investments/${params.id}/updates`)}
+              >
+                View updates
+              </Button>
+              <Button
+                className="w-full lg:w-auto mb-4 mr-4"
+                variant="secondary"
+                onClick={() =>
+                  router.push(`/investments/${params.id}/transactions`)
+                }
+              >
+                View transactions
+              </Button>
+              <Button
+                className="w-full lg:w-auto mb-4 mr-4"
+                variant="danger"
+                onClick={() => setShowDeleteInvestmentModal(true)}
+              >
+                Delete investment
+              </Button>
+              {showDeleteInvestmentModal && (
+                <Modal
+                  title="Delete investment"
+                  onClose={() => setShowDeleteInvestmentModal(false)}
                 >
-                  {formatAsROIPercentage(findLastUpdate()?.roi)} (
-                  {settings &&
-                    formatAmountInCentsAsCurrencyString(
-                      findLastUpdate()?.return,
-                      settings.currency
-                    )}
-                  )
-                </div>
-              </div>
-
-              <div>
-                <Button
-                  className="w-full lg:w-auto mb-4 mr-4"
-                  variant="secondary"
-                  onClick={() =>
-                    router.push(`/investments/${params.id}/updates`)
-                  }
-                >
-                  View updates
-                </Button>
-                <Button
-                  className="w-full lg:w-auto mb-4 mr-4"
-                  variant="secondary"
-                  onClick={() =>
-                    router.push(`/investments/${params.id}/transactions`)
-                  }
-                >
-                  View transactions
-                </Button>
-                <Button
-                  className="w-full lg:w-auto mb-4 mr-4"
-                  variant="danger"
-                  onClick={() => setShowDeleteInvestmentModal(true)}
-                >
-                  Delete investment
-                </Button>
-                {showDeleteInvestmentModal && (
-                  <Modal
-                    title="Delete investment"
-                    onClose={() => setShowDeleteInvestmentModal(false)}
-                  >
-                    Are you sure?
-                    <div className="mt-4 flex gap-4 justify-between lg:justify-end">
-                      <Button
-                        className="w-full lg:w-auto"
-                        variant="secondary"
-                        onClick={() => setShowDeleteInvestmentModal(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        className="w-full lg:w-auto"
-                        variant="danger"
-                        onClick={deleteInvestment}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </Modal>
-                )}
-              </div>
+                  Are you sure?
+                  <div className="mt-4 flex gap-4 justify-between lg:justify-end">
+                    <Button
+                      className="w-full lg:w-auto"
+                      variant="secondary"
+                      onClick={() => setShowDeleteInvestmentModal(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="w-full lg:w-auto"
+                      variant="danger"
+                      onClick={deleteInvestment}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </Modal>
+              )}
             </div>
 
             <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
             <div>
               {updates.length === 0 && (
-                <div className="mb-4">
-                  <p className="mb-4">There are no updates yet.</p>
-                  <p>Go to 'View updates' and click on 'Add update'.</p>
-                </div>
+                <div className="mb-4">There are no updates yet.</div>
               )}
               {transactions.length === 0 && (
-                <div className="mb-4">
-                  <p className="mb-4">There are no transactions yet.</p>
-                  <p>
-                    Go to 'View transactions' and click on 'Add transaction'.
-                  </p>
-                </div>
+                <div className="mb-4">There are no transactions yet.</div>
               )}
             </div>
 
