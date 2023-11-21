@@ -20,11 +20,11 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
   };
 
   return (
-    <nav className="sticky top-0 border-b z-50 bg-white lg:px-12 py-2 lg:py-4 w-full lg:flex lg:items-center font-bold gap-8">
-      <div className="px-4 lg:px-0 lg:px-auto flex justify-between items-center w-full sm:w-auto">
-        <div className="text-3xl sm:text-4xl text-green-400">
+    <nav className="sticky top-0 z-50 bg-green-400 text-white px-4 w-full lg:flex lg:items-center font-bold gap-8">
+      <div className="flex justify-between items-center w-full sm:w-auto">
+        <div className="text-3xl py-4">
           <Link href="/">
-            <AiOutlineStock size={48} className="inline mr-1" />
+            <AiOutlineStock size={40} className="inline mr-1" />
             growfolio
           </Link>
         </div>
@@ -36,13 +36,13 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       {/* desktop */}
       <div className="hidden md:flex flex-grow text-xl justify-between items-center">
         <div className="flex gap-8">
-          <Link className={`hover:text-green-400`} href="#why">
+          <Link href="#why" className="hover:text-black">
             Why
           </Link>
-          <Link className={`hover:text-green-400`} href="#pricing">
+          <Link href="#pricing" className="hover:text-black">
             Pricing
           </Link>
-          <Link className={`hover:text-green-400`} href="#contact">
+          <Link href="#contact" className="hover:text-black">
             Contact
           </Link>
         </div>
@@ -50,7 +50,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
         <div>
           <Button
             className={`font-bold px-8`}
-            variant="primary"
+            variant="tertiary"
             onClick={() => {
               router.push("/login");
             }}
@@ -63,7 +63,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       {/* mobile */}
       <div className={`${isOpen ? "block" : "hidden"} py-4 text-lg md:hidden`}>
         <div className="flex flex-col gap-2">
-          <div className="px-4 ">
+          <div className="">
             <Link
               className={`hover:text-green-400`}
               href="#why"
@@ -72,7 +72,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
               Why
             </Link>
           </div>
-          <div className="px-4 ">
+          <div className="">
             <Link
               className={`hover:text-green-400`}
               href="#pricing"
@@ -81,7 +81,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
               Pricing
             </Link>
           </div>
-          <div className="px-4 ">
+          <div className="">
             <Link
               className={`hover:text-green-400`}
               href="#contact"
@@ -90,10 +90,10 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
               Contact
             </Link>
           </div>
-          <div className={`px-4`}>
+          <div className="">
             <Button
               className={`w-full`}
-              variant="primary"
+              variant="tertiary"
               onClick={() => {
                 router.push("/login");
               }}

@@ -19,7 +19,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
           <div className="px-4 lg:px-8 py-8">
             <div className="text-xl text-center font-bold pb-8">Login</div>
             <button
-              className="border p-4 rounded-md w-full hover:border-black"
+              className="border-2 p-4 rounded-md w-full hover:border-black"
               onClick={() => {
                 router.push("/api/auth/google");
               }}
