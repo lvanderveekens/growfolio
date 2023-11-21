@@ -117,8 +117,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         </div>
 
         {/* mobile */}
-        <div className={`${isOpen ? "block" : "hidden"} py-4 lg md:hidden`}>
-          <div className="flex flex-col gap-2">
+        <div className={`${isOpen ? "block" : "hidden"} pb-4 lg md:hidden`}>
+          <div className="flex flex-col gap-4">
             {!isLoadingUser && user && (
               <div className="font-normal">{user.email}</div>
             )}

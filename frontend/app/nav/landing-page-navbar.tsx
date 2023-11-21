@@ -61,8 +61,8 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       </div>
 
       {/* mobile */}
-      <div className={`${isOpen ? "block" : "hidden"} py-4 text-lg md:hidden`}>
-        <div className="flex flex-col gap-2">
+      <div className={`${isOpen ? "block" : "hidden"} pb-4 text-lg md:hidden`}>
+        <div className="flex flex-col gap-4">
           <div className="">
             <Link
               className={`hover:text-green-400`}

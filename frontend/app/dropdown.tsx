@@ -61,7 +61,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   return (
-    <div className={`${className} relative block w-full`} ref={dropdownRef}>
+    <div className={`${className} bg-white relative block w-full`} ref={dropdownRef}>
       <div>
         <button
           type="button"

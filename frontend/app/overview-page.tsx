@@ -435,7 +435,7 @@ export default function OverviewPage() {
             {lastUpdateDate && transactions.length > 0 && (
               <>
                 <div className="mb-4">Last update: {lastUpdateDate}</div>
-                <div className="border py-[75px] text-center mb-4">
+                <div className="border py-[75px] bg-white text-center mb-4">
                   <div className="font-bold text-3xl">
                     {settings &&
                       formatAmountInCentsAsCurrencyString(
@@ -484,6 +484,7 @@ export default function OverviewPage() {
                 {investmentRows.map((investmentRow) => {
                   return (
                     <Link
+                      className="bg-white"
                       key={investmentRow.id}
                       href={`/investments/${investmentRow.id}`}
                     >

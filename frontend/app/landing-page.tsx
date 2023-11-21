@@ -93,96 +93,98 @@ export default function LandingPage() {
       </div>
 
       {/* why section */}
-      <div id="why" className="container py-[50px] lg:py-[100px]">
-        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
-          Why Growfolio?
-        </h2>
+      <div id="why" className="py-[50px] lg:py-[100px] bg-white">
+        <div className="container">
+          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
+            Why Growfolio?
+          </h2>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
-          <div className="lg:col-span-5">
-            <div className="text-xl lg:text-3xl font-bold mb-8">
-              All investments in one place.
+          <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
+            <div className="lg:col-span-5">
+              <div className="text-xl lg:text-3xl font-bold mb-8">
+                All investments in one place.
+              </div>
+              <div className="text-lg lg:text-2xl">
+                Have all your investments, be it stocks, bonds,
+                cryptocurrencies, or any asset, neatly organized in one place.
+                No more flipping between apps to get the big picture.
+              </div>
             </div>
-            <div className="text-lg lg:text-2xl">
-              Have all your investments, be it stocks, bonds, cryptocurrencies,
-              or any asset, neatly organized in one place. No more flipping
-              between apps to get the big picture.
+            <div className="lg:col-start-7 lg:col-span-6">
+              <img
+                src="/why-1.png"
+                className="mx-auto w-auto max-w-full max-h-[550px]"
+              />
             </div>
           </div>
-          <div className="lg:col-start-7 lg:col-span-6">
-            <img
-              src="/why-1.png"
-              className="mx-auto w-auto max-w-full max-h-[550px]"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
-          <div className="order-2 lg:order-none lg:col-span-6">
-            <img
-              src="/why-2.png"
-              className="mx-auto w-auto max-w-full max-h-[550px]"
-            />
-          </div>
-          <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-xl lg:text-3xl font-bold mb-8">
-              Visualize your portfolio growth.
+          <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
+            <div className="order-2 lg:order-none lg:col-span-6">
+              <img
+                src="/why-2.png"
+                className="mx-auto w-auto max-w-full max-h-[550px]"
+              />
             </div>
-            <div className="text-lg lg:text-2xl">
-              Charts and graphs make it easy to understand your portfolio's
-              performance at a glance. No more deciphering endless rows and
-              columns of numbers.
+            <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
+              <div className="text-xl lg:text-3xl font-bold mb-8">
+                Visualize your portfolio growth.
+              </div>
+              <div className="text-lg lg:text-2xl">
+                Charts and graphs make it easy to understand your portfolio's
+                performance at a glance. No more deciphering endless rows and
+                columns of numbers.
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
-          <div className="lg:col-span-5">
-            <div className="text-xl lg:text-3xl font-bold mb-8">
-              Mobile-friendly.
+          <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
+            <div className="lg:col-span-5">
+              <div className="text-xl lg:text-3xl font-bold mb-8">
+                Mobile-friendly.
+              </div>
+              <div className="text-lg lg:text-2xl">
+                Access your investment data anytime, anywhere, right from your
+                smartphone. Stay informed about your portfolio's performance,
+                even when you're on the move.
+              </div>
             </div>
-            <div className="text-lg lg:text-2xl">
-              Access your investment data anytime, anywhere, right from your
-              smartphone. Stay informed about your portfolio's performance, even
-              when you're on the move.
+            <div className="lg:col-start-7 lg:col-span-6">
+              <img
+                src="/why-3.png"
+                className="mx-auto w-auto max-w-full max-h-[550px]"
+              />
             </div>
           </div>
-          <div className="lg:col-start-7 lg:col-span-6">
-            <img
-              src="/why-3.png"
-              className="mx-auto w-auto max-w-full max-h-[550px]"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
-          <div className="order-2 lg:order-none lg:col-span-6">
-            <img
-              src="/why-4.jpeg"
-              className="mx-auto w-auto max-w-full max-h-[550px]"
-            />
-          </div>
-          <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-            <div className="text-xl lg:text-3xl font-bold mb-8">
-              By an investor, for investors.
+          <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
+            <div className="order-2 lg:order-none lg:col-span-6">
+              <img
+                src="/why-4.jpeg"
+                className="mx-auto w-auto max-w-full max-h-[550px]"
+              />
             </div>
-            <div className="text-lg lg:text-2xl">
-              Benefit from a platform developed by an active investor who
-              understands your needs and priorities firsthand.
+            <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
+              <div className="text-xl lg:text-3xl font-bold mb-8">
+                By an investor, for investors.
+              </div>
+              <div className="text-lg lg:text-2xl">
+                Benefit from a platform developed by an active investor who
+                understands your needs and priorities firsthand.
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* pricing section */}
-      <div id="pricing" className="py-[50px] lg:py-[100px] bg-[#F7F7F7]">
+      <div id="pricing" className="py-[50px] lg:py-[100px]">
         <div className="container">
           <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
             Pricing
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
-            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+            <div className="flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
               <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Basic
               </div>
@@ -218,7 +220,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex flex-col rounded-3xl border border-black border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+            <div className="flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
               <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Premium
               </div>
@@ -250,7 +252,7 @@ export default function LandingPage() {
       </div>
 
       {/* contact section */}
-      <div id="contact" className="py-[50px] lg:py-[100px]">
+      <div id="contact" className="py-[50px] lg:py-[100px] bg-white">
         <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
           Contact
         </h2>

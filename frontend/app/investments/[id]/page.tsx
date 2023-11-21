@@ -209,7 +209,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <>
                 <div className="mb-4">Last update: {lastUpdate!!.date}</div>
 
-                <div className="border py-[75px] text-center mb-4">
+                <div className="border bg-white py-[75px] text-center mb-4">
                   <div className="font-bold text-3xl">
                     {settings &&
                       formatAmountInCentsAsCurrencyString(

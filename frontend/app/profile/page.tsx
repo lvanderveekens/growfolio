@@ -44,7 +44,7 @@ export default function ProfilePage() {
           </div>
         )}
         {!loading && (
-          <div className="w-full lg:w-[500px]">
+          <div className="w-full lg:w-[400px]">
             <div className="mb-4">
               <label>
                 <div>Email</div>
