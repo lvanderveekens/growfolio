@@ -1,19 +1,19 @@
 "use client"
 
+import AppLayout from "@/app/app-layout";
 import { api } from "@/app/axios";
+import { Button } from "@/app/button";
 import Modal from "@/app/modal";
 import { Investment } from "@/app/overview-page";
 import { Settings } from "@/app/settings/settings";
 import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
-import { FaXmark } from "react-icons/fa6";
+import { FaRegTrashCan } from "react-icons/fa6";
 import AddTransactionForm from "../../add-transaction-form";
 import ImportTransactionsForm from "../../import-transactions-form";
-import { Transaction } from "../../transaction";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
-import AppLayout from "@/app/app-layout";
-import { Button } from "@/app/button";
+import { Transaction } from "../../transaction";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -97,31 +97,30 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
         {transactions.length === 0 && <div className="mb-4">No transactions found.</div>}
         {transactions.length > 0 && (
           <div className="overflow-x-auto mb-4">
-            <table className="whitespace-nowrap w-full">
+            <table>
               <thead>
-                <tr className="border">
-                  <th className="border px-3 text-left">Date</th>
-                  <th className="border px-3 text-left">Type</th>
-                  <th className="border px-3 text-left">Amount</th>
-                  <th className="border px-3 text-left">Actions</th>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((transaction) => {
                   return (
                     <tr key={transaction.id} className="border">
-                      <td className="border px-3">{transaction.date}</td>
-                      <td className="border px-3">
+                      <td>{transaction.date}</td>
+                      <td>
                         {capitalize(transaction.type)}
                       </td>
-                      <td className="border px-3">
+                      <td>
                         {settings && formatAmountInCentsAsCurrencyString(transaction.amount, settings.currency)}
                       </td>
-                      <td className="border px-3">
-                        <FaXmark
-                          className="hover:cursor-pointer"
+                      <td>
+                        <FaRegTrashCan
+                          className="hover:cursor-pointer text-red-500 hover:text-red-700"
                           size={24}
-                          color="red"
                           onClick={async () => {
                             await deleteTransaction(transaction.id);
                             fetchTransactions();

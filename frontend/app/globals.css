@@ -15,6 +15,26 @@
       @apply py-2;
       @apply w-full;
     }
+
+    table {
+      @apply whitespace-nowrap;
+      @apply w-full;
+    }
+
+    tr {
+      @apply border;
+    }
+
+    th {
+      @apply border;
+      @apply p-2;
+      @apply text-left;
+    }
+
+    td {
+      @apply border;
+      @apply p-2;
+    }
   }
 
 @tailwind components;

@@ -8,7 +8,7 @@ import { Settings } from "@/app/settings/settings";
 import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
-import { FaXmark } from "react-icons/fa6";
+import { FaRegTrashCan } from "react-icons/fa6";
 import AddUpdateForm from "../../add-update-form";
 import ImportUpdatesForm from "../../import-updates-form";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
@@ -96,31 +96,30 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
         {updates.length === 0 && <div className="mb-4">No updates found.</div>}
         {updates.length > 0 && (
           <div className="overflow-x-auto mb-4">
-            <table className="whitespace-nowrap w-full">
+            <table>
               <thead>
-                <tr className="border">
-                  <th className="border px-3 text-left">Date</th>
-                  <th className="border px-3 text-left">Value</th>
-                  <th className="border px-3 text-left">Actions</th>
+                <tr>
+                  <th>Date</th>
+                  <th>Value</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {updates.map((update) => {
                   return (
-                    <tr key={update.id} className="border">
-                      <td className="border px-3">{update.date}</td>
-                      <td className="border px-3">
+                    <tr key={update.id}>
+                      <td>{update.date}</td>
+                      <td>
                         {settings &&
                           formatAmountInCentsAsCurrencyString(
                             update.value,
                             settings.currency
                           )}
                       </td>
-                      <td className="border px-3">
-                        <FaXmark
-                          className="hover:cursor-pointer"
+                      <td>
+                        <FaRegTrashCan
+                          className="hover:cursor-pointer text-red-500 hover:text-red-700"
                           size={24}
-                          color="red"
                           onClick={async () => {
                             await deleteUpdate(update.id!!);
                             fetchUpdates();
