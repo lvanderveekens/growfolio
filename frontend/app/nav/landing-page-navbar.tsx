@@ -63,44 +63,36 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       {/* mobile */}
       <div className={`${isOpen ? "block" : "hidden"} pb-4 text-lg md:hidden`}>
         <div className="flex flex-col gap-4">
-          <div className="">
-            <Link
-              className={`hover:text-green-400`}
-              href="#why"
-              onClick={toggleNavbar}
-            >
-              Why
-            </Link>
-          </div>
-          <div className="">
-            <Link
-              className={`hover:text-green-400`}
-              href="#pricing"
-              onClick={toggleNavbar}
-            >
-              Pricing
-            </Link>
-          </div>
-          <div className="">
-            <Link
-              className={`hover:text-green-400`}
-              href="#contact"
-              onClick={toggleNavbar}
-            >
-              Contact
-            </Link>
-          </div>
-          <div className="">
-            <Button
-              className={`w-full`}
-              variant="tertiary"
-              onClick={() => {
-                router.push("/login");
-              }}
-            >
-              Log in
-            </Button>
-          </div>
+          <Link
+            className={`hover:text-green-400`}
+            href="#why"
+            onClick={toggleNavbar}
+          >
+            Why
+          </Link>
+          <Link
+            className={`hover:text-green-400`}
+            href="#pricing"
+            onClick={toggleNavbar}
+          >
+            Pricing
+          </Link>
+          <Link
+            className={`hover:text-green-400`}
+            href="#contact"
+            onClick={toggleNavbar}
+          >
+            Contact
+          </Link>
+          <Button
+            className={`w-full`}
+            variant="tertiary"
+            onClick={() => {
+              router.push("/login");
+            }}
+          >
+            Log in
+          </Button>
         </div>
       </div>
     </nav>

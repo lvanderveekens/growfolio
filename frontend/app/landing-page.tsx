@@ -93,7 +93,7 @@ export default function LandingPage() {
       </div>
 
       {/* why section */}
-      <div id="why" className="py-[50px] lg:py-[100px] bg-white">
+      <div id="why" className="scroll-mt-[50px] py-[50px] lg:py-[100px] bg-white">
         <div className="container">
           <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
             Why Growfolio?
@@ -177,7 +177,7 @@ export default function LandingPage() {
       </div>
 
       {/* pricing section */}
-      <div id="pricing" className="py-[50px] lg:py-[100px]">
+      <div id="pricing" className="scroll-mt-[50px] py-[50px] lg:py-[100px]">
         <div className="container">
           <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
             Pricing
@@ -252,7 +252,7 @@ export default function LandingPage() {
       </div>
 
       {/* contact section */}
-      <div id="contact" className="py-[50px] lg:py-[100px] bg-white">
+      <div id="contact" className="scroll-mt-[50px] py-[50px] lg:py-[100px] bg-white">
         <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
           Contact
         </h2>

@@ -122,37 +122,29 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
             {!isLoadingUser && user && (
               <div className="font-normal">{user.email}</div>
             )}
-            <div className="">
-              <Link className='hover:text-black' href="/">
-                <div className="flex items-center">Overview</div>
-              </Link>
-            </div>
-            <div className="">
-              <Link className='hover:text-black' href="/profile">
-                <div className="flex items-center">Profile</div>
-              </Link>
-            </div>
-            <div className="">
-              <Link className='hover:text-black' href="/settings">
-                <div className="flex items-center">Settings</div>
-              </Link>
-            </div>
-            <div className={``}>
-              <button
-                className='hover:text-black'
-                onClick={() => {
-                  api.post(`/auth/logout`).then((res) => {
-                    if (window.location.pathname === "/") {
-                      window.location.reload();
-                    } else {
-                      router.push("/");
-                    }
-                  });
-                }}
-              >
-                <div className="flex items-center">Log out</div>
-              </button>
-            </div>
+            <Link className="hover:text-black" href="/">
+              <div className="flex items-center">Overview</div>
+            </Link>
+            <Link className="hover:text-black" href="/profile">
+              <div className="flex items-center">Profile</div>
+            </Link>
+            <Link className="hover:text-black" href="/settings">
+              <div className="flex items-center">Settings</div>
+            </Link>
+            <button
+              className="hover:text-black"
+              onClick={() => {
+                api.post(`/auth/logout`).then((res) => {
+                  if (window.location.pathname === "/") {
+                    window.location.reload();
+                  } else {
+                    router.push("/");
+                  }
+                });
+              }}
+            >
+              <div className="flex items-center">Log out</div>
+            </button>
           </div>
         </div>
       </nav>
