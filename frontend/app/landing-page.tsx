@@ -184,7 +184,7 @@ export default function LandingPage() {
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
-            <div className="flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+            <div className="shadow-lg flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
               <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Basic
               </div>
@@ -220,7 +220,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
+            <div className="shadow-lg flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
               <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
                 Premium
               </div>
