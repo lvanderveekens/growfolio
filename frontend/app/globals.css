@@ -8,6 +8,11 @@
       @apply disabled:bg-gray-100;
       @apply w-full;
       @apply bg-white;
+
+      appearance: none;
+      border-radius: 0;
+      -webkit-appearance: none;
+      -webkit-border-radius: 0;
     }
 
     textarea {
@@ -16,6 +21,11 @@
       @apply py-2;
       @apply w-full;
       @apply bg-white;
+
+      appearance: none;
+      border-radius: 0;
+      -webkit-appearance: none;
+      -webkit-border-radius: 0;
     }
 
     table {
