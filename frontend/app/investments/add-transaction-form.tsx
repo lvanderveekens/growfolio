@@ -137,7 +137,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       <div className="mb-4">
         <label>Amount</label>
         <CurrencyInput
-          className="border w-full px-4 py-2"
+          className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
           placeholder={signPrefixesByCurrency[currency]}
           decimalsLimit={2}

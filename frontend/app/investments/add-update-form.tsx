@@ -108,7 +108,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
       <div className="mb-4">
         <label>Value</label>
         <CurrencyInput
-          className="border w-full px-4 py-2"
+          className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
           placeholder={signPrefixesByCurrency[currency]}
           decimalsLimit={2}

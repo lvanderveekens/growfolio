@@ -131,7 +131,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       <div className="mb-4">
         <label>Initial principal (optional)</label>
         <CurrencyInput
-          className="border w-full px-4 py-2"
+          className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
           placeholder={signPrefixesByCurrency[currency]}
           decimalsLimit={2}
@@ -148,7 +148,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       <div className="mb-4">
         <label>Initial value (optional)</label>
         <CurrencyInput
-          className="border w-full px-4 py-2"
+          className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
           placeholder={signPrefixesByCurrency[currency]}
           decimalsLimit={2}

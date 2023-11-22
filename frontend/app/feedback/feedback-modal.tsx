@@ -40,7 +40,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="mb-4">
           <label>
-            <div className="mb-4">Do you have any suggestions?</div>
+            <div className="mb-4">Do you have any suggestions or feature requests?</div>
             <textarea
               className="w-full border resize-none h-auto"
               placeholder="Enter your suggestions"
