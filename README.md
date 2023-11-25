@@ -29,7 +29,7 @@ Track your investment portfolio 💰.
 Stop the dev server first. 
 
     (local) frontend $ npm run build
-    (local) frontend $ make scp-build
+    (local) frontend $ make copy-build
     (server) frontend $ pm2 reload nextjs
 
 Build runs locally, because it's killed when done on the server due to lack of resources...
@@ -39,5 +39,5 @@ Build runs locally, because it's killed when done on the server due to lack of r
 Stop the server instance first before copying.
 
     (local) backend $ make build-production
-    (local) backend $ make scp-build
+    (local) backend $ make copy-build
     (server) backend $ make run-production
