@@ -10,6 +10,7 @@ import { TbLogout } from 'react-icons/tb';
 import { api } from "../axios";
 import { FeedbackButton } from "../feedback/feedback-button";
 import { User } from "../overview-page";
+import { Button } from "../button";
 
 interface AppNavbarProps {
 }
@@ -99,8 +100,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
             </div>
           </div>
 
-          <div className="hover:text-black">
-            <button
+          <div>
+            <Button
+              variant="tertiary"
               onClick={() => {
                 api.post(`/auth/logout`).then((res) => {
                   if (window.location.pathname === "/") {
@@ -111,8 +113,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 });
               }}
             >
-              <div className="flex items-center">Log out</div>
-            </button>
+              Log out
+            </Button>
           </div>
         </div>
 
@@ -131,8 +133,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
             <Link className="hover:text-black" href="/settings">
               <div className="flex items-center">Settings</div>
             </Link>
-            <button
-              className="hover:text-black"
+            <Button
+              variant='tertiary'
               onClick={() => {
                 api.post(`/auth/logout`).then((res) => {
                   if (window.location.pathname === "/") {
@@ -143,8 +145,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 });
               }}
             >
-              <div className="flex items-center">Log out</div>
-            </button>
+              Log out
+            </Button>
           </div>
         </div>
       </nav>

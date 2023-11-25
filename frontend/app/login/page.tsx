@@ -4,12 +4,13 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { AiOutlineStock } from "react-icons/ai";
+import { Button } from '../button';
 
 export default function LoginPage({ params, }: { params: { provider: string } }) {
   const router = useRouter();
 
   return (
-    <div className="bg-gray-100">
+    <div className="">
       <div className='container flex justify-center items-center min-h-screen '>
         <div className="bg-white rounded-md border w-full lg:w-[400px]">
           <div className="px-4 lg:px-8 py-8 text-4xl text-green-400 font-bold text-center border-b-[1px]">
@@ -18,8 +19,9 @@ export default function LoginPage({ params, }: { params: { provider: string } })
           </div>
           <div className="px-4 lg:px-8 py-8">
             <div className="text-xl text-center font-bold pb-8">Login</div>
-            <button
-              className="border-2 p-4 rounded-md w-full hover:border-black"
+            <Button
+              className="w-full px-4 py-4"
+              variant='secondary'
               onClick={() => {
                 router.push("/api/auth/google");
               }}
@@ -34,7 +36,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
                 />
                 Log in with Google
               </div>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -438,15 +438,6 @@ export default function OverviewPage() {
               </>
             )}
 
-            <div>
-              {updates.length === 0 && (
-                <div className="mb-4">There are no updates yet.</div>
-              )}
-              {transactions.length === 0 && (
-                <div className="mb-4">There are no transactions yet.</div>
-              )}
-            </div>
-
             <h2 className="text-2xl font-bold mb-4">Investments</h2>
 
             {loading && (
@@ -529,20 +520,10 @@ export default function OverviewPage() {
             )}
           </div>
 
-          <h2 className="text-2xl font-bold mb-4">Performance</h2>
-
-          {investments.length === 0 && (
-            <div className="mb-4">There are no investments yet.</div>
-          )}
-          {investments.length > 0 && updates.length === 0 && (
-            <div className="mb-4">There are no updates yet.</div>
-          )}
-          {investments.length > 0 && transactions.length === 0 && (
-            <div className="mb-4">There are no transactions yet.</div>
-          )}
-
           {updateDataPoints.length > 0 && (
             <>
+              <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
               <div className="mb-4">
                 <Dropdown
                   className="lg:w-auto"

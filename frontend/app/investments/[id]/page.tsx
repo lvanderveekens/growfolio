@@ -219,21 +219,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             )}
 
             <div>
-              {updates.length === 0 && (
-                <div className="mb-4">There are no updates yet.</div>
-              )}
-              {transactions.length === 0 && (
-                <div className="mb-4">There are no transactions yet.</div>
-              )}
-            </div>
-
-            <div>
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
                 variant="secondary"
                 onClick={() => router.push(`/investments/${params.id}/updates`)}
               >
-                View updates
+                Manage updates
               </Button>
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
@@ -242,7 +233,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   router.push(`/investments/${params.id}/transactions`)
                 }
               >
-                View transactions
+                Manage transactions
               </Button>
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
@@ -277,19 +268,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               )}
             </div>
 
-            <h2 className="text-2xl font-bold mb-4">Performance</h2>
-
-            <div>
-              {updates.length === 0 && (
-                <div className="mb-4">There are no updates yet.</div>
-              )}
-              {transactions.length === 0 && (
-                <div className="mb-4">There are no transactions yet.</div>
-              )}
-            </div>
-
             {updateDataPoints.length > 0 && (
               <>
+                <h2 className="text-2xl font-bold mb-4">Performance</h2>
                 <div className="mb-4">
                   <Dropdown
                     className="w-full lg:w-auto"
