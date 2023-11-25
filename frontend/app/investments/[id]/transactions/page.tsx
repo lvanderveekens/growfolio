@@ -9,11 +9,12 @@ import { Settings } from "@/app/settings/settings";
 import { capitalize, formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaChevronLeft, FaRegTrashCan } from "react-icons/fa6";
 import AddTransactionForm from "../../add-transaction-form";
 import ImportTransactionsForm from "../../import-transactions-form";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 import { Transaction } from "../../transaction";
+import Link from "next/link";
 
 export default function InvestmentTransactionsPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -86,15 +87,25 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   return (
     <AppLayout>
       <div className="container my-4">
+        <Link
+          className="mb-4 inline-block"
+          href={`/investments/${investment.id}`}
+        >
+          <div className="flex items-center">
+            <FaChevronLeft className="inline" />
+            Back to {investment.name}
+          </div>
+        </Link>
+
         <h1 className="text-3xl font-bold mb-4">
-          Transactions: {investment.name}
+          {investment.name} transactions
         </h1>
 
-        {investment.locked && (
-          <InvestmentIsLockedMessage />
-        )}
+        {investment.locked && <InvestmentIsLockedMessage />}
 
-        {transactions.length === 0 && <div className="mb-4">No transactions found.</div>}
+        {transactions.length === 0 && (
+          <div className="mb-4">No transactions found.</div>
+        )}
         {transactions.length > 0 && (
           <div className="overflow-x-auto mb-4">
             <table>
@@ -111,11 +122,13 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                   return (
                     <tr key={transaction.id} className="border">
                       <td>{transaction.date}</td>
+                      <td>{capitalize(transaction.type)}</td>
                       <td>
-                        {capitalize(transaction.type)}
-                      </td>
-                      <td>
-                        {settings && formatAmountInCentsAsCurrencyString(transaction.amount, settings.currency)}
+                        {settings &&
+                          formatAmountInCentsAsCurrencyString(
+                            transaction.amount,
+                            settings.currency
+                          )}
                       </td>
                       <td>
                         <FaRegTrashCan
@@ -145,7 +158,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
           >
             Add transaction
           </Button>
-          {showAddTransactionModal && settings &&(
+          {showAddTransactionModal && settings && (
             <Modal
               title="Add transaction"
               onClose={() => setShowAddTransactionModal(false)}

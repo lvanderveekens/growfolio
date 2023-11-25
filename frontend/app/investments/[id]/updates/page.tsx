@@ -8,11 +8,12 @@ import { Settings } from "@/app/settings/settings";
 import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaChevronLeft, FaRegTrashCan } from "react-icons/fa6";
 import AddUpdateForm from "../../add-update-form";
 import ImportUpdatesForm from "../../import-updates-form";
 import { InvestmentIsLockedMessage } from "../../investment-locked-message";
 import { Button } from "@/app/button";
+import Link from "next/link";
 
 export default function InvestmentUpdatesPage({ params }: { params: { id: string } }) {
   const [investment, setInvestment] = useState<Investment>();
@@ -85,13 +86,18 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <AppLayout>
       <div className="container my-4">
+        <Link className="mb-4 inline-block" href={`/investments/${investment.id}`}>
+          <div className="flex items-center">
+            <FaChevronLeft className="inline" />
+            Back to {investment.name}
+          </div>
+        </Link>
+
         <h1 className="text-3xl sm:text-3xl font-bold mb-4">
-          Updates: {investment.name}
+          {investment.name} updates
         </h1>
 
-        {investment.locked && (
-          <InvestmentIsLockedMessage />
-        )}
+        {investment.locked && <InvestmentIsLockedMessage />}
 
         {updates.length === 0 && <div className="mb-4">No updates found.</div>}
         {updates.length > 0 && (

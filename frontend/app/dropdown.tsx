@@ -3,6 +3,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
 
 interface DropdownProps {
   className?: string;
+  dropdownClassName?: string;
   selected?: DropdownOption;
   placeholder?: string;
   onChange: (option: DropdownOption) => void;
@@ -16,6 +17,7 @@ export interface DropdownOption {
 
 const Dropdown: React.FC<DropdownProps> = ({
   className,
+  dropdownClassName,
   selected,
   placeholder,
   onChange,
@@ -61,7 +63,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   return (
-    <div className={`${className} bg-white relative block w-full`} ref={dropdownRef}>
+    <div className={`${className} w-full bg-white relative inline-block`} ref={dropdownRef}>
       <div>
         <button
           type="button"
@@ -70,15 +72,15 @@ const Dropdown: React.FC<DropdownProps> = ({
           onClick={toggleDropdown}
         >
           {selected ? (
-            <span>{selected.label}</span>
+            <span className="mr-2">{selected.label}</span>
           ) : (
-            <span className="text-gray-400">{placeholder ?? "Select an option"}</span>
+            <span className="mr-2 text-gray-400">{placeholder ?? "Select an option"}</span>
           )}
           {isOpen ? <FaChevronUp /> : <FaChevronDown />}
         </button>
       </div>
       {isOpen && (
-        <div className="z-10 absolute -mt-[1px] left-0 w-full origin-top-right bg-white border">
+        <div className={`${dropdownClassName} z-10 absolute -mt-[1px] w-full left-0 origin-top-right bg-white border`}>
           {options.map((option) => (
             <div
               key={option.value}

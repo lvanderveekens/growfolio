@@ -65,7 +65,7 @@ export default function OverviewPage() {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
   
-  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ALL)
+  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ANY_TIME)
   
   const [loading, setLoading] = useState(true); 
 
@@ -414,24 +414,6 @@ export default function OverviewPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-            <div className="mb-4">
-              <label className="">Date range</label>
-              <Dropdown
-                className="w-full lg:w-[180px]"
-                selected={{
-                  label: selectedDateRange,
-                  value: selectedDateRange,
-                }}
-                onChange={(option) => setSelectedDateRange(option.value)}
-                options={Object.values(DateRange).map((dateRange) => ({
-                  label: dateRange,
-                  value: dateRange,
-                }))}
-              />
-            </div>
-
-            <h2 className="text-2xl font-bold mb-4">Value</h2>
-
             {lastUpdateDate && transactions.length > 0 && (
               <>
                 <div className="mb-4">Last update: {lastUpdateDate}</div>
@@ -550,100 +532,114 @@ export default function OverviewPage() {
           <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
           {investments.length === 0 && (
-            <div className="mb-4">
-              There are no investments yet.
-            </div>
+            <div className="mb-4">There are no investments yet.</div>
           )}
           {investments.length > 0 && updates.length === 0 && (
-            <div className="mb-4">
-              There are no updates yet.
-            </div>
+            <div className="mb-4">There are no updates yet.</div>
           )}
           {investments.length > 0 && transactions.length === 0 && (
-            <div className="mb-4">
-              There are no transactions yet.
-            </div>
+            <div className="mb-4">There are no transactions yet.</div>
           )}
 
           {updateDataPoints.length > 0 && (
-            <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Allocation</h3>
-                <div className="w-full h-full">
-                  <Pie
-                    options={allocationPieOptions}
-                    data={calculateAllocationPieData(investments)}
-                  />
-                </div>
-              </div>
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Allocation by type</h3>
-                <div className="w-full h-full">
-                  <Pie
-                    options={allocationPieOptions}
-                    data={calculateAllocationByTypePieData(investments)}
-                  />
-                </div>
+            <>
+              <div className="mb-4">
+                <Dropdown
+                  className="lg:w-auto"
+                  dropdownClassName="lg:w-[180px]"
+                  selected={{
+                    label: selectedDateRange,
+                    value: selectedDateRange,
+                  }}
+                  onChange={(option) => setSelectedDateRange(option.value)}
+                  options={Object.values(DateRange).map((dateRange) => ({
+                    label: dateRange,
+                    value: dateRange,
+                  }))}
+                />
               </div>
 
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Principal vs value</h3>
+              <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Allocation</h3>
+                  <div className="w-full h-full">
+                    <Pie
+                      options={allocationPieOptions}
+                      data={calculateAllocationPieData(investments)}
+                    />
+                  </div>
+                </div>
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Allocation by type</h3>
+                  <div className="w-full h-full">
+                    <Pie
+                      options={allocationPieOptions}
+                      data={calculateAllocationByTypePieData(investments)}
+                    />
+                  </div>
+                </div>
 
-                <div className="w-full h-full">
-                  {settings && (
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Principal vs value</h3>
+
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Line
+                        options={principalVsValueLineOptions(settings.currency)}
+                        data={buildPrincipalVsValueLineData(updateDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">ROI</h3>
+
+                  <div className="w-full h-full">
                     <Line
-                      options={principalVsValueLineOptions(settings.currency)}
-                      data={buildPrincipalVsValueLineData(updateDataPoints)}
+                      options={roiLineOptions}
+                      data={buildROILineData(updateDataPoints)}
                     />
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">ROI</h3>
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Return</h3>
 
-                <div className="w-full h-full">
-                  <Line
-                    options={roiLineOptions}
-                    data={buildROILineData(updateDataPoints)}
-                  />
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Line
+                        options={returnLineOptions(settings.currency)}
+                        data={buildReturnLineData(updateDataPoints)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Return</h3>
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Monthly change</h3>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={monthlyChangeBarOptions(settings.currency)}
+                        data={buildMonthlyChangeBarData(
+                          monthlyChangeDataPoints
+                        )}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="aspect-square">
+                  <h3 className="font-bold mb-4">Yearly change</h3>
 
-                <div className="w-full h-full">
-                  {settings && (
-                    <Line
-                      options={returnLineOptions(settings.currency)}
-                      data={buildReturnLineData(updateDataPoints)}
-                    />
-                  )}
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={yearlyChangeBarOptions(settings.currency)}
+                        data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Monthly change</h3>
-                <div className="w-full h-full">
-                  {settings && (
-                    <Bar
-                      options={monthlyChangeBarOptions(settings.currency)}
-                      data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="aspect-square">
-                <h3 className="font-bold mb-4">Yearly change</h3>
-
-                <div className="w-full h-full">
-                  {settings && (
-                    <Bar
-                      options={yearlyChangeBarOptions(settings.currency)}
-                      data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </main>
@@ -907,6 +903,7 @@ export const calculateYearlyChangeDataPoints = (
 }; 
 
 export enum DateRange {
+  ANY_TIME = "Any time",
   LAST_MONTH = "Last month",
   LAST_3_MONTHS = "Last 3 months",
   LAST_6_MONTHS = "Last 6 months",
@@ -914,7 +911,6 @@ export enum DateRange {
   LAST_2_YEARS = "Last 2 years",
   LAST_5_YEARS = "Last 5 years",
   LAST_10_YEARS = "Last 10 years",
-  ALL = "All",
 }
 
 export function convertToDate(range: DateRange): Date | null {
