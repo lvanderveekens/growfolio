@@ -191,32 +191,28 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {investment.locked && <InvestmentIsLockedMessage />}
 
-            {lastUpdate && transactions.length > 0 && (
-              <>
-                <div className="mb-4">Last update: {lastUpdate!!.date}</div>
+            <div className="mb-4">
+              Last update: {lastUpdate?.date ?? "Never"}
+            </div>
 
-                <div className="border bg-white py-[75px] text-center mb-4">
-                  <div className="font-bold text-3xl">
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        lastUpdate?.value,
-                        settings.currency
-                      )}
-                  </div>
-                  <div
-                    className={`${getAmountTextColor(lastUpdate?.return ?? 0)}`}
-                  >
-                    {formatAsROIPercentage(lastUpdate?.roi)} (
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        lastUpdate?.return,
-                        settings.currency
-                      )}
-                    )
-                  </div>
-                </div>
-              </>
-            )}
+            <div className="border bg-white py-[75px] text-center mb-4">
+              <div className="font-bold text-3xl">
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    lastUpdate?.value ?? 0,
+                    settings.currency
+                  )}
+              </div>
+              <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)}`}>
+                {formatAsROIPercentage(lastUpdate?.roi ?? 0)} (
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    lastUpdate?.return ?? 0,
+                    settings.currency
+                  )}
+                )
+              </div>
+            </div>
 
             <div>
               <Button
@@ -268,9 +264,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               )}
             </div>
 
+            <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
+            {updateDataPoints.length === 0 && (
+              <div>There are no data points yet.</div>
+            )}
+
             {updateDataPoints.length > 0 && (
               <>
-                <h2 className="text-2xl font-bold mb-4">Performance</h2>
                 <div className="mb-4">
                   <Dropdown
                     className="w-full lg:w-auto"

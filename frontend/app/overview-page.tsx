@@ -98,16 +98,24 @@ export default function OverviewPage() {
       const investmentRows = investments.map((i) => {
         const lastUpdate = updates.findLast((u) => u.investmentId == i.id)!;
 
-        const value = lastUpdate?.value;
-        const principal = calculatePrincipalForInvestment(i);
-        const returnValue = (lastUpdate && principal) && value - principal;
-        const roi = (returnValue && principal) && returnValue / principal;
+        const value = lastUpdate?.value ?? 0;
+
+        const transactionsForInvestment = transactions.filter((tx) => tx.investmentId == i.id);
+        const principal = calculatePrincipal(transactionsForInvestment);
+
+        let returnValue = 0
+        let roi = 0
+
+        if (lastUpdate && transactionsForInvestment.length > 0) {
+          returnValue = value - principal
+          roi = returnValue / principal;
+        }
 
         return {
           id: i.id,
           name: i.name,
           type: i.type,
-          lastUpdateDate: lastUpdate?.date ?? "-",
+          lastUpdateDate: lastUpdate?.date,
           principal: principal,
           value: value,
           return: returnValue,
@@ -252,16 +260,6 @@ export default function OverviewPage() {
     };
   };
 
-  const calculatePrincipalForInvestment = (investment: Investment): number | undefined => {
-    const transactionsForInvestment = transactions.filter(
-      (transaction) => transaction.investmentId == investment.id
-    );
-    if (transactionsForInvestment.length == 0) {
-      return 
-    }
-    return calculatePrincipal(transactionsForInvestment);
-  };
-
   const getLatestInvestmentValue = (investment: Investment) => {
     return (
       updates.findLast(
@@ -372,7 +370,7 @@ export default function OverviewPage() {
     }
 
     return (
-      <div className="border hover:border-black p-4">
+      <div className="">
         <div className="font-bold flex justify-between">
           <div>{investmentRow.name}</div>
           <div>
@@ -399,7 +397,7 @@ export default function OverviewPage() {
         </div>
         <div className="flex justify-between">
           <div>Last update</div>
-          <div>{investmentRow.lastUpdateDate}</div>
+          <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
         </div>
       </div>
     );
@@ -414,29 +412,26 @@ export default function OverviewPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-            {lastUpdateDate && transactions.length > 0 && (
-              <>
-                <div className="mb-4">Last update: {lastUpdateDate}</div>
-                <div className="border py-[75px] bg-white text-center mb-4">
-                  <div className="font-bold text-3xl">
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        totalValue,
-                        settings.currency
-                      )}
-                  </div>
-                  <div className={`${getAmountTextColor(totalReturn)}`}>
-                    {formatAsROIPercentage(totalRoi)} (
-                    {settings &&
-                      formatAmountInCentsAsCurrencyString(
-                        totalReturn,
-                        settings.currency
-                      )}
-                    )
-                  </div>
-                </div>
-              </>
-            )}
+            <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
+
+            <div className="border py-[75px] bg-white text-center mb-4">
+              <div className="font-bold text-3xl">
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    totalValue,
+                    settings.currency
+                  )}
+              </div>
+              <div className={`${getAmountTextColor(totalReturn)}`}>
+                {formatAsROIPercentage(totalRoi)} (
+                {settings &&
+                  formatAmountInCentsAsCurrencyString(
+                    totalReturn,
+                    settings.currency
+                  )}
+                )
+              </div>
+            </div>
 
             <h2 className="text-2xl font-bold mb-4">Investments</h2>
 
@@ -457,12 +452,12 @@ export default function OverviewPage() {
                 {investmentRows.map((investmentRow) => {
                   return (
                     <Link
-                      className="bg-white"
+                      className="bg-white border hover:border-black p-4"
                       key={investmentRow.id}
                       href={`/investments/${investmentRow.id}`}
                     >
                       {investmentRow.locked ? (
-                        <div key={investmentRow.id} className="relative">
+                        <div key={investmentRow.id} className="relative h-full">
                           <div className="absolute w-full h-full bg-white opacity-60"></div>
                           <div className="absolute w-full h-full flex items-center justify-center">
                             <BiLockAlt size={32} />
@@ -520,10 +515,14 @@ export default function OverviewPage() {
             )}
           </div>
 
+          <h2 className="text-2xl font-bold mb-4">Performance</h2>
+
+          {updateDataPoints.length === 0 && (
+            <div>There are no data points yet.</div>
+          )}
+
           {updateDataPoints.length > 0 && (
             <>
-              <h2 className="text-2xl font-bold mb-4">Performance</h2>
-
               <div className="mb-4">
                 <Dropdown
                   className="lg:w-auto"
@@ -793,9 +792,9 @@ export interface InvestmentRow {
   name: string;
   type: InvestmentType;
   lastUpdateDate: string;
-  principal?: number;
-  value?: number;
-  return?: number;
+  principal: number;
+  value: number;
+  return: number;
   roi?: number;
   locked: boolean;
 }
