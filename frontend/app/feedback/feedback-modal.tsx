@@ -36,11 +36,16 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({onSubmit, onClose})
   };
 
   return (
-    <Modal title="Submit feedback" onClose={onClose}>
+    <Modal title="Feedback" onClose={onClose}>
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="mb-4">
           <label>
-            <div className="mb-4">Do you have any suggestions or feature requests?</div>
+            <div className="mb-4">Share your thoughts with us!</div>
+            <div className="mb-4">
+              Whether it's feedback or feature requests, your input matters.
+              Help us improve by letting us know what you think.
+            </div>
+            <div className="mb-4">Thank you!</div>
             <textarea
               className="w-full border resize-none h-auto"
               placeholder="Enter your suggestions"
