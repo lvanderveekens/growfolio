@@ -30,6 +30,9 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   const [showAddTransactionModal, setShowAddTransactionModal] = useState<boolean>(false);
   const [showImportTransactionsModal, setShowImportTransactionsModal] = useState<boolean>(false);
 
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
+  const [showDeleteTransactionModal, setShowDeleteTransactionModal] = useState<boolean>(false);
+
   const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
@@ -65,8 +68,25 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
   }
 
   const deleteTransaction = async (id: string) => {
-    await api.delete(`/transactions/${id}`);
+    api.delete(`/transactions/${id}`)
+      .then((res) => {
+        if (res.status == 204) {
+          fetchTransactions();
+          closeDeleteTransactionModal();
+        }
+      })
+      .catch((err) => console.log(err));
   }
+
+  const openDeleteTransactionModal = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowDeleteTransactionModal(true);
+  };
+
+  const closeDeleteTransactionModal = () => {
+    setShowDeleteTransactionModal(false);
+    setSelectedTransaction(undefined);
+  };
 
   if (loadingInvestment || loadingTransactions) {
     return <p>Loading...</p>;
@@ -134,10 +154,7 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                         <FaRegTrashCan
                           className="hover:cursor-pointer text-red-500 hover:text-red-700"
                           size={24}
-                          onClick={async () => {
-                            await deleteTransaction(transaction.id);
-                            fetchTransactions();
-                          }}
+                          onClick={() => openDeleteTransactionModal(transaction)}
                         />
                       </td>
                     </tr>
@@ -145,6 +162,27 @@ export default function InvestmentTransactionsPage({ params }: { params: { id: s
                 })}
               </tbody>
             </table>
+            {showDeleteTransactionModal && selectedTransaction && (
+              <Modal title="Delete transaction" onClose={closeDeleteTransactionModal}>
+                Are you sure?
+                <div className="mt-4 flex gap-4 justify-between lg:justify-end">
+                  <Button
+                    className="w-full lg:w-auto"
+                    variant="secondary"
+                    onClick={closeDeleteTransactionModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="w-full lg:w-auto"
+                    variant="danger"
+                    onClick={() => deleteTransaction(selectedTransaction.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Modal>
+            )}
           </div>
         )}
 

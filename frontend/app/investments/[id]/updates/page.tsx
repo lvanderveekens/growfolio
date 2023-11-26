@@ -29,6 +29,9 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
   const [showImportUpdatesModal, setShowImportUpdatesModal] = useState<boolean>(false);
 
+  const [selectedUpdate, setSelectedUpdate] = useState<InvestmentUpdate>();
+  const [showDeleteUpdateModal, setShowDeleteUpdateModal] = useState<boolean>(false);
+
   const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
@@ -63,9 +66,27 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
       .finally(() => setLoadingUpdates(false));
   }
 
-  const deleteUpdate = async (id: string) => {
-    await api.delete(`/investment-updates/${id}`);
+  const deleteUpdate = (id: string) => {
+    api
+      .delete(`/investment-updates/${id}`)
+      .then((res) => {
+        if (res.status == 204) {
+          fetchUpdates();
+          closeDeleteUpdateModal();
+        }
+      })
+      .catch((err) => console.log(err));
   }
+
+  const openDeleteUpdateModal = (update: InvestmentUpdate) => {
+    setSelectedUpdate(update);
+    setShowDeleteUpdateModal(true);
+  };
+
+  const closeDeleteUpdateModal = () => {
+    setShowDeleteUpdateModal(false);
+    setSelectedUpdate(undefined);
+  };
 
   if (loadingInvestment || loadingUpdates) {
     return <p>Loading...</p>;
@@ -86,7 +107,10 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <AppLayout>
       <div className="container my-4">
-        <Link className="mb-4 inline-block" href={`/investments/${investment.id}`}>
+        <Link
+          className="mb-4 inline-block"
+          href={`/investments/${investment.id}`}
+        >
           <div className="flex items-center">
             <FaChevronLeft className="inline" />
             Back to {investment.name}
@@ -126,10 +150,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                         <FaRegTrashCan
                           className="hover:cursor-pointer text-red-500 hover:text-red-700"
                           size={24}
-                          onClick={async () => {
-                            await deleteUpdate(update.id!!);
-                            fetchUpdates();
-                          }}
+                          onClick={() => openDeleteUpdateModal(update)}
                         />
                       </td>
                     </tr>
@@ -137,6 +158,27 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                 })}
               </tbody>
             </table>
+            {showDeleteUpdateModal && selectedUpdate && (
+              <Modal title="Delete update" onClose={closeDeleteUpdateModal}>
+                Are you sure?
+                <div className="mt-4 flex gap-4 justify-between lg:justify-end">
+                  <Button
+                    className="w-full lg:w-auto"
+                    variant="secondary"
+                    onClick={closeDeleteUpdateModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="w-full lg:w-auto"
+                    variant="danger"
+                    onClick={() => deleteUpdate(selectedUpdate.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Modal>
+            )}
           </div>
         )}
 
