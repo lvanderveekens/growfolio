@@ -791,7 +791,7 @@ export interface InvestmentRow {
   id: string;
   name: string;
   type: InvestmentType;
-  lastUpdateDate: string;
+  lastUpdateDate?: string;
   principal: number;
   value: number;
   return: number;
@@ -1005,9 +1005,13 @@ const getLaterDate = (date1: string, date2: string): string => {
 
 export const getLastUpdateDate = (investmentRows: InvestmentRow[])=> investmentRows.reduce<string | null>(
   (result, investmentRow) => {
-    return result === null
-      ? investmentRow.lastUpdateDate
-      : getLaterDate(result, investmentRow.lastUpdateDate);
+    if (result === null) {
+      return investmentRow.lastUpdateDate ?? null;
+    }
+    if (investmentRow.lastUpdateDate === undefined) {
+      return result;
+    }
+    return getLaterDate(result, investmentRow.lastUpdateDate);
   },
   null
 );

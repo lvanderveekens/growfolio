@@ -27,7 +27,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   const dropdownRef = useRef(null);
 
   const toggleDropdown = (event: any) => {
-    event.stopPropagation()
+    event.stopPropagation();
+    event.target.focus(); // necessary for Safari...
     setIsOpen(!isOpen);
   };
 
@@ -63,7 +64,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   return (
-    <div className={`${className} w-full bg-white relative inline-block`} tabIndex={1} ref={dropdownRef}>
+    <div className={`${className} w-full bg-white relative inline-block`} ref={dropdownRef}>
       <div>
         <button
           type="button"
