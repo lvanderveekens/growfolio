@@ -15,7 +15,10 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (modalBackgroundRef.current && modalBackgroundRef.current.contains(event.target)) {
+      if (
+        modalBackgroundRef.current &&
+        modalBackgroundRef.current.contains(event.target)
+      ) {
         onClose();
       }
     };
@@ -29,9 +32,12 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
     document.addEventListener("click", handleOutsideClick);
     document.addEventListener("keydown", handleEscapeKey);
 
+    document.body.style.overflow = "hidden"; // Disable background scroll
+
     return () => {
       document.removeEventListener("click", handleOutsideClick);
       document.removeEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = "";
     };
   }, []);
 
