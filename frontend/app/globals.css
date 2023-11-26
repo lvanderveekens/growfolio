@@ -1,6 +1,15 @@
 @tailwind base;
 
 @layer base {
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+      outline: none; /* Remove the default outline */
+      border: 1px solid black;
+    }
+
     input {
       @apply border;
       @apply px-2;

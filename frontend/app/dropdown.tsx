@@ -63,7 +63,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   return (
-    <div className={`${className} w-full bg-white relative inline-block`} ref={dropdownRef}>
+    <div className={`${className} w-full bg-white relative inline-block`} tabIndex={1} ref={dropdownRef}>
       <div>
         <button
           type="button"
@@ -80,7 +80,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         </button>
       </div>
       {isOpen && (
-        <div className={`${dropdownClassName} z-10 absolute -mt-[1px] w-full left-0 origin-top-right bg-white border`}>
+        <div className={`${dropdownClassName} z-10 absolute w-full left-0 origin-top-right bg-white border-x border-b`}>
           {options.map((option) => (
             <div
               key={option.value}
