@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"growfolio/api"
+	"growfolio/discord"
 	"growfolio/domain/services"
 	"growfolio/postgres"
 
@@ -58,16 +59,21 @@ func main() {
 	userRepository := postgres.NewUserRepository(db)
 	settingsRepository := postgres.NewSettingsRepository(db)
 
+	eventHandlers := []services.EventHandler{
+		discord.NewDiscordEventHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_EVENT_CHANNEL_ID")),
+	}
+	eventPublisher := services.NewEventPublisher(eventHandlers)
+
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"), mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")))
 	settingsService := services.NewSettingsService(settingsRepository)
 	transactionService := services.NewTransactionService(transactionRepository)
 	investmentService := services.NewInvestmentService(investmentRepository, transactionService, investmentUpdateService)
-	userService := services.NewUserService(userRepository, investmentRepository)
+	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
 	transactionHandler := api.NewTransactionHandler(transactionService, investmentService)
-	authHandler := api.NewAuthHandler(&userRepository, tokenService, os.Getenv("DOMAIN"), mustParseBool(os.Getenv("USE_SECURE_COOKIES")))
+	authHandler := api.NewAuthHandler(userService, tokenService, os.Getenv("DOMAIN"), mustParseBool(os.Getenv("USE_SECURE_COOKIES")))
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)

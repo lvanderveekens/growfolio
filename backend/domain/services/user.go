@@ -21,12 +21,18 @@ type UserRepository interface {
 type UserService struct {
 	userRepository       UserRepository
 	investmentRepository InvestmentRepository
+	eventPublisher       EventPublisher
 }
 
-func NewUserService(userRepository UserRepository, investmentRepository InvestmentRepository) UserService {
+func NewUserService(
+	userRepository UserRepository,
+	investmentRepository InvestmentRepository,
+	eventPublisher EventPublisher,
+) UserService {
 	return UserService{
 		userRepository:       userRepository,
 		investmentRepository: investmentRepository,
+		eventPublisher:       eventPublisher,
 	}
 }
 
@@ -40,6 +46,17 @@ func (s UserService) FindByStripeCustomerID(stripeCustomerID string) (domain.Use
 
 func (s UserService) FindByID(id string) (domain.User, error) {
 	return s.userRepository.FindByID(id)
+}
+
+func (s UserService) Create(user domain.User) (domain.User, error) {
+	user, err := s.userRepository.Create(user)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	s.eventPublisher.Publish(domain.NewUserCreatedEvent(user))
+
+	return user, nil
 }
 
 func (s UserService) UpgradeToPremium(user domain.User, stripeCustomerID string) error {

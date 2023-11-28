@@ -12,20 +12,20 @@ import (
 )
 
 type AuthHandler struct {
-	userRepository   services.UserRepository
+	userService      services.UserService
 	tokenService     TokenService
 	domain           string
 	useSecureCookies bool
 }
 
 func NewAuthHandler(
-	userRepository services.UserRepository,
+	userService services.UserService,
 	tokenService TokenService,
 	domain string,
 	useSecureCookies bool,
 ) AuthHandler {
 	return AuthHandler{
-		userRepository:   userRepository,
+		userService:      userService,
 		tokenService:     tokenService,
 		domain:           domain,
 		useSecureCookies: useSecureCookies,
@@ -70,10 +70,10 @@ func (h AuthHandler) LogOut(c *gin.Context) (response[empty], error) {
 }
 
 func (h AuthHandler) findOrCreateUser(gothUser goth.User) (domain.User, error) {
-	user, err := h.userRepository.FindByID(gothUser.UserID)
+	user, err := h.userService.FindByID(gothUser.UserID)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
-			created, err := h.userRepository.Create(toUser(gothUser))
+			created, err := h.userService.Create(toUser(gothUser))
 			if err != nil {
 				return domain.User{}, fmt.Errorf("failed to create user: %w", err)
 			}
