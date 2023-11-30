@@ -68,7 +68,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       <div>
         <button
           type="button"
-          className="inline-flex justify-between items-center w-full px-2 py-2 border hover:bg-gray-50"
+          className="inline-flex justify-between items-center w-full px-2 py-2 border focus:border-black hover:bg-gray-50"
           id="options-menu"
           onClick={toggleDropdown}
         >
@@ -81,7 +81,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         </button>
       </div>
       {isOpen && (
-        <div className={`${dropdownClassName} z-10 absolute w-full left-0 origin-top-right bg-white border-x border-b`}>
+        <div className={`${dropdownClassName} z-10 absolute w-full left-0 origin-top-right bg-white border-x border-b border-black`}>
           {options.map((option) => (
             <div
               key={option.value}

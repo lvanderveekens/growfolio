@@ -2,14 +2,6 @@
 
 @layer base {
 
-    input:focus,
-    select:focus,
-    textarea:focus,
-    button:focus {
-      outline: none; /* Remove the default outline */
-      border: 1px solid black;
-    }
-
     input {
       @apply border;
       @apply px-2;
@@ -35,6 +27,12 @@
       border-radius: 0;
       -webkit-appearance: none;
       -webkit-border-radius: 0;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none; /* Remove the default outline */
+      @apply border-black;
     }
 
     table {
