@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"growfolio/domain"
-	"log/slog"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -70,7 +69,6 @@ func (r TransactionRepository) Find(findQuery domain.FindTransactionQuery) ([]do
 	if err != nil {
 		return nil, fmt.Errorf("failed to build SQL: %w", err)
 	}
-	slog.Info("query: " + query)
 
 	entities := []Transaction{}
 	err = r.db.Select(&entities, query, args...)

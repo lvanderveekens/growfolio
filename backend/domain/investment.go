@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type InvestmentType string
 
 const (
@@ -16,6 +18,7 @@ type CreateInvestmentCommand struct {
 	Name             string
 	User             User
 	Locked           bool
+	InitialDate      *time.Time
 	InitialPrincipal *int64
 	InitialValue     *int64
 }
@@ -25,6 +28,7 @@ func NewCreateInvestmentCommand(
 	name string,
 	user User,
 	locked bool,
+	initialDate *time.Time,
 	initialPrincipal,
 	initialValue *int64,
 ) CreateInvestmentCommand {
@@ -33,25 +37,35 @@ func NewCreateInvestmentCommand(
 		Name:             name,
 		User:             user,
 		Locked:           locked,
+		InitialDate:      initialDate,
 		InitialPrincipal: initialPrincipal,
 		InitialValue:     initialValue,
 	}
 }
 
 type Investment struct {
-	ID     string
-	Type   InvestmentType
-	Name   string
-	UserID string
-	Locked bool
+	ID             string
+	Type           InvestmentType
+	Name           string
+	UserID         string
+	Locked         bool
+	LastUpdateDate *time.Time
 }
 
-func NewInvestment(id string, t InvestmentType, name, userID string, locked bool) Investment {
+func NewInvestment(
+	id string,
+	t InvestmentType,
+	name,
+	userID string,
+	locked bool,
+	lastUpdateDate *time.Time,
+) Investment {
 	return Investment{
-		ID:     id,
-		Type:   t,
-		Name:   name,
-		UserID: userID,
-		Locked: locked,
+		ID:             id,
+		Type:           t,
+		Name:           name,
+		UserID:         userID,
+		Locked:         locked,
+		LastUpdateDate: lastUpdateDate,
 	}
 }

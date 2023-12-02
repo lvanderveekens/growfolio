@@ -56,9 +56,16 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 		return domain.Investment{}, fmt.Errorf("failed to create investment: %w", err)
 	}
 
+	var initialDate time.Time
+	if command.InitialDate != nil {
+		initialDate = *command.InitialDate
+	} else {
+		initialDate = time.Now()
+	}
+
 	if command.InitialValue != nil {
 		_, err := s.investmentUpdateService.Create(domain.NewCreateInvestmentUpdateCommand(
-			time.Now(),
+			initialDate,
 			investment,
 			*command.InitialValue,
 		))
@@ -68,7 +75,7 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 	}
 	if command.InitialPrincipal != nil {
 		_, err := s.transactionService.Create(domain.NewCreateTransactionCommand(
-			time.Now(),
+			initialDate,
 			domain.TransactionTypeBuy,
 			investment,
 			*command.InitialPrincipal,

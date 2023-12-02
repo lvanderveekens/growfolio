@@ -2,16 +2,20 @@ import { useState } from 'react';
 import { InvestmentType, labelsByInvestmentType } from '../investment-type';
 import { api } from '../axios';
 import Dropdown from '../dropdown';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useRouter } from "next/navigation";
 import { Button } from '../button';
 import CurrencyInput from 'react-currency-input-field';
 import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByCurrency } from '../settings/settings';
+import moment from 'moment';
 
 export interface CreateInvestmentRequest {
   type: InvestmentType;
   name: string;
-  initialPrincipal?: number
-  initialValue?: number
+  initialDate?: string;
+  initialPrincipal?: number;
+  initialValue?: number;
 }
 
 type AddInvestmentFormProps = {
@@ -23,21 +27,20 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
 
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
+  const [initialDate, setInitialDate] = useState<Date>();
   const [initialPrincipal, setInitialPrincipal] = useState<number>();
   const [initialValue, setInitialValue] = useState<number>();
 
   const [errors, setErrors] = useState({
     type: "",
     name: "",
-    initialPrincipal: "",
-    initialValue: "",
   });
 
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = { type: "", name: "", initialPrincipal: "", initialValue: "" };
+    const newErrors = { type: "", name: ""};
 
     if (!type) {
       newErrors.type = "Type is required";
@@ -47,14 +50,6 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       newErrors.name = "Name is required";
       valid = false;
     }
-    // if (!initialPrincipal) {
-    //   newErrors.initialPrincipal = "Initial principal is required";
-    //   valid = false;
-    // }
-    // if (!initialValue) {
-    //   newErrors.initialValue = "Initial value is required";
-    //   valid = false;
-    // }
 
     setErrors(newErrors);
     return valid;
@@ -72,6 +67,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
     const req: CreateInvestmentRequest = {
       type: type!,
       name: name!,
+      initialDate: moment(initialDate).format("YYYY-MM-DD"),
       initialPrincipal: initialPrincipal,
       initialValue: initialValue,
     };
@@ -129,6 +125,17 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
         <div className="text-red-500">{errors.name}</div>
       </div>
       <div className="mb-4">
+        <div>Initial date (optional)</div>
+        <DatePicker
+          className="border w-full p-2"
+          wrapperClassName="w-full"
+          placeholderText="YYYY-MM-DD"
+          selected={initialDate}
+          onChange={(date) => date && setInitialDate(date)}
+          dateFormat="yyyy-MM-dd"
+        />
+      </div>
+      <div className="mb-4">
         <label>Initial principal (optional)</label>
         <CurrencyInput
           className="border w-full px-2 py-2"
@@ -143,7 +150,6 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           groupSeparator={groupSeparatorsByCurrency[currency]}
           decimalSeparator={decimalSeparatorsByCurrency[currency]}
         />
-        <div className="text-red-500">{errors.initialPrincipal}</div>
       </div>
       <div className="mb-4">
         <label>Initial value (optional)</label>
@@ -160,7 +166,6 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           groupSeparator={groupSeparatorsByCurrency[currency]}
           decimalSeparator={decimalSeparatorsByCurrency[currency]}
         />
-        <div className="text-red-500">{errors.initialValue}</div>
       </div>
       <div>
         <Button

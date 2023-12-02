@@ -21,7 +21,9 @@ type InvestmentUpdateService struct {
 	investmentUpdateRepository InvestmentUpdateRepository
 }
 
-func NewInvestmentUpdateService(investmentUpdateRepository InvestmentUpdateRepository) InvestmentUpdateService {
+func NewInvestmentUpdateService(
+	investmentUpdateRepository InvestmentUpdateRepository,
+) InvestmentUpdateService {
 	return InvestmentUpdateService{
 		investmentUpdateRepository: investmentUpdateRepository,
 	}

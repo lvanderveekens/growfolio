@@ -115,7 +115,7 @@ export default function OverviewPage() {
           id: i.id,
           name: i.name,
           type: i.type,
-          lastUpdateDate: lastUpdate?.date,
+          lastUpdateDate: i.lastUpdateDate,
           principal: principal,
           value: value,
           return: returnValue,
@@ -778,6 +778,7 @@ export interface Investment {
   type: InvestmentType;
   name: string;
   locked: boolean;
+  lastUpdateDate?: string;
 }
 
 export interface InvestmentUpdate {

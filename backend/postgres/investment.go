@@ -21,10 +21,6 @@ type Investment struct {
 	Locked    bool                  `db:"locked"`
 }
 
-func (i Investment) toDomainInvestment() domain.Investment {
-	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID, i.Locked)
-}
-
 type InvestmentRepository struct {
 	db *sqlx.DB
 }
@@ -42,7 +38,11 @@ func (r InvestmentRepository) FindByUserID(userID string) ([]domain.Investment, 
 
 	investments := make([]domain.Investment, 0)
 	for _, entity := range entities {
-		investments = append(investments, entity.toDomainInvestment())
+		investment, err := r.toDomainInvestment(entity)
+		if err != nil {
+			return []domain.Investment{}, fmt.Errorf("failed to map entity to investment: %w", err)
+		}
+		investments = append(investments, investment)
 	}
 
 	return investments, nil
@@ -74,7 +74,7 @@ func (r InvestmentRepository) FindByID(id string) (domain.Investment, error) {
 		return domain.Investment{}, fmt.Errorf("failed to select investment: %w", err)
 	}
 
-	return entity.toDomainInvestment(), nil
+	return r.toDomainInvestment(entity)
 }
 
 func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.Investment, error) {
@@ -93,7 +93,7 @@ func (r InvestmentRepository) Create(c domain.CreateInvestmentCommand) (domain.I
 		return domain.Investment{}, fmt.Errorf("failed to insert investment: %w", err)
 	}
 
-	return entity.toDomainInvestment(), nil
+	return r.toDomainInvestment(entity)
 }
 
 func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
@@ -104,9 +104,32 @@ func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
 		WHERE id = $1
 		RETURNING *;
 	`, id, locked).StructScan(&entity)
+	return err
+}
+
+func (r InvestmentRepository) findLastUpdateDate(id string) (*time.Time, error) {
+	var entity InvestmentUpdate
+	err := r.db.QueryRowx(`
+		SELECT *
+		FROM investment_update
+		WHERE investment_id = $1
+        ORDER BY date DESC
+        LIMIT 1;
+	`, id).StructScan(&entity)
 	if err != nil {
-		return fmt.Errorf("failed to update investment: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to find last update: %w", err)
+	}
+	return &entity.Date, nil
+}
+
+func (r InvestmentRepository) toDomainInvestment(i Investment) (domain.Investment, error) {
+	lastUpdateDate, err := r.findLastUpdateDate(i.ID.String())
+	if err != nil {
+		return domain.Investment{}, fmt.Errorf("failed to find last update date: %w", err)
 	}
 
-	return nil
+	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID, i.Locked, lastUpdateDate), nil
 }

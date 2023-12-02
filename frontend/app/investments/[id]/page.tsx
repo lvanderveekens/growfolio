@@ -192,7 +192,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {investment.locked && <InvestmentIsLockedMessage />}
 
             <div className="mb-4">
-              Last update: {lastUpdate?.date ?? "Never"}
+              Last update: {investment.lastUpdateDate ?? "Never"}
             </div>
 
             <div className="border bg-white py-[75px] text-center mb-4">

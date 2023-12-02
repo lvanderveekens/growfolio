@@ -124,7 +124,12 @@ func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investment
 		return response[investmentDto]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
-	created, err := h.investmentService.Create(request.toCommand(user))
+	command, err := request.toCommand(user)
+	if err != nil {
+		return response[investmentDto]{}, fmt.Errorf("failed to map request to command: %w", err)
+	}
+
+	created, err := h.investmentService.Create(command)
 	if err != nil {
 		return response[investmentDto]{}, fmt.Errorf("failed to create investment: %w", err)
 	}
@@ -267,12 +272,19 @@ type InvestmentUpdateRecord struct {
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {
-	return newInvestmentDto(i.ID, i.Type, i.Name, i.Locked)
+	var lastUpdateDate *string
+	if i.LastUpdateDate != nil {
+		formatted := (*i.LastUpdateDate).Format("2006-01-02")
+		lastUpdateDate = &formatted
+	}
+
+	return newInvestmentDto(i.ID, i.Type, i.Name, i.Locked, lastUpdateDate)
 }
 
 type CreateInvestmentRequest struct {
 	Type             domain.InvestmentType `json:"type"`
 	Name             string                `json:"name"`
+	InitialDate      *string               `json:"initialDate"`
 	InitialPrincipal *int64                `json:"initialPrincipal"`
 	InitialValue     *int64                `json:"initialValue"`
 }
@@ -287,17 +299,35 @@ func (r CreateInvestmentRequest) validate() error {
 	return nil
 }
 
-func (r CreateInvestmentRequest) toCommand(user domain.User) domain.CreateInvestmentCommand {
-	return domain.NewCreateInvestmentCommand(r.Type, r.Name, user, false, r.InitialPrincipal, r.InitialValue)
+func (r CreateInvestmentRequest) toCommand(user domain.User) (domain.CreateInvestmentCommand, error) {
+	var initialDate *time.Time
+	if r.InitialDate != nil {
+		parsed, err := time.Parse("2006-01-02", *r.InitialDate)
+		if err != nil {
+			return domain.CreateInvestmentCommand{}, fmt.Errorf("failed to parse initial date: %w", err)
+		}
+		initialDate = &parsed
+	}
+
+	return domain.NewCreateInvestmentCommand(
+		r.Type,
+		r.Name,
+		user,
+		false,
+		initialDate,
+		r.InitialPrincipal,
+		r.InitialValue,
+	), nil
 }
 
 type investmentDto struct {
-	ID     string                `json:"id"`
-	Type   domain.InvestmentType `json:"type"`
-	Name   string                `json:"name"`
-	Locked bool                  `json:"locked"`
+	ID             string                `json:"id"`
+	Type           domain.InvestmentType `json:"type"`
+	Name           string                `json:"name"`
+	Locked         bool                  `json:"locked"`
+	LastUpdateDate *string               `json:"lastUpdateDate"`
 }
 
-func newInvestmentDto(id string, t domain.InvestmentType, name string, locked bool) investmentDto {
-	return investmentDto{ID: id, Type: t, Name: name, Locked: locked}
+func newInvestmentDto(id string, t domain.InvestmentType, name string, locked bool, lastUpdateDate *string) investmentDto {
+	return investmentDto{ID: id, Type: t, Name: name, Locked: locked, LastUpdateDate: lastUpdateDate}
 }

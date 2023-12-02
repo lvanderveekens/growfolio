@@ -106,7 +106,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       <div className="mb-4">
         <div>Date</div>
         <DatePicker
-          className="border w-full px-4 py-2"
+          className="border w-full p-2"
           wrapperClassName="w-full"
           placeholderText="YYYY-MM-DD"
           selected={date}

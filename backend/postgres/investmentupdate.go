@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"growfolio/domain"
-	"log/slog"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -77,7 +76,6 @@ func (r InvestmentUpdateRepository) Find(findQuery domain.FindInvestmentUpdateQu
 	if err != nil {
 		return nil, fmt.Errorf("failed to build SQL: %w", err)
 	}
-	slog.Info("query: " + query)
 
 	entities := []InvestmentUpdate{}
 	err = r.db.Select(&entities, query, args...)
