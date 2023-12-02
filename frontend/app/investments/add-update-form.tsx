@@ -65,7 +65,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
     const req: CreateInvestmentUpdateRequest = {
       date: moment(date).format("YYYY-MM-DD"),
       investmentId: investmentId,
-      value: value! * 100,
+      value: Math.round(value! * 100),
     };
 
     api

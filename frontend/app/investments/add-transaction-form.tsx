@@ -75,7 +75,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
       date: moment(date).format("YYYY-MM-DD"),
       type: type!,
       investmentId: investmentId,
-      amount: amount! * 100,
+      amount: Math.round(amount! * 100),
     };
 
     api

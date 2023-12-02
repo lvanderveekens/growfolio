@@ -144,7 +144,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           decimalsLimit={2}
           onValueChange={(value, name, values) => {
             if (values && values.float) {
-              setInitialPrincipal(values.float * 100);
+              setInitialPrincipal(Math.round(values.float * 100));
             }
           }}
           groupSeparator={groupSeparatorsByCurrency[currency]}
@@ -160,7 +160,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           decimalsLimit={2}
           onValueChange={(value, name, values) => {
             if (values && values.float) {
-              setInitialValue(values.float * 100);
+              setInitialValue(Math.round(values.float * 100));
             }
           }}
           groupSeparator={groupSeparatorsByCurrency[currency]}
