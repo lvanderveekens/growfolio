@@ -1,7 +1,7 @@
 import { Transaction, TransactionType } from "./investments/transaction";
 import { InvestmentUpdate } from "./overview-page";
 
-export const calculatePrincipal = (
+export const calculateCost = (
   transactions: Transaction[]
 ) => {
   let sum = 0;
@@ -15,7 +15,7 @@ export const calculatePrincipal = (
   return Math.max(0, sum);
 };
 
-export const calculatePrincipalForDate = (
+export const calculateCostForDate = (
   date: string,
   transactions: Transaction[]
 ): number => {

@@ -14,13 +14,13 @@ const (
 )
 
 type CreateInvestmentCommand struct {
-	Type             InvestmentType
-	Name             string
-	User             User
-	Locked           bool
-	InitialDate      *time.Time
-	InitialPrincipal *int64
-	InitialValue     *int64
+	Type         InvestmentType
+	Name         string
+	User         User
+	Locked       bool
+	InitialDate  *time.Time
+	InitialCost  *int64
+	InitialValue *int64
 }
 
 func NewCreateInvestmentCommand(
@@ -29,17 +29,17 @@ func NewCreateInvestmentCommand(
 	user User,
 	locked bool,
 	initialDate *time.Time,
-	initialPrincipal,
+	initialCost,
 	initialValue *int64,
 ) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
-		Type:             t,
-		Name:             name,
-		User:             user,
-		Locked:           locked,
-		InitialDate:      initialDate,
-		InitialPrincipal: initialPrincipal,
-		InitialValue:     initialValue,
+		Type:         t,
+		Name:         name,
+		User:         user,
+		Locked:       locked,
+		InitialDate:  initialDate,
+		InitialCost:  initialCost,
+		InitialValue: initialValue,
 	}
 }
 

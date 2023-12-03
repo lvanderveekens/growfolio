@@ -282,11 +282,11 @@ func toInvestmentDto(i domain.Investment) investmentDto {
 }
 
 type CreateInvestmentRequest struct {
-	Type             domain.InvestmentType `json:"type"`
-	Name             string                `json:"name"`
-	InitialDate      *string               `json:"initialDate"`
-	InitialPrincipal *int64                `json:"initialPrincipal"`
-	InitialValue     *int64                `json:"initialValue"`
+	Type         domain.InvestmentType `json:"type"`
+	Name         string                `json:"name"`
+	InitialDate  *string               `json:"initialDate"`
+	InitialCost  *int64                `json:"initialCost"`
+	InitialValue *int64                `json:"initialValue"`
 }
 
 func (r CreateInvestmentRequest) validate() error {
@@ -315,7 +315,7 @@ func (r CreateInvestmentRequest) toCommand(user domain.User) (domain.CreateInves
 		user,
 		false,
 		initialDate,
-		r.InitialPrincipal,
+		r.InitialCost,
 		r.InitialValue,
 	), nil
 }

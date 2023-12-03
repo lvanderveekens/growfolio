@@ -14,7 +14,7 @@ export interface CreateInvestmentRequest {
   type: InvestmentType;
   name: string;
   initialDate?: string;
-  initialPrincipal?: number;
+  initialCost?: number;
   initialValue?: number;
 }
 
@@ -28,7 +28,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
   const [initialDate, setInitialDate] = useState<Date>();
-  const [initialPrincipal, setInitialPrincipal] = useState<number>();
+  const [initialCost, setInitialCost] = useState<number>();
   const [initialValue, setInitialValue] = useState<number>();
 
   const [errors, setErrors] = useState({
@@ -68,7 +68,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       type: type!,
       name: name!,
       initialDate: moment(initialDate).format("YYYY-MM-DD"),
-      initialPrincipal: initialPrincipal,
+      initialCost: initialCost,
       initialValue: initialValue,
     };
 
@@ -136,7 +136,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
         />
       </div>
       <div className="mb-4">
-        <label>Initial principal (optional)</label>
+        <label>Initial cost (optional)</label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -144,7 +144,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           decimalsLimit={2}
           onValueChange={(value, name, values) => {
             if (values && values.float) {
-              setInitialPrincipal(Math.round(values.float * 100));
+              setInitialCost(Math.round(values.float * 100));
             }
           }}
           groupSeparator={groupSeparatorsByCurrency[currency]}

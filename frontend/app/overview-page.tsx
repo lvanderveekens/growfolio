@@ -27,7 +27,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "./app-layout";
 import { api } from "./axios";
 import { Button } from "./button";
-import { calculatePrincipal, calculatePrincipalForDate, calculateValueForDate } from "./calculator";
+import { calculateCost, calculateCostForDate, calculateValueForDate } from "./calculator";
 import Dropdown from "./dropdown";
 import { buildMonthlyChangeBarData, buildYearlyChangeBarData, monthlyChangeBarOptions, yearlyChangeBarOptions } from "./investments/[id]/page";
 import { Transaction } from "./investments/transaction";
@@ -101,14 +101,14 @@ export default function OverviewPage() {
         const value = lastUpdate?.value ?? 0;
 
         const transactionsForInvestment = transactions.filter((tx) => tx.investmentId == i.id);
-        const principal = calculatePrincipal(transactionsForInvestment);
+        const cost = calculateCost(transactionsForInvestment);
 
         let returnValue = 0
         let roi = 0
 
         if (lastUpdate && transactionsForInvestment.length > 0) {
-          returnValue = value - principal
-          roi = returnValue / principal;
+          returnValue = value - cost
+          roi = returnValue / cost;
         }
 
         return {
@@ -116,7 +116,7 @@ export default function OverviewPage() {
           name: i.name,
           type: i.type,
           lastUpdateDate: i.lastUpdateDate,
-          principal: principal,
+          cost: cost,
           value: value,
           return: returnValue,
           roi: roi,
@@ -138,14 +138,14 @@ export default function OverviewPage() {
 
     return uniqueUpdateDates.map((date) => {
       const value = calculateValueForDate(date, updates);
-      const principal = calculatePrincipalForDate(date, transactions);
-      const returnValue = value - principal;
-      const roi = returnValue / principal;
+      const cost = calculateCostForDate(date, transactions);
+      const returnValue = value - cost;
+      const roi = returnValue / cost;
 
       return {
         date: date,
         value: value,
-        principal: principal,
+        cost: cost,
         return: returnValue,
         roi: roi,
       };
@@ -194,18 +194,18 @@ export default function OverviewPage() {
     });
   };
 
-  const buildPrincipalVsValueLineData = (
+  const buildCostVsValueLineData = (
     updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
         {
-          label: "Principal",
+          label: "Cost",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
           data: updateDataPoints.map((x) => ({
             x: x.date,
-            y: x.principal / 100,
+            y: x.cost / 100,
           })),
         },
         {
@@ -222,7 +222,7 @@ export default function OverviewPage() {
   };
 
   const buildReturnLineData = (
-    dateWithPrincipalAndValue: UpdateDataPoint[]
+    dateWithCostAndValue: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
@@ -230,9 +230,9 @@ export default function OverviewPage() {
           label: "Return",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
-          data: dateWithPrincipalAndValue.map((x) => ({
+          data: dateWithCostAndValue.map((x) => ({
             x: x.date,
-            y: (x.value - x.principal) / 100,
+            y: (x.value - x.cost) / 100,
           })),
         },
       ],
@@ -252,7 +252,6 @@ export default function OverviewPage() {
             return {
               x: x.date,
               y: x.roi,
-              // y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
             }
           }),
         },
@@ -353,13 +352,13 @@ export default function OverviewPage() {
     };
   };
 
-  const totalPrincipal = investmentRows.reduce(
-    (acc, row) => acc + (row.principal ?? 0),
+  const totalCost = investmentRows.reduce(
+    (acc, row) => acc + (row.cost ?? 0),
     0
   );
   const totalValue = investmentRows.reduce((acc, row) => acc + (row.value ?? 0), 0);
-  const totalReturn = totalValue - totalPrincipal;
-  const totalRoi = totalReturn / totalPrincipal;
+  const totalReturn = totalValue - totalCost;
+  const totalRoi = totalReturn / totalCost;
 
   const [showAddInvestmentModal, setShowAddInvestmentModal] =
     useState<boolean>(false);
@@ -560,13 +559,13 @@ export default function OverviewPage() {
                 </div>
 
                 <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Principal vs value</h3>
+                  <h3 className="font-bold mb-4">Cost vs value</h3>
 
                   <div className="w-full h-full">
                     {settings && (
                       <Line
-                        options={principalVsValueLineOptions(settings.currency)}
-                        data={buildPrincipalVsValueLineData(updateDataPoints)}
+                        options={costVsValueLineOptions(settings.currency)}
+                        data={buildCostVsValueLineData(updateDataPoints)}
                       />
                     )}
                   </div>
@@ -627,7 +626,7 @@ export default function OverviewPage() {
   );
 }
 
-export const principalVsValueLineOptions = (currency: string) => ({
+export const costVsValueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",
@@ -793,7 +792,7 @@ export interface InvestmentRow {
   name: string;
   type: InvestmentType;
   lastUpdateDate?: string;
-  principal: number;
+  cost: number;
   value: number;
   return: number;
   roi?: number;
@@ -802,7 +801,7 @@ export interface InvestmentRow {
 
 export interface UpdateDataPoint {
   date: string;
-  principal: number;
+  cost: number;
   value: number;
   return: number;
   roi: number;
@@ -811,14 +810,14 @@ export interface UpdateDataPoint {
 export interface MonthlyChangeDataPoint {
   yearMonth: string;
   value: number;
-  principal: number;
+  cost: number;
   return: number;
 }
 
 export interface YearlyChangeDataPoint {
   year: string;
   value: number;
-  principal: number;
+  cost: number;
   return: number;
 }
 
@@ -868,7 +867,7 @@ export const calculateYearlyChangeDataPoints = (
       dataPoints.push({
         year: previousYear[0],
         value: previousYear[1][1].value - previousYear[1][0].value,
-        principal: previousYear[1][1].principal - previousYear[1][0].principal,
+        cost: previousYear[1][1].cost - previousYear[1][0].cost,
         return: previousYear[1][1].return - previousYear[1][0].return,
       });
     }
@@ -876,7 +875,7 @@ export const calculateYearlyChangeDataPoints = (
     dataPoints.push({
       year: currentYear[0],
       value: currentYear[1][1].value - previousYear[1][1].value,
-      principal: currentYear[1][1].principal - previousYear[1][1].principal,
+      cost: currentYear[1][1].cost - previousYear[1][1].cost,
       return: currentYear[1][1].return - previousYear[1][1].return,
     });
   }
@@ -974,7 +973,7 @@ export const calculateMonthlyChangeDataPoints = (
       dataPoints.push({
         yearMonth: previousYearMonth[0],
         value: previousYearMonth[1][1].value - previousYearMonth[1][0].value,
-        principal: previousYearMonth[1][1].principal - previousYearMonth[1][0].principal,
+        cost: previousYearMonth[1][1].cost - previousYearMonth[1][0].cost,
         return: previousYearMonth[1][1].return - previousYearMonth[1][0].return,
       });
     }
@@ -982,7 +981,7 @@ export const calculateMonthlyChangeDataPoints = (
     dataPoints.push({
       yearMonth: currentYearMonth[0],
       value: currentYearMonth[1][1].value - previousYearMonth[1][1].value,
-      principal: currentYearMonth[1][1].principal - previousYearMonth[1][1].principal,
+      cost: currentYearMonth[1][1].cost - previousYearMonth[1][1].cost,
       return: currentYearMonth[1][1].return - previousYearMonth[1][1].return,
     });
   }

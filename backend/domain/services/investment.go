@@ -73,12 +73,12 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 			return domain.Investment{}, fmt.Errorf("failed to create update: %w", err)
 		}
 	}
-	if command.InitialPrincipal != nil {
+	if command.InitialCost != nil {
 		_, err := s.transactionService.Create(domain.NewCreateTransactionCommand(
 			initialDate,
 			domain.TransactionTypeBuy,
 			investment,
-			*command.InitialPrincipal,
+			*command.InitialCost,
 		))
 		if err != nil {
 			return domain.Investment{}, fmt.Errorf("failed to create transaction: %w", err)

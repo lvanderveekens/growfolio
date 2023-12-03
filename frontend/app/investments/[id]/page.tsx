@@ -3,7 +3,7 @@
 import AppLayout from "@/app/app-layout";
 import { api } from "@/app/axios";
 import { Button } from "@/app/button";
-import { calculatePrincipalForDate } from "@/app/calculator";
+import { calculateCostForDate } from "@/app/calculator";
 import Dropdown from "@/app/dropdown";
 import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
@@ -92,18 +92,18 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       return []
     }
     const updateDataPoints = updates.map((update) => {
-      const principal = calculatePrincipalForDate(
+      const cost = calculateCostForDate(
         update.date,
         transactions
       );
       const value = update.value;
-      const returnValue = value - principal;
-      const roi = returnValue / principal;
+      const returnValue = value - cost;
+      const roi = returnValue / cost;
 
       return {
         id: update.id,
         date: update.date,
-        principal: principal,
+        cost: cost,
         value: value,
         return: returnValue,
         roi: roi,
@@ -290,15 +290,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                   <div className="aspect-square">
                     <h1 className="text-xl font-bold mb-4">
-                      Principal vs value
+                      Cost vs value
                     </h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Line
-                          options={principalVsValueLineOptions(
+                          options={costVsValueLineOptions(
                             settings.currency
                           )}
-                          data={buildPrincipalVsValueLineData(updateDataPoints)}
+                          data={buildCostVsValueLineData(updateDataPoints)}
                         />
                       )}
                     </div>
@@ -363,16 +363,16 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   );
 }
 
-const buildPrincipalVsValueLineData = (updateRows: UpdateDataPoint[]) => {
+const buildCostVsValueLineData = (updateRows: UpdateDataPoint[]) => {
   return {
     datasets: [
       {
-        label: "Principal",
+        label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: updateRows.map((x) => ({
           x: x.date,
-          y: x.principal / 100,
+          y: x.cost / 100,
         })),
       },
       {
@@ -388,7 +388,7 @@ const buildPrincipalVsValueLineData = (updateRows: UpdateDataPoint[]) => {
   };
 };
 
-const principalVsValueLineOptions = (currency: string) => ({
+const costVsValueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",
@@ -600,7 +600,7 @@ const roiLineOptions: ChartOptions<"line"> = {
 interface UpdateDataPoint {
   id: string;
   date: string;
-  principal: number;
+  cost: number;
   value: number;
   return: number;
   roi: number;
@@ -609,7 +609,7 @@ interface UpdateDataPoint {
 interface MonthlyChangeDataPoint {
   yearMonth: string;
   value: number;
-  principal: number;
+  cost: number;
   return: number;
 }
 
@@ -622,7 +622,7 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
         backgroundColor: chartBackgroundColors[0],
         data: updateDataPoints.map((x) => ({
           x: x.date,
-          y: (x.value - x.principal) / 100,
+          y: (x.value - x.cost) / 100,
         })),
       },
     ],
@@ -636,12 +636,12 @@ export const buildMonthlyChangeBarData = (
   return {
     datasets: [
       {
-        label: "Principal",
+        label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
           x: dataPoint.yearMonth,
-          y: dataPoint.principal / 100,
+          y: dataPoint.cost / 100,
         })),
       },
       {
@@ -663,12 +663,12 @@ export const buildYearlyChangeBarData = (
   return {
     datasets: [
       {
-        label: "Principal",
+        label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: yearlyChangeDataPoints.map((dataPoint) => ({
           x: dataPoint.year,
-          y: dataPoint.principal / 100,
+          y: dataPoint.cost / 100,
         })),
       },
       {
@@ -692,7 +692,7 @@ const buildROILineData = (updateDataPoints: UpdateDataPoint[]) => {
         backgroundColor: chartBackgroundColors[0],
         data: updateDataPoints.map((x) => ({
           x: x.date,
-          y: (((x.value - x.principal) / x.principal) * 100).toFixed(2),
+          y: (((x.value - x.cost) / x.cost) * 100).toFixed(2),
         })),
       },
     ],
