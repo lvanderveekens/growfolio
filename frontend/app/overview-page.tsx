@@ -396,7 +396,7 @@ export default function OverviewPage() {
         </div>
         <div className="flex justify-between">
           <div>Last update</div>
-          <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
+          <div>{investmentRow.lastUpdateDate ?? "n/a"}</div>
         </div>
       </div>
     );
@@ -411,7 +411,7 @@ export default function OverviewPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-            <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
+            <div className="mb-4">Last update: {lastUpdateDate ?? "n/a"}</div>
 
             <div className="border py-[75px] bg-white text-center mb-4">
               <div className="font-bold text-3xl">
