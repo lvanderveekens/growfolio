@@ -16,23 +16,20 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentService          services.InvestmentService
-	investmentUpdateRepository services.InvestmentUpdateRepository
-	transactionRepository      services.TransactionRepository
-	userRepository             services.UserRepository
+	investmentService       services.InvestmentService
+	investmentUpdateService services.InvestmentUpdateService
+	userRepository          services.UserRepository
 }
 
 func NewInvestmentHandler(
 	investmentService services.InvestmentService,
-	investmentUpdateRepository services.InvestmentUpdateRepository,
-	transactionRepository services.TransactionRepository,
+	investmentUpdateService services.InvestmentUpdateService,
 	userRepository services.UserRepository,
 ) InvestmentHandler {
 	return InvestmentHandler{
-		investmentService:          investmentService,
-		investmentUpdateRepository: investmentUpdateRepository,
-		transactionRepository:      transactionRepository,
-		userRepository:             userRepository,
+		investmentService:       investmentService,
+		investmentUpdateService: investmentUpdateService,
+		userRepository:          userRepository,
 	}
 }
 
@@ -88,14 +85,9 @@ func (h InvestmentHandler) DeleteInvestment(c *gin.Context) (response[empty], er
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to delete investment")
 	}
 
-	err = h.investmentUpdateRepository.DeleteByInvestmentID(investment.ID)
+	err = h.investmentUpdateService.DeleteByInvestmentID(investment.ID)
 	if err != nil {
 		return response[empty]{}, fmt.Errorf("failed to delete updates: %w", err)
-	}
-
-	err = h.transactionRepository.DeleteByInvestmentID(investment.ID)
-	if err != nil {
-		return response[empty]{}, fmt.Errorf("failed to delete transactions: %w", err)
 	}
 
 	err = h.investmentService.DeleteByID(investment.ID)
@@ -137,6 +129,42 @@ func (h InvestmentHandler) CreateInvestment(c *gin.Context) (response[investment
 	return newResponse(http.StatusCreated, toInvestmentDto(created)), nil
 }
 
+func (h InvestmentHandler) CreateUpdate(c *gin.Context) (response[investmentUpdateDto], error) {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	var request createInvestmentUpdateRequest
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to decode request body: %w", err)
+	}
+
+	id := c.Param("id")
+	investment, err := h.investmentService.FindByID(id)
+	if err != nil {
+		if err == domain.ErrInvestmentNotFound {
+			return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
+		}
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to find investment: %w", err)
+	}
+
+	if investment.UserID != tokenUserID {
+		return response[investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to create update for investment")
+	}
+
+	command, err := request.toCommand(investment)
+	if err != nil {
+		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
+	}
+
+	update, err := h.investmentUpdateService.Create(command)
+	if err != nil {
+		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
+	}
+
+	return newResponse(http.StatusCreated, toInvestmentUpdateDto(update)), nil
+}
+
 func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
@@ -162,6 +190,9 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 	slog.Info("Received file: " + csvFormFile.Filename)
 
 	csvFile, err := csvFormFile.Open()
+	if err != nil {
+		return response[empty]{}, fmt.Errorf("failed to open CSV file: %w", err)
+	}
 	defer csvFile.Close()
 
 	csvReader := csv.NewReader(csvFile)
@@ -175,11 +206,31 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 	for i := 1; i < len(records); i++ { // skipping the header row
 		record := records[i]
 		dateString := record[0]
-		valueString := record[1]
+		depositString := record[1]
+		withdrawalString := record[2]
+		valueString := record[3]
 
 		date, err := time.Parse("2006-01-02", dateString)
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to parse date: %w", err)
+		}
+
+		var deposit *int64
+		if depositString != "" {
+			parsed, err := strconv.ParseInt(depositString, 10, 64)
+			if err != nil {
+				return response[empty]{}, fmt.Errorf("failed to parse deposit: %w", err)
+			}
+			deposit = &parsed
+		}
+
+		var withdrawal *int64
+		if withdrawalString != "" {
+			parsed, err := strconv.ParseInt(withdrawalString, 10, 64)
+			if err != nil {
+				return response[empty]{}, fmt.Errorf("failed to parse withdrawal: %w", err)
+			}
+			withdrawal = &parsed
 		}
 
 		value, err := strconv.ParseInt(valueString, 10, 64)
@@ -187,88 +238,18 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 			return response[empty]{}, fmt.Errorf("failed to parse value: %w", err)
 		}
 
-		commands = append(commands, domain.NewCreateInvestmentUpdateCommand(date, investment, value))
+		commands = append(commands, domain.NewCreateInvestmentUpdateCommand(investment, date, deposit, withdrawal, value))
 	}
 
 	for _, command := range commands {
 		slog.Info("Received update: " + fmt.Sprintf("%+v", command))
-		_, err := h.investmentUpdateRepository.Create(command)
+		_, err := h.investmentUpdateService.Create(command)
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to create update: %w", err)
 		}
 	}
 
 	return newEmptyResponse(200), nil
-}
-
-func (h InvestmentHandler) ImportTransactions(c *gin.Context) (response[empty], error) {
-	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
-	tokenUserID := tokenClaims["userId"].(string)
-
-	id := c.Param("id")
-	investment, err := h.investmentService.FindByID(id)
-	if err != nil {
-		if err == domain.ErrInvestmentNotFound {
-			return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
-		}
-		return response[empty]{}, fmt.Errorf("failed to find investment by id %s: %w", id, err)
-	}
-
-	if investment.UserID != tokenUserID {
-		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to read investment")
-	}
-
-	csvFormFile, err := c.FormFile("csvFile")
-	if err != nil {
-		return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
-	}
-
-	slog.Info("Received file: " + csvFormFile.Filename)
-
-	csvFile, err := csvFormFile.Open()
-	defer csvFile.Close()
-
-	csvReader := csv.NewReader(csvFile)
-	records, err := csvReader.ReadAll()
-	if err != nil {
-		return response[empty]{}, fmt.Errorf("failed to read CSV records: %w", err)
-	}
-
-	commands := make([]domain.CreateTransactionCommand, 0)
-
-	for i := 1; i < len(records); i++ { // skipping the header row
-		record := records[i]
-		dateString := record[0]
-		_type := domain.TransactionType(record[1])
-		amountString := record[2]
-
-		date, err := time.Parse("2006-01-02", dateString)
-		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to parse date: %w", err)
-		}
-
-		amount, err := strconv.ParseInt(amountString, 10, 64)
-		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to parse amount: %w", err)
-		}
-
-		commands = append(commands, domain.NewCreateTransactionCommand(date, _type, investment, amount))
-	}
-
-	for _, command := range commands {
-		slog.Info("Received transaction: " + fmt.Sprintf("%+v", command))
-		_, err := h.transactionRepository.Create(command)
-		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to create transaction: %w", err)
-		}
-	}
-
-	return newEmptyResponse(200), nil
-}
-
-type InvestmentUpdateRecord struct {
-	Date  string
-	Value int64
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {
@@ -318,6 +299,22 @@ func (r CreateInvestmentRequest) toCommand(user domain.User) (domain.CreateInves
 		r.InitialCost,
 		r.InitialValue,
 	), nil
+}
+
+type createInvestmentUpdateRequest struct {
+	Date       string `json:"date"`
+	Deposit    *int64 `json:"deposit"`
+	Withdrawal *int64 `json:"withdrawal"`
+	Value      int64  `json:"value"`
+}
+
+func (r createInvestmentUpdateRequest) toCommand(investment domain.Investment) (domain.CreateInvestmentUpdateCommand, error) {
+	date, err := time.Parse("2006-01-02", r.Date)
+	if err != nil {
+		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse date: %w", err)
+	}
+
+	return domain.NewCreateInvestmentUpdateCommand(investment, date, r.Deposit, r.Withdrawal, r.Value), nil
 }
 
 type investmentDto struct {

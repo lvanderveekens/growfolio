@@ -82,7 +82,6 @@ func createHandlerFunc[T any](f func(c *gin.Context) (response[T], error)) gin.H
 type Handlers struct {
 	investment       InvestmentHandler
 	investmentUpdate InvestmentUpdateHandler
-	transaction      TransactionHandler
 	auth             AuthHandler
 	user             UserHandler
 	settings         SettingsHandler
@@ -94,7 +93,6 @@ type Handlers struct {
 func NewHandlers(
 	investment InvestmentHandler,
 	investmentUpdate InvestmentUpdateHandler,
-	transaction TransactionHandler,
 	auth AuthHandler,
 	user UserHandler,
 	settings SettingsHandler,
@@ -105,7 +103,6 @@ func NewHandlers(
 	return Handlers{
 		investment:       investment,
 		investmentUpdate: investmentUpdate,
-		transaction:      transaction,
 		auth:             auth,
 		user:             user,
 		settings:         settings,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"growfolio/domain"
 	"growfolio/domain/services"
+	"growfolio/pointer"
 	xslices "growfolio/slices"
 	"net/http"
 	"slices"
@@ -31,7 +32,7 @@ func NewInvestmentUpdateHandler(
 func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[[]investmentUpdateDto], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
-	investmentIDFilter := stringOrNil(c.Query("investmentId"))
+	investmentIDFilter := pointer.StringOrNil(c.Query("investmentId"))
 
 	var dateFromFilter *time.Time
 	if c.Query("dateFrom") != "" {
@@ -74,41 +75,6 @@ func (h InvestmentUpdateHandler) GetInvestmentUpdates(c *gin.Context) (response[
 	return newResponse(http.StatusOK, dtos), nil
 }
 
-func (h InvestmentUpdateHandler) CreateInvestmentUpdate(c *gin.Context) (response[investmentUpdateDto], error) {
-	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
-	tokenUserID := tokenClaims["userId"].(string)
-
-	var request createInvestmentUpdateRequest
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
-		return response[investmentUpdateDto]{}, fmt.Errorf("failed to decode request body: %w", err)
-	}
-
-	investment, err := h.investmentService.FindByID(request.InvestmentID)
-	if err != nil {
-		if err == domain.ErrInvestmentNotFound {
-			return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
-		}
-		return response[investmentUpdateDto]{}, fmt.Errorf("failed to find investment: %w", err)
-	}
-
-	if investment.UserID != tokenUserID {
-		return response[investmentUpdateDto]{}, NewError(http.StatusForbidden, "not allowed to create update for investment")
-	}
-
-	command, err := request.toCommand(investment)
-	if err != nil {
-		return response[investmentUpdateDto]{}, NewError(http.StatusBadRequest, err.Error())
-	}
-
-	update, err := h.investmentUpdateService.Create(command)
-	if err != nil {
-		return response[investmentUpdateDto]{}, fmt.Errorf("failed to create investment update: %w", err)
-	}
-
-	return newResponse(http.StatusCreated, toInvestmentUpdateDto(update)), nil
-}
-
 func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (response[empty], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
@@ -143,31 +109,25 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 }
 
 func toInvestmentUpdateDto(u domain.InvestmentUpdate) investmentUpdateDto {
-	return newInvestmentUpdateDto(u.ID, u.Date.Format("2006-01-02"), u.InvestmentID, u.Value)
-}
-
-type createInvestmentUpdateRequest struct {
-	Date         string `json:"date"`
-	InvestmentID string `json:"investmentId"`
-	Value        int64  `json:"value"`
-}
-
-func (r createInvestmentUpdateRequest) toCommand(i domain.Investment) (domain.CreateInvestmentUpdateCommand, error) {
-	d, err := time.Parse("2006-01-02", r.Date)
-	if err != nil {
-		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse date: %w", err)
-	}
-
-	return domain.NewCreateInvestmentUpdateCommand(d, i, r.Value), nil
+	return newInvestmentUpdateDto(u.ID, u.Date.Format("2006-01-02"), u.InvestmentID, u.Deposit, u.Withdrawal, u.Value)
 }
 
 type investmentUpdateDto struct {
 	ID           string `json:"id"`
-	Date         string `json:"date"`
 	InvestmentID string `json:"investmentId"`
+	Date         string `json:"date"`
+	Deposit      *int64 `json:"deposit"`
+	Withdrawal   *int64 `json:"withdrawal"`
 	Value        int64  `json:"value"`
 }
 
-func newInvestmentUpdateDto(id, date, investmentId string, value int64) investmentUpdateDto {
-	return investmentUpdateDto{ID: id, Date: date, InvestmentID: investmentId, Value: value}
+func newInvestmentUpdateDto(id, date, investmentId string, deposit, withdrawal *int64, value int64) investmentUpdateDto {
+	return investmentUpdateDto{
+		ID:           id,
+		InvestmentID: investmentId,
+		Date:         date,
+		Deposit:      deposit,
+		Withdrawal:   withdrawal,
+		Value:        value,
+	}
 }

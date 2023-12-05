@@ -1,15 +1,17 @@
-import { Transaction, TransactionType } from "./investments/transaction";
 import { InvestmentUpdate } from "./overview-page";
 
 export const calculateCost = (
-  transactions: Transaction[]
+  investmentUpdates: InvestmentUpdate[]
 ) => {
+  console.log("calculateCost")
+  console.log(investmentUpdates);
   let sum = 0;
-  for (const transaction of transactions) {
-    if (transaction.type == TransactionType.BUY) {
-      sum += transaction.amount;
-    } else {
-      sum -= transaction.amount;
+  for (const investmentUpdate of investmentUpdates) {
+    if (investmentUpdate.deposit) {
+      sum += investmentUpdate.deposit;
+    }
+    if (investmentUpdate.withdrawal) {
+      sum -= investmentUpdate.deposit;
     }
   }
   return Math.max(0, sum);
@@ -17,20 +19,9 @@ export const calculateCost = (
 
 export const calculateCostForDate = (
   date: string,
-  transactions: Transaction[]
+  investmentUpdates: InvestmentUpdate[]
 ): number => {
-  let sum = 0;
-  for (const transaction of transactions) {
-    if (new Date(transaction.date) > new Date(date)) {
-      break;
-    }
-    if (transaction.type == TransactionType.BUY) {
-      sum += transaction.amount;
-    } else {
-      sum -= transaction.amount;
-    }
-  }
-  return Math.max(0, sum);
+  return calculateCost(investmentUpdates.filter((update) => new Date(update.date) <= new Date(date)))
 };
 
 export const calculateValueForDate = (

@@ -30,7 +30,6 @@ import { Button } from "./button";
 import { calculateCost, calculateCostForDate, calculateValueForDate } from "./calculator";
 import Dropdown from "./dropdown";
 import { buildMonthlyChangeBarData, buildYearlyChangeBarData, monthlyChangeBarOptions, yearlyChangeBarOptions } from "./investments/[id]/page";
-import { Transaction } from "./investments/transaction";
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
 import { Settings } from "./settings/settings";
@@ -54,11 +53,7 @@ ChartJS.register(
 
 export default function OverviewPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [updates, setUpdates] = useState<
-    InvestmentUpdate[]
-  >([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  
+  const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
   
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
@@ -77,7 +72,6 @@ export default function OverviewPage() {
     Promise.all([
       fetchInvestments(),
       fetchInvestmentUpdates(),
-      fetchTransactions(),
       fetchSettings(),
       fetchUser(),
     ]).finally(() => setLoading(false));
@@ -96,17 +90,19 @@ export default function OverviewPage() {
 
     if (investments.length > 0) {
       const investmentRows = investments.map((i) => {
-        const lastUpdate = updates.findLast((u) => u.investmentId == i.id)!;
+        const investmentUpdatesForInvestment = investmentUpdates.filter((tx) => tx.investmentId == i.id);
+        let lastUpdateForInvestment = null;
+        if (investmentUpdatesForInvestment.length > 0) {
+          lastUpdateForInvestment = investmentUpdatesForInvestment[investmentUpdatesForInvestment.length - 1];
+        }
 
-        const value = lastUpdate?.value ?? 0;
-
-        const transactionsForInvestment = transactions.filter((tx) => tx.investmentId == i.id);
-        const cost = calculateCost(transactionsForInvestment);
+        const value = lastUpdateForInvestment?.value ?? 0;
+        const cost = calculateCost(investmentUpdatesForInvestment);
 
         let returnValue = 0
         let roi = 0
 
-        if (lastUpdate && transactionsForInvestment.length > 0) {
+        if (lastUpdateForInvestment) {
           returnValue = value - cost
           roi = returnValue / cost;
         }
@@ -126,19 +122,16 @@ export default function OverviewPage() {
 
       setInvestmentRows(investmentRows);
     }
-  }, [investments, transactions, updates]);
+  }, [investments, investmentUpdates]);
 
   const calculateUpdateDataPoints = () => {
-    if (transactions.length === 0) {
-      return []
-    }
     const uniqueUpdateDates = Array.from(
-      new Set(updates.map((update) => update.date))
+      new Set(investmentUpdates.map((update) => update.date))
     );
 
     return uniqueUpdateDates.map((date) => {
-      const value = calculateValueForDate(date, updates);
-      const cost = calculateCostForDate(date, transactions);
+      const value = calculateValueForDate(date, investmentUpdates);
+      const cost = calculateCostForDate(date, investmentUpdates);
       const returnValue = value - cost;
       const roi = returnValue / cost;
 
@@ -181,11 +174,7 @@ export default function OverviewPage() {
         },
       }
     )
-    .then((res) => setUpdates(res.data));
-  };
-
-  const fetchTransactions = async () => {
-    api.get(`/transactions`).then((res) => setTransactions(res.data));
+    .then((res) => setInvestmentUpdates(res.data));
   };
 
   const fetchSettings = async () => {
@@ -261,7 +250,7 @@ export default function OverviewPage() {
 
   const getLatestInvestmentValue = (investment: Investment) => {
     return (
-      updates.findLast(
+      investmentUpdates.findLast(
         (update) => update.investmentId == investment.id
       )?.value ?? 0
     );
@@ -782,8 +771,10 @@ export interface Investment {
 
 export interface InvestmentUpdate {
   id: string;
-  date: string;
   investmentId: string;
+  date: string;
+  deposit: number;
+  withdrawal: number;
   value: number;
 }
 

@@ -6,3 +6,10 @@ func GetOrDefault[T any](nillable *T, defaultValue T) T {
 	}
 	return *nillable
 }
+
+func StringOrNil(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}

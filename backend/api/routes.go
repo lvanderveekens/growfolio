@@ -35,19 +35,14 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		private.POST("/auth/logout", createHandlerFunc(s.handlers.auth.LogOut))
 
 		private.GET("/investments", createHandlerFunc(s.handlers.investment.GetInvestments))
+		private.POST("/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
 		private.GET("/investments/:id", createHandlerFunc(s.handlers.investment.GetInvestment))
 		private.DELETE("/investments/:id", createHandlerFunc(s.handlers.investment.DeleteInvestment))
-		private.POST("/investments", createHandlerFunc(s.handlers.investment.CreateInvestment))
-		private.POST("/investments/:id/updates", createHandlerFunc(s.handlers.investment.ImportUpdates))
-		private.POST("/investments/:id/transactions", createHandlerFunc(s.handlers.investment.ImportTransactions))
+		private.POST("/investments/:id/updates", createHandlerFunc(s.handlers.investment.CreateUpdate))
+		private.POST("/investments/:id/updates/csv", createHandlerFunc(s.handlers.investment.ImportUpdates))
 
 		private.GET("/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.GetInvestmentUpdates))
-		private.POST("/investment-updates", createHandlerFunc(s.handlers.investmentUpdate.CreateInvestmentUpdate))
 		private.DELETE("/investment-updates/:id", createHandlerFunc(s.handlers.investmentUpdate.DeleteInvestmentUpdate))
-
-		private.GET("/transactions", createHandlerFunc(s.handlers.transaction.GetTransactions))
-		private.POST("/transactions", createHandlerFunc(s.handlers.transaction.CreateTransaction))
-		private.DELETE("/transactions/:id", createHandlerFunc(s.handlers.transaction.DeleteTransaction))
 
 		private.GET("/user", createHandlerFunc(s.handlers.user.GetUser))
 

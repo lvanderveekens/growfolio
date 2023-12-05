@@ -55,7 +55,6 @@ func main() {
 	investmentRepository := postgres.NewInvestmentRepository(db)
 	investmentUpdateRepository := postgres.NewInvestmentUpdateRepository(db)
 	investmentUpdateService := services.NewInvestmentUpdateService(investmentUpdateRepository)
-	transactionRepository := postgres.NewTransactionRepository(db)
 	userRepository := postgres.NewUserRepository(db)
 	settingsRepository := postgres.NewSettingsRepository(db)
 
@@ -66,13 +65,11 @@ func main() {
 
 	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"), mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")))
 	settingsService := services.NewSettingsService(settingsRepository)
-	transactionService := services.NewTransactionService(transactionRepository)
-	investmentService := services.NewInvestmentService(investmentRepository, transactionService, investmentUpdateService)
+	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
 
-	investmentHandler := api.NewInvestmentHandler(investmentService, &investmentUpdateRepository, transactionRepository, &userRepository)
+	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
-	transactionHandler := api.NewTransactionHandler(transactionService, investmentService)
 	authHandler := api.NewAuthHandler(userService, tokenService, os.Getenv("DOMAIN"), mustParseBool(os.Getenv("USE_SECURE_COOKIES")))
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
@@ -89,7 +86,6 @@ func main() {
 	handlers := api.NewHandlers(
 		investmentHandler,
 		investmentUpdateHandler,
-		transactionHandler,
 		authHandler,
 		userHandler,
 		settingsHandler,

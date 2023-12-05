@@ -13,16 +13,18 @@ import (
 )
 
 type InvestmentUpdate struct {
-	ID           uuid.UUID
+	ID           uuid.UUID `db:"id"`
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
-	Date         time.Time
-	InvestmentID string `db:"investment_id"`
-	Value        int64
+	InvestmentID string    `db:"investment_id"`
+	Date         time.Time `db:"date"`
+	Deposit      *int64    `db:"deposit"`
+	Withdrawal   *int64    `db:"withdrawal"`
+	Value        int64     `db:"value"`
 }
 
 func (i InvestmentUpdate) toDomainInvestmentUpdate() domain.InvestmentUpdate {
-	return domain.NewInvestmentUpdate(i.ID.String(), i.Date, i.InvestmentID, i.Value)
+	return domain.NewInvestmentUpdate(i.ID.String(), i.InvestmentID, i.Date, i.Deposit, i.Withdrawal, i.Value)
 }
 
 type InvestmentUpdateRepository struct {

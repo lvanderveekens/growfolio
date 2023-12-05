@@ -17,18 +17,15 @@ type InvestmentRepository interface {
 
 type InvestmentService struct {
 	investmentRepository    InvestmentRepository
-	transactionService      TransactionService
 	investmentUpdateService InvestmentUpdateService
 }
 
 func NewInvestmentService(
 	investmentRepository InvestmentRepository,
-	transactionService TransactionService,
 	investmentUpdateService InvestmentUpdateService,
 ) InvestmentService {
 	return InvestmentService{
 		investmentRepository:    investmentRepository,
-		transactionService:      transactionService,
 		investmentUpdateService: investmentUpdateService,
 	}
 }
@@ -56,32 +53,21 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 		return domain.Investment{}, fmt.Errorf("failed to create investment: %w", err)
 	}
 
-	var initialDate time.Time
+	initialDate := time.Now()
 	if command.InitialDate != nil {
 		initialDate = *command.InitialDate
-	} else {
-		initialDate = time.Now()
 	}
 
-	if command.InitialValue != nil {
+	if command.InitialCost != nil || command.InitialValue != nil {
 		_, err := s.investmentUpdateService.Create(domain.NewCreateInvestmentUpdateCommand(
-			initialDate,
 			investment,
+			initialDate,
+			command.InitialCost,
+			nil,
 			*command.InitialValue,
 		))
 		if err != nil {
 			return domain.Investment{}, fmt.Errorf("failed to create update: %w", err)
-		}
-	}
-	if command.InitialCost != nil {
-		_, err := s.transactionService.Create(domain.NewCreateTransactionCommand(
-			initialDate,
-			domain.TransactionTypeBuy,
-			investment,
-			*command.InitialCost,
-		))
-		if err != nil {
-			return domain.Investment{}, fmt.Errorf("failed to create transaction: %w", err)
 		}
 	}
 

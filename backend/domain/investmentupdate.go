@@ -3,27 +3,39 @@ package domain
 import "time"
 
 type CreateInvestmentUpdateCommand struct {
-	Date       time.Time
 	Investment Investment
+	Date       time.Time
+	Deposit    *int64
+	Withdrawal *int64
 	Value      int64
 }
 
-func NewCreateInvestmentUpdateCommand(date time.Time, investment Investment, value int64) CreateInvestmentUpdateCommand {
-	return CreateInvestmentUpdateCommand{Date: date, Investment: investment, Value: value}
+func NewCreateInvestmentUpdateCommand(investment Investment, date time.Time, deposit, withdrawal *int64, value int64) CreateInvestmentUpdateCommand {
+	return CreateInvestmentUpdateCommand{
+		Investment: investment,
+		Date:       date,
+		Deposit:    deposit,
+		Withdrawal: withdrawal,
+		Value:      value,
+	}
 }
 
 type InvestmentUpdate struct {
 	ID           string
-	Date         time.Time
 	InvestmentID string
+	Date         time.Time
+	Deposit      *int64
+	Withdrawal   *int64
 	Value        int64
 }
 
-func NewInvestmentUpdate(id string, date time.Time, investmentID string, value int64) InvestmentUpdate {
+func NewInvestmentUpdate(id, investmentID string, date time.Time, deposit, withdrawal *int64, value int64) InvestmentUpdate {
 	return InvestmentUpdate{
 		ID:           id,
-		Date:         date,
 		InvestmentID: investmentID,
+		Date:         date,
+		Deposit:      deposit,
+		Withdrawal:   withdrawal,
 		Value:        value,
 	}
 }
