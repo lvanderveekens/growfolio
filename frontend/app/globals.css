@@ -46,14 +46,15 @@
     }
 
     th {
-      @apply border;
-      @apply p-2;
+      @apply border-y;
+      @apply p-4;
       @apply text-left;
+      /* @apply bg-gray-200; */
     }
 
     td {
-      @apply border;
-      @apply p-2;
+      @apply border-y;
+      @apply p-4;
     }
 
     body {

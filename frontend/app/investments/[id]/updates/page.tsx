@@ -114,28 +114,67 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <AppLayout>
       <div className="container my-4">
-        <Link
-          className="mb-4 inline-block"
-          href={`/investments/${investment.id}`}
-        >
+        <Link className="mb-4 inline-block" href={`/investments/${investment.id}`}>
           <div className="flex items-center">
             <FaChevronLeft className="inline" />
             Back to {investment.name}
           </div>
         </Link>
 
-        <h1 className="text-3xl sm:text-3xl font-bold mb-4">
-          {investment.name} updates
-        </h1>
+        <h1 className="text-3xl sm:text-3xl font-bold mb-4">{investment.name} updates</h1>
 
         {investment.locked && <InvestmentIsLockedMessage />}
 
         {investmentUpdates.length === 0 && <div className="mb-4">No updates found.</div>}
         {investmentUpdates.length > 0 && (
-          <div className="overflow-x-auto mb-4">
+          <div className="overflow-x-auto bg-white">
+            <div className="border border-b-0 p-4 flex gap-4 justify-end">
+              <Button
+                className="w-full lg:w-auto "
+                variant="primary"
+                type="submit"
+                onClick={() => setShowUpdateInvestmentModal(true)}
+                disabled={investment.locked}
+              >
+                Add update
+              </Button>
+              {showUpdateInvestmentModal && settings && (
+                <Modal title="Add update" onClose={() => setShowUpdateInvestmentModal(false)}>
+                  <AddUpdateForm
+                    onAdd={() => {
+                      setShowUpdateInvestmentModal(false);
+                      fetchInvestmentUpdates();
+                    }}
+                    investmentId={params.id}
+                    currency={settings.currency}
+                  />
+                </Modal>
+              )}
+              <Button
+                className="w-full lg:w-auto "
+                variant="primary"
+                type="submit"
+                onClick={() => setShowImportUpdatesModal(true)}
+                disabled={investment.locked}
+              >
+                Import updates
+              </Button>
+              {showImportUpdatesModal && (
+                <Modal title="Import updates" onClose={() => setShowImportUpdatesModal(false)}>
+                  <ImportUpdatesForm
+                    onImport={() => {
+                      setShowImportUpdatesModal(false);
+                      fetchInvestmentUpdates();
+                    }}
+                    investmentId={params.id}
+                  />
+                </Modal>
+              )}
+            </div>
+
             <table>
               <thead>
-                <tr>
+                <tr className="bg-gray-100">
                   <th>Date</th>
                   <th>Deposit</th>
                   <th>Withdrawal</th>
@@ -144,31 +183,13 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                 </tr>
               </thead>
               <tbody>
-                {investmentUpdates.map((update) => {
+                {investmentUpdates.map((update, index) => {
                   return (
-                    <tr key={update.id}>
+                    <tr key={update.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                       <td>{update.date}</td>
-                      <td>
-                        {settings &&
-                          formatAmountInCentsAsCurrencyString(
-                            update.deposit,
-                            settings.currency
-                          )}
-                      </td>
-                      <td>
-                        {settings &&
-                          formatAmountInCentsAsCurrencyString(
-                            update.withdrawal,
-                            settings.currency
-                          )}
-                      </td>
-                      <td>
-                        {settings &&
-                          formatAmountInCentsAsCurrencyString(
-                            update.value,
-                            settings.currency
-                          )}
-                      </td>
+                      <td>{settings && formatAmountInCentsAsCurrencyString(update.deposit, settings.currency)}</td>
+                      <td>{settings && formatAmountInCentsAsCurrencyString(update.withdrawal, settings.currency)}</td>
+                      <td>{settings && formatAmountInCentsAsCurrencyString(update.value, settings.currency)}</td>
                       <td>
                         <FaRegTrashCan
                           className="hover:cursor-pointer text-red-500 hover:text-red-700"
@@ -185,18 +206,10 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               <Modal title="Delete update" onClose={closeDeleteUpdateModal}>
                 Are you sure?
                 <div className="mt-4 flex gap-4 justify-between lg:justify-end">
-                  <Button
-                    className="w-full lg:w-auto"
-                    variant="secondary"
-                    onClick={closeDeleteUpdateModal}
-                  >
+                  <Button className="w-full lg:w-auto" variant="secondary" onClick={closeDeleteUpdateModal}>
                     Cancel
                   </Button>
-                  <Button
-                    className="w-full lg:w-auto"
-                    variant="danger"
-                    onClick={() => deleteUpdate(selectedUpdate.id)}
-                  >
+                  <Button className="w-full lg:w-auto" variant="danger" onClick={() => deleteUpdate(selectedUpdate.id)}>
                     Delete
                   </Button>
                 </div>
@@ -204,56 +217,6 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             )}
           </div>
         )}
-
-        <div>
-          <Button
-            className="w-full lg:w-auto mb-2 mr-4"
-            variant="secondary"
-            type="submit"
-            onClick={() => setShowUpdateInvestmentModal(true)}
-            disabled={investment.locked}
-          >
-            Add update
-          </Button>
-          {showUpdateInvestmentModal && settings && (
-            <Modal
-              title="Add update"
-              onClose={() => setShowUpdateInvestmentModal(false)}
-            >
-              <AddUpdateForm
-                onAdd={() => {
-                  setShowUpdateInvestmentModal(false);
-                  fetchInvestmentUpdates();
-                }}
-                investmentId={params.id}
-                currency={settings.currency}
-              />
-            </Modal>
-          )}
-          <Button
-            className="w-full lg:w-auto mr-4"
-            variant="secondary"
-            type="submit"
-            onClick={() => setShowImportUpdatesModal(true)}
-            disabled={investment.locked}
-          >
-            Import updates
-          </Button>
-          {showImportUpdatesModal && (
-            <Modal
-              title="Import updates"
-              onClose={() => setShowImportUpdatesModal(false)}
-            >
-              <ImportUpdatesForm
-                onImport={() => {
-                  setShowImportUpdatesModal(false);
-                  fetchInvestmentUpdates();
-                }}
-                investmentId={params.id}
-              />
-            </Modal>
-          )}
-        </div>
       </div>
     </AppLayout>
   );
