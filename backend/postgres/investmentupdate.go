@@ -115,10 +115,10 @@ func (r InvestmentUpdateRepository) Create(c domain.CreateInvestmentUpdateComman
 
 	var entity InvestmentUpdate
 	err = r.db.QueryRowx(`
-		INSERT INTO investment_update (id, investment_id, "date", "value") 
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO investment_update (id, investment_id, "date", deposit, withdrawal, "value") 
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING *
-	`, id, c.Investment.ID, c.Date, c.Value).StructScan(&entity)
+	`, id, c.Investment.ID, c.Date, c.Deposit, c.Withdrawal, c.Value).StructScan(&entity)
 	if err != nil {
 		return domain.InvestmentUpdate{}, fmt.Errorf("failed to insert investment update: %w", err)
 	}

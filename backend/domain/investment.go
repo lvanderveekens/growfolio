@@ -20,7 +20,7 @@ type CreateInvestmentCommand struct {
 	Locked       bool
 	InitialDate  *time.Time
 	InitialCost  *int64
-	InitialValue *int64
+	InitialValue int64
 }
 
 func NewCreateInvestmentCommand(
@@ -29,8 +29,8 @@ func NewCreateInvestmentCommand(
 	user User,
 	locked bool,
 	initialDate *time.Time,
-	initialCost,
-	initialValue *int64,
+	initialCost *int64,
+	initialValue int64,
 ) CreateInvestmentCommand {
 	return CreateInvestmentCommand{
 		Type:         t,

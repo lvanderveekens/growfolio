@@ -11,7 +11,8 @@ import { decimalSeparatorsByCurrency, groupSeparatorsByCurrency, signPrefixesByC
 
 export interface CreateInvestmentUpdateRequest {
   date: string
-  investmentId: string
+  deposit?: number
+  withdrawal?: number
   value: number
 }
 
@@ -27,6 +28,8 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   currency
 }) => {
   const [date, setDate] = useState<Date>();
+  const [deposit, setDeposit] = useState<number>();
+  const [withdrawal, setWithdrawal] = useState<number>();
   const [value, setValue] = useState<number>();
 
   const [errors, setErrors] = useState({
@@ -64,12 +67,13 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
 
     const req: CreateInvestmentUpdateRequest = {
       date: moment(date).format("YYYY-MM-DD"),
-      investmentId: investmentId,
+      deposit: deposit && Math.round(deposit! * 100),
+      withdrawal: withdrawal && Math.round(withdrawal! * 100),
       value: Math.round(value! * 100),
     };
 
     api
-      .post("/investment-updates", req, {
+      .post(`/investments/${investmentId}/updates`, req, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -85,9 +89,27 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
       });
   };
 
+  const handleDepositChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
+    if (values && values.float != null) {
+      setDeposit(values.float);
+    } else {
+      setDeposit(undefined)
+    }
+  };
+
+  const handleWithdrawalChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
+    if (values && values.float != null) {
+      setWithdrawal(values.float);
+    } else {
+      setWithdrawal(undefined)
+    }
+  };
+
   const handleValueChange = (value: string | undefined, name?: string, values?: CurrencyInputOnChangeValues) => {
     if (values && values.float != null) {
       setValue(values.float);
+    } else {
+      setValue(undefined)
     }
   };
 
@@ -104,6 +126,30 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
           dateFormat="yyyy-MM-dd"
         />
         <div className="text-red-500">{errors.date}</div>
+      </div>
+      <div className="mb-4">
+        <label>Deposit (optional)</label>
+        <CurrencyInput
+          className="border w-full px-2 py-2"
+          prefix={signPrefixesByCurrency[currency]}
+          placeholder={signPrefixesByCurrency[currency]}
+          decimalsLimit={2}
+          onValueChange={handleDepositChange}
+          groupSeparator={groupSeparatorsByCurrency[currency]}
+          decimalSeparator={decimalSeparatorsByCurrency[currency]}
+        />
+      </div>
+      <div className="mb-4">
+        <label>Withdrawal (optional)</label>
+        <CurrencyInput
+          className="border w-full px-2 py-2"
+          prefix={signPrefixesByCurrency[currency]}
+          placeholder={signPrefixesByCurrency[currency]}
+          decimalsLimit={2}
+          onValueChange={handleWithdrawalChange}
+          groupSeparator={groupSeparatorsByCurrency[currency]}
+          decimalSeparator={decimalSeparatorsByCurrency[currency]}
+        />
       </div>
       <div className="mb-4">
         <label>Value</label>

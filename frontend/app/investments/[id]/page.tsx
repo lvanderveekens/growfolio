@@ -5,7 +5,6 @@ import { api } from "@/app/axios";
 import { Button } from "@/app/button";
 import { calculateCostForDate } from "@/app/calculator";
 import Dropdown from "@/app/dropdown";
-import { Transaction } from "@/app/investments/transaction";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
@@ -52,8 +51,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>()
 
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
+  const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
@@ -70,7 +68,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     fetchInvestment()
     fetchInvestmentUpdates()
-    fetchTransactions()
     fetchSettings()
   }, [selectedDateRange]);
 
@@ -84,21 +81,21 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     setYearlyChangeDataPoints(
       calculateYearlyChangeDataPoints(updateDataPoints)
     );
-  }, [transactions, updates]);
+  }, [investmentUpdates]);
 
 
   const calculateUpdateDataPoints = () => {
-    if (transactions.length === 0) {
-      return []
-    }
-    const updateDataPoints = updates.map((update) => {
-      const cost = calculateCostForDate(
-        update.date,
-        transactions
-      );
+    const updateDataPoints = investmentUpdates.map((update) => {
+      const cost = calculateCostForDate(update.date, investmentUpdates);
       const value = update.value;
-      const returnValue = value - cost;
-      const roi = returnValue / cost;
+
+      let returnValue = 0;
+      let roi = 0;
+
+      if (value && cost) {
+        returnValue = value - cost;
+        roi = returnValue / cost;
+      }
 
       return {
         id: update.id,
@@ -122,13 +119,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
       .finally(() => setLoading(false));
     }
 
-  const fetchTransactions = () => {
-    api.get(`/transactions?investmentId=${params.id}`)
-      .then((res) => {
-        setTransactions(res.data)
-      });
-  }
-
   const fetchSettings = async () => {
     api.get(`/settings`).then((res) => {
       setSettings(res.data);
@@ -146,7 +136,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
           ...(dateFrom && { dateFrom: dateFrom }),
         },
       })
-      .then((res) => setUpdates(res.data));
+      .then((res) => setInvestmentUpdates(res.data));
   };
 
   const deleteInvestment = () => {
@@ -192,7 +182,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {investment.locked && <InvestmentIsLockedMessage />}
 
             <div className="mb-4">
-              Last update: {investment.lastUpdateDate ?? "n/a"}
+              Last update: {investment.lastUpdateDate ?? "Never"}
             </div>
 
             <div className="border bg-white py-[75px] text-center mb-4">
@@ -221,15 +211,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 onClick={() => router.push(`/investments/${params.id}/updates`)}
               >
                 Manage updates
-              </Button>
-              <Button
-                className="w-full lg:w-auto mb-4 mr-4"
-                variant="secondary"
-                onClick={() =>
-                  router.push(`/investments/${params.id}/transactions`)
-                }
-              >
-                Manage transactions
               </Button>
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"

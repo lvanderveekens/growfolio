@@ -27,7 +27,7 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
     formData.append('csvFile', csvFile);
 
     // Make a POST request using Axios
-    const response = await api.post(`/investments/${investmentId}/updates`, formData, {
+    const response = await api.post(`/investments/${investmentId}/updates/csv`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -43,11 +43,14 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
         <div className="mb-4">
           Provide a CSV that complies with the following format:
         </div>
-        <div className="p-4 text-white bg-black">
-          <div>Date,ValueInCents</div>
-          <div>2023-08-01,2000</div>
-          <div>2023-08-09,5000</div>
-          <div>2023-08-17,12000</div>
+        <div className="p-4 mb-4 text-white bg-black overflow-x-auto">
+          <div>Date,Deposit,Withdrawal,Value</div>
+          <div>2023-08-01,100,50,2000</div>
+          <div>2023-08-09,100,50,5000</div>
+          <div>2023-08-17,100,50,12000</div>
+        </div>
+        <div className="mb-4">
+          Notice that the amounts are in cents.
         </div>
       </div>
       <div className="mb-4">

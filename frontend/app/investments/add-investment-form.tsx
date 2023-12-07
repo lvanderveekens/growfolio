@@ -28,19 +28,20 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
   const [type, setType] = useState<InvestmentType>();
   const [name, setName] = useState<string>();
   const [initialDate, setInitialDate] = useState<Date>();
-  const [initialCost, setInitialCost] = useState<number>();
+  const [initialDeposit, setInitialDeposit] = useState<number>();
   const [initialValue, setInitialValue] = useState<number>();
 
   const [errors, setErrors] = useState({
     type: "",
     name: "",
+    initialValue: "",
   });
 
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = { type: "", name: ""};
+    const newErrors = { type: "", name: "", initialValue: ""};
 
     if (!type) {
       newErrors.type = "Type is required";
@@ -48,6 +49,11 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
     }
     if (!name || name.trim() === "") {
       newErrors.name = "Name is required";
+      valid = false;
+    }
+    console.log(initialValue)
+    if (!initialValue) {
+      newErrors.initialValue = "Initial value is required";
       valid = false;
     }
 
@@ -68,7 +74,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       type: type!,
       name: name!,
       initialDate: moment(initialDate).format("YYYY-MM-DD"),
-      initialCost: initialCost,
+      initialCost: initialDeposit,
       initialValue: initialValue,
     };
 
@@ -136,7 +142,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
         />
       </div>
       <div className="mb-4">
-        <label>Initial cost (optional)</label>
+        <label>Initial deposit (optional)</label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -144,7 +150,9 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           decimalsLimit={2}
           onValueChange={(value, name, values) => {
             if (values && values.float) {
-              setInitialCost(Math.round(values.float * 100));
+              setInitialDeposit(Math.round(values.float * 100));
+            } else {
+              setInitialValue(undefined);
             }
           }}
           groupSeparator={groupSeparatorsByCurrency[currency]}
@@ -152,7 +160,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
         />
       </div>
       <div className="mb-4">
-        <label>Initial value (optional)</label>
+        <label>Initial value</label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -161,11 +169,14 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
           onValueChange={(value, name, values) => {
             if (values && values.float) {
               setInitialValue(Math.round(values.float * 100));
+            } else {
+              setInitialValue(undefined);
             }
           }}
           groupSeparator={groupSeparatorsByCurrency[currency]}
           decimalSeparator={decimalSeparatorsByCurrency[currency]}
         />
+        <div className="text-red-500">{errors.initialValue}</div>
       </div>
       <div>
         <Button

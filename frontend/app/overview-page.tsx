@@ -102,7 +102,7 @@ export default function OverviewPage() {
         let returnValue = 0
         let roi = 0
 
-        if (lastUpdateForInvestment) {
+        if (value && cost) {
           returnValue = value - cost
           roi = returnValue / cost;
         }
@@ -385,7 +385,7 @@ export default function OverviewPage() {
         </div>
         <div className="flex justify-between">
           <div>Last update</div>
-          <div>{investmentRow.lastUpdateDate ?? "n/a"}</div>
+          <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
         </div>
       </div>
     );
@@ -400,24 +400,15 @@ export default function OverviewPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
 
-            <div className="mb-4">Last update: {lastUpdateDate ?? "n/a"}</div>
+            <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
             <div className="border py-[75px] bg-white text-center mb-4">
               <div className="font-bold text-3xl">
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    totalValue,
-                    settings.currency
-                  )}
+                {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
               </div>
               <div className={`${getAmountTextColor(totalReturn)}`}>
                 {formatAsROIPercentage(totalRoi)} (
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    totalReturn,
-                    settings.currency
-                  )}
-                )
+                {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)})
               </div>
             </div>
 
@@ -425,16 +416,10 @@ export default function OverviewPage() {
 
             {loading && (
               <div className="mb-4">
-                <ClipLoader
-                  size={28}
-                  aria-label="Loading Spinner"
-                  data-testid="loader"
-                />
+                <ClipLoader size={28} aria-label="Loading Spinner" data-testid="loader" />
               </div>
             )}
-            {!loading && investmentRows.length === 0 && (
-              <div className="mb-4">There are no investments yet.</div>
-            )}
+            {!loading && investmentRows.length === 0 && <div className="mb-4">There are no investments yet.</div>}
             {!loading && investmentRows.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                 {investmentRows.map((investmentRow) => {
@@ -472,25 +457,16 @@ export default function OverviewPage() {
               Add investment
             </Button>
             {showAddInvestmentModal && (
-              <Modal
-                title="Add investment"
-                onClose={() => setShowAddInvestmentModal(false)}
-              >
-                {user?.accountType === AccountType.BASIC &&
-                investments.length >= 2 ? (
+              <Modal title="Add investment" onClose={() => setShowAddInvestmentModal(false)}>
+                {user?.accountType === AccountType.BASIC && investments.length >= 2 ? (
                   <div>
                     <div>
-                      You've reached the limit of 2 investments for a Basic
-                      account. Upgrade to Premium to track unlimited
-                      investments.
+                      You've reached the limit of 2 investments for a Basic account. Upgrade to Premium to track
+                      unlimited investments.
                     </div>
                     {user && user.accountType == AccountType.BASIC && (
                       <div className="mt-4">
-                        <Button
-                          className="w-full sm:w-auto"
-                          variant="primary"
-                          onClick={createCheckoutSession}
-                        >
+                        <Button className="w-full sm:w-auto" variant="primary" onClick={createCheckoutSession}>
                           Upgrade to Premium
                         </Button>
                       </div>
@@ -505,9 +481,7 @@ export default function OverviewPage() {
 
           <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-          {updateDataPoints.length === 0 && (
-            <div>There are no data points yet.</div>
-          )}
+          {updateDataPoints.length === 0 && <div>There are no data points yet.</div>}
 
           {updateDataPoints.length > 0 && (
             <>
@@ -531,19 +505,13 @@ export default function OverviewPage() {
                 <div className="aspect-square">
                   <h3 className="font-bold mb-4">Allocation</h3>
                   <div className="w-full h-full">
-                    <Pie
-                      options={allocationPieOptions}
-                      data={calculateAllocationPieData(investments)}
-                    />
+                    <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
                   </div>
                 </div>
                 <div className="aspect-square">
                   <h3 className="font-bold mb-4">Allocation by type</h3>
                   <div className="w-full h-full">
-                    <Pie
-                      options={allocationPieOptions}
-                      data={calculateAllocationByTypePieData(investments)}
-                    />
+                    <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
                   </div>
                 </div>
 
@@ -563,10 +531,7 @@ export default function OverviewPage() {
                   <h3 className="font-bold mb-4">ROI</h3>
 
                   <div className="w-full h-full">
-                    <Line
-                      options={roiLineOptions}
-                      data={buildROILineData(updateDataPoints)}
-                    />
+                    <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
                   </div>
                 </div>
                 <div className="aspect-square">
@@ -587,9 +552,7 @@ export default function OverviewPage() {
                     {settings && (
                       <Bar
                         options={monthlyChangeBarOptions(settings.currency)}
-                        data={buildMonthlyChangeBarData(
-                          monthlyChangeDataPoints
-                        )}
+                        data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
                       />
                     )}
                   </div>

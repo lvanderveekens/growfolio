@@ -3,8 +3,6 @@ import { InvestmentUpdate } from "./overview-page";
 export const calculateCost = (
   investmentUpdates: InvestmentUpdate[]
 ) => {
-  console.log("calculateCost")
-  console.log(investmentUpdates);
   let sum = 0;
   for (const investmentUpdate of investmentUpdates) {
     if (investmentUpdate.deposit) {

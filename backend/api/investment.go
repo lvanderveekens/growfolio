@@ -267,7 +267,7 @@ type CreateInvestmentRequest struct {
 	Name         string                `json:"name"`
 	InitialDate  *string               `json:"initialDate"`
 	InitialCost  *int64                `json:"initialCost"`
-	InitialValue *int64                `json:"initialValue"`
+	InitialValue int64                 `json:"initialValue"`
 }
 
 func (r CreateInvestmentRequest) validate() error {

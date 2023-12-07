@@ -24,7 +24,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   const [loadingUpdates, setLoadingUpdates] = useState<boolean>(true)
   const [loadingUpdatesError, setLoadingUpdatesError] = useState<string>();
 
-  const [updates, setUpdates] = useState<InvestmentUpdate[]>([])
+  const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([])
 
   const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
   const [showImportUpdatesModal, setShowImportUpdatesModal] = useState<boolean>(false);
@@ -36,7 +36,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
   useEffect(() => {
     fetchInvestment()
-    fetchUpdates()
+    fetchInvestmentUpdates()
     fetchSettings()
   }, []);
 
@@ -56,14 +56,21 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
       .finally(() => setLoadingInvestment(false));
     }
 
-  const fetchUpdates = () => {
-    api.get(`/investment-updates?investmentId=${params.id}`)
-      .then((res) => setUpdates(res.data))
+  const fetchInvestmentUpdates = () => {
+    api
+      .get(`/investment-updates?investmentId=${params.id}`)
+      .then((res) => {
+        const updates = res.data as InvestmentUpdate[]
+        updates.sort((a, b) => (new Date(b.date).getTime()) - (new Date(a.date).getTime()));
+        setInvestmentUpdates(updates);
+      })
       .catch((error) => {
         console.error(`Error fetching updates: ${error}`);
-        setLoadingUpdatesError(error)
+        setLoadingUpdatesError(error);
       })
-      .finally(() => setLoadingUpdates(false));
+      .finally(() => {
+        setLoadingUpdates(false);
+      });
   }
 
   const deleteUpdate = (id: string) => {
@@ -71,7 +78,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
       .delete(`/investment-updates/${id}`)
       .then((res) => {
         if (res.status == 204) {
-          fetchUpdates();
+          fetchInvestmentUpdates();
           closeDeleteUpdateModal();
         }
       })
@@ -123,22 +130,38 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         {investment.locked && <InvestmentIsLockedMessage />}
 
-        {updates.length === 0 && <div className="mb-4">No updates found.</div>}
-        {updates.length > 0 && (
+        {investmentUpdates.length === 0 && <div className="mb-4">No updates found.</div>}
+        {investmentUpdates.length > 0 && (
           <div className="overflow-x-auto mb-4">
             <table>
               <thead>
                 <tr>
                   <th>Date</th>
+                  <th>Deposit</th>
+                  <th>Withdrawal</th>
                   <th>Value</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {updates.map((update) => {
+                {investmentUpdates.map((update) => {
                   return (
                     <tr key={update.id}>
                       <td>{update.date}</td>
+                      <td>
+                        {settings &&
+                          formatAmountInCentsAsCurrencyString(
+                            update.deposit,
+                            settings.currency
+                          )}
+                      </td>
+                      <td>
+                        {settings &&
+                          formatAmountInCentsAsCurrencyString(
+                            update.withdrawal,
+                            settings.currency
+                          )}
+                      </td>
                       <td>
                         {settings &&
                           formatAmountInCentsAsCurrencyString(
@@ -200,7 +223,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               <AddUpdateForm
                 onAdd={() => {
                   setShowUpdateInvestmentModal(false);
-                  fetchUpdates();
+                  fetchInvestmentUpdates();
                 }}
                 investmentId={params.id}
                 currency={settings.currency}
@@ -224,7 +247,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               <ImportUpdatesForm
                 onImport={() => {
                   setShowImportUpdatesModal(false);
-                  fetchUpdates();
+                  fetchInvestmentUpdates();
                 }}
                 investmentId={params.id}
               />
