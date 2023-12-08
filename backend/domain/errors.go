@@ -1,6 +1,6 @@
 package domain
 
-import "errors"
+import "github.com/pkg/errors"
 
 var ErrInvestmentNotFound = errors.New("investment not found")
 

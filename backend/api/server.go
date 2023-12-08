@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -63,7 +64,7 @@ func createHandlerFunc[T any](f func(c *gin.Context) (response[T], error)) gin.H
 	return func(c *gin.Context) {
 		response, err := f(c)
 		if err != nil {
-			fmt.Printf("error: %s\n", err.Error())
+			slog.Error(fmt.Sprintf("%+v", err))
 
 			if err, ok := err.(Error); ok {
 				c.JSON(err.Status, err)

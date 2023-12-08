@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"growfolio/domain"
 	"growfolio/domain/services"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/pkg/errors"
 )
 
 type InvestmentHandler struct {
@@ -39,7 +39,7 @@ func (h InvestmentHandler) GetInvestments(c *gin.Context) (response[[]investment
 
 	investments, err := h.investmentService.FindByUserID(tokenUserID)
 	if err != nil {
-		return response[[]investmentDto]{}, fmt.Errorf("failed to find investments: %w", err)
+		return response[[]investmentDto]{}, errors.Wrap(err, "failed to find investments")
 	}
 
 	dtos := make([]investmentDto, 0)

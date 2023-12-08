@@ -2,10 +2,11 @@ package postgres
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"growfolio/domain"
 	"time"
+
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
