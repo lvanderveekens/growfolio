@@ -23,7 +23,7 @@ export default function CheckoutSuccessPage() {
           page.
         </div>
         <button className="w-full lg:w-auto mb-2 border px-3 py-2 mr-4">
-          <Link href="/">Go to Overview</Link>
+          <Link href="/">Go to Portfolio</Link>
         </button>
       </div>
     </AppLayout>

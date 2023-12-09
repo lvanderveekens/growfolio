@@ -6,7 +6,7 @@ import { Button } from "@/app/button";
 import Dropdown from "@/app/dropdown";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
-import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/overview-page";
+import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/portfolio-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
 import {
@@ -30,6 +30,7 @@ import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { FaChevronLeft } from "react-icons/fa6";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
+import { labelsByInvestmentType } from "@/app/investment-type";
 
 ChartJS.register(
   ArcElement,
@@ -165,41 +166,32 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
         {error && <p>Error: ${error}</p>}
         {investment && (
           <>
-            <Link className="mb-4 inline-block" href="/">
+            <Link className="mb-4 inline-block hover:underline underline-offset-4" href="/">
               <div className="flex items-center">
                 <FaChevronLeft className="inline" />
-                Back to Overview
+                Back to Portfolio
               </div>
             </Link>
 
             <div className="mb-4">
-              <h1 className="text-3xl sm:text-3xl font-bold">
-                {investment.name}
-              </h1>
+              <h1 className="text-3xl sm:text-3xl font-bold">{investment.name}</h1>
             </div>
 
             {investment.locked && <InvestmentIsLockedMessage />}
 
             <div className="mb-4">
-              Last update: {investment.lastUpdateDate ?? "Never"}
+              <div className="">Type: {labelsByInvestmentType[investment.type]}</div>
+              <div className="">Last update: {investment.lastUpdateDate ?? "Never"}</div>
             </div>
 
             <div className="border bg-white py-[75px] text-center mb-4">
-              <div className="font-bold text-3xl">
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    lastUpdate?.value ?? 0,
-                    settings.currency
-                  )}
+              <div className="font-bold">Value</div>
+              <div className="font-bold text-4xl">
+                {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
               </div>
               <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)}`}>
-                {formatAsROIPercentage(lastUpdate?.roi ?? 0)} (
-                {settings &&
-                  formatAmountInCentsAsCurrencyString(
-                    lastUpdate?.return ?? 0,
-                    settings.currency
-                  )}
-                )
+                {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
+                {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
               </div>
             </div>
 
@@ -219,10 +211,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 Delete investment
               </Button>
               {showDeleteInvestmentModal && (
-                <Modal
-                  title="Delete investment"
-                  onClose={() => setShowDeleteInvestmentModal(false)}
-                >
+                <Modal title="Delete investment" onClose={() => setShowDeleteInvestmentModal(false)}>
                   Are you sure?
                   <div className="mt-4 flex gap-4 justify-between lg:justify-end">
                     <Button
@@ -232,11 +221,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     >
                       Cancel
                     </Button>
-                    <Button
-                      className="w-full lg:w-auto"
-                      variant="danger"
-                      onClick={deleteInvestment}
-                    >
+                    <Button className="w-full lg:w-auto" variant="danger" onClick={deleteInvestment}>
                       Delete
                     </Button>
                   </div>
@@ -246,9 +231,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-            {updateDataPoints.length === 0 && (
-              <div>There are no data points yet.</div>
-            )}
+            {updateDataPoints.length === 0 && <div>There are no data points yet.</div>}
 
             {updateDataPoints.length > 0 && (
               <>
@@ -269,15 +252,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 </div>
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">
-                      Cost vs value
-                    </h1>
+                    <h1 className="text-xl font-bold mb-4">Cost vs value</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Line
-                          options={costVsValueLineOptions(
-                            settings.currency
-                          )}
+                          options={costVsValueLineOptions(settings.currency)}
                           data={buildCostVsValueLineData(updateDataPoints)}
                         />
                       )}
@@ -299,10 +278,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   <div className="aspect-square">
                     <h1 className="text-xl font-bold mb-4">ROI</h1>
                     <div className="w-full h-full">
-                      <Line
-                        options={roiLineOptions}
-                        data={buildROILineData(updateDataPoints)}
-                      />
+                      <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
                     </div>
                   </div>
 
@@ -312,9 +288,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       {settings && (
                         <Bar
                           options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyChangeBarData(
-                            monthlyChangeDataPoints
-                          )}
+                          data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
                         />
                       )}
                     </div>
@@ -326,9 +300,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       {settings && (
                         <Bar
                           options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyChangeBarData(
-                            yearlyChangeDataPoints
-                          )}
+                          data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
                         />
                       )}
                     </div>

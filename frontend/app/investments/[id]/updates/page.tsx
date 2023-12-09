@@ -3,7 +3,7 @@
 import AppLayout from "@/app/app-layout";
 import { api } from "@/app/axios";
 import Modal from "@/app/modal";
-import { Investment, InvestmentUpdate } from "@/app/overview-page";
+import { Investment, InvestmentUpdate } from "@/app/portfolio-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountInCentsAsCurrencyString } from "@/app/string";
 import "chartjs-adapter-moment";
@@ -114,7 +114,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
   return (
     <AppLayout>
       <div className="container my-4">
-        <Link className="mb-4 inline-block" href={`/investments/${investment.id}`}>
+        <Link className="mb-4 inline-block hover:underline underline-offset-4" href={`/investments/${investment.id}`}>
           <div className="flex items-center">
             <FaChevronLeft className="inline" />
             Back to {investment.name}

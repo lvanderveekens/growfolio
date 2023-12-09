@@ -9,7 +9,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { TbLogout } from 'react-icons/tb';
 import { api } from "../axios";
 import { FeedbackButton } from "../feedback/feedback-button";
-import { User } from "../overview-page";
+import { User } from "../portfolio-page";
 import { Button } from "../button";
 
 interface AppNavbarProps {
@@ -85,7 +85,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
           <div className="flex gap-8 h-full items-center">
             <div className="hover:text-black">
               <Link href="/">
-                <div className="flex items-center">Overview</div>
+                <div className="flex items-center">Portfolio</div>
               </Link>
             </div>
             <div className="hover:text-black">
@@ -125,7 +125,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               <div className="font-normal">{user.email}</div>
             )}
             <Link className="hover:text-black" href="/">
-              <div className="flex items-center">Overview</div>
+              <div className="flex items-center">Portfolio</div>
             </Link>
             <Link className="hover:text-black" href="/profile">
               <div className="flex items-center">Profile</div>

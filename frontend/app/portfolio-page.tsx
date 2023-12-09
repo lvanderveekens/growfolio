@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InvestmentType } from "./investment-type";
+import { InvestmentType, labelsByInvestmentType } from "./investment-type";
 import AddInvestmentForm from "./investments/add-investment-form";
 
 import {
@@ -51,7 +51,7 @@ ChartJS.register(
   Legend
 );
 
-export default function OverviewPage() {
+export default function PortfolioPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
@@ -361,26 +361,16 @@ export default function OverviewPage() {
       <div className="">
         <div className="font-bold flex justify-between">
           <div>{investmentRow.name}</div>
-          <div>
-            {formatAmountInCentsAsCurrencyString(
-              investmentRow.value,
-              settings.currency
-            )}
-          </div>
+          <div>{formatAmountInCentsAsCurrencyString(investmentRow.value, settings.currency)}</div>
         </div>
         <div className="flex justify-between">
-          <div>ROI</div>
-          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)}`}>
-            {formatAsROIPercentage(investmentRow.roi)}
-          </div>
+          <div>Type</div>
+          <div>{labelsByInvestmentType[investmentRow.type]}</div>
         </div>
         <div className="flex justify-between">
           <div>Return</div>
           <div className={`${getAmountTextColor(investmentRow.roi ?? 0)}`}>
-            {formatAmountInCentsAsCurrencyString(
-              investmentRow.return,
-              settings.currency
-            )}
+            {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} ({formatAsROIPercentage(investmentRow.roi)})
           </div>
         </div>
         <div className="flex justify-between">
@@ -398,21 +388,23 @@ export default function OverviewPage() {
       <main>
         <div className="container my-4">
           <div className="mb-4">
-            <h1 className="text-3xl sm:text-3xl font-bold mb-4">Overview</h1>
+            <h1 className="text-3xl sm:text-3xl font-bold mb-4">Portfolio</h1>
 
             <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
             <div className="border py-[75px] bg-white text-center mb-4">
-              <div className="font-bold text-3xl">
+              <div className="font-bold">
+                Value
+              </div>
+              <div className="font-bold text-4xl">
                 {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
               </div>
               <div className={`${getAmountTextColor(totalReturn)}`}>
-                {formatAsROIPercentage(totalRoi)} (
-                {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)})
+                {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} ({formatAsROIPercentage(totalRoi)})
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold mb-4">Investments</h2>
+            <h2 className="text-2xl font-bold mb-4">My investments</h2>
 
             {loading && (
               <div className="mb-4">
@@ -425,7 +417,7 @@ export default function OverviewPage() {
                 {investmentRows.map((investmentRow) => {
                   return (
                     <Link
-                      className="bg-white border hover:border-black p-4"
+                      className="bg-white border hover:bg-gray-100 p-4"
                       key={investmentRow.id}
                       href={`/investments/${investmentRow.id}`}
                     >

@@ -4,7 +4,7 @@ import { api } from "@/app/axios";
 import "chartjs-adapter-moment";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
-import { AccountType, User, getAccountTypeLabel } from "../overview-page";
+import { AccountType, User, getAccountTypeLabel } from "../portfolio-page";
 import { createCheckoutSession, createPortalSession } from "../stripe/client";
 import AppLayout from "../app-layout";
 import { Button } from "../button";

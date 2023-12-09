@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import "chartjs-adapter-moment";
-import OverviewPage, { User } from "./overview-page";
+import PortfolioPage, { User } from "./portfolio-page";
 import axios from "axios";
 import LandingPage from "./landing-page";
 
@@ -31,7 +31,7 @@ export default function Home() {
   }
 
   if (user) {
-    return <OverviewPage />
+    return <PortfolioPage />
   } else {
     return <LandingPage />
   }

@@ -1,4 +1,4 @@
-import { InvestmentUpdate } from "./overview-page";
+import { InvestmentUpdate } from "./portfolio-page";
 
 export const calculateValueForDate = (
   date: string,

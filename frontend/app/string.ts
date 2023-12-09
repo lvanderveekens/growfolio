@@ -50,11 +50,7 @@ export function formatAsROIPercentage(number?: number) {
     maximumFractionDigits: 2,
   });
 
-  if (number > 0) {
-    return `+${percentageString}`;
-  } else {
-    return percentageString;
-  }
+  return percentageString
 }
 
 export function capitalize(input: string): string {
