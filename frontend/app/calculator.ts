@@ -9,7 +9,7 @@ export const calculateCost = (
       sum += investmentUpdate.deposit;
     }
     if (investmentUpdate.withdrawal) {
-      sum -= investmentUpdate.deposit;
+      sum -= investmentUpdate.withdrawal;
     }
   }
   return Math.max(0, sum);
