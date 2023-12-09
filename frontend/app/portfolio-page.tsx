@@ -35,6 +35,7 @@ import Modal from "./modal";
 import { Settings } from "./settings/settings";
 import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
 import { createCheckoutSession } from "./stripe/client";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa6";
 
 
 ChartJS.register(
@@ -210,15 +211,14 @@ export default function PortfolioPage() {
     };
   };
 
-  const buildCostVsValueLineDataCopy = (
+  const valueLineData = (
     updateDataPoints: UpdateDataPoint[]
   ) => {
     return {
       datasets: [
         {
           label: "Value",
-          borderColor: "black",
-          backgroundColor: "black",
+          borderColor: "#e5e7eb", // same color as default tailwind 'border' class
           pointStyle: false,
           data: updateDataPoints.map((x) => ({
             x: x.date,
@@ -388,8 +388,11 @@ export default function PortfolioPage() {
         </div>
         <div className="flex justify-between">
           <div>Return</div>
-          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)}`}>
-            {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} ({formatAsROIPercentage(investmentRow.roi)})
+          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
+            {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
+            {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
+            {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
+            {formatAsROIPercentage(investmentRow.roi)})
           </div>
         </div>
         <div className="flex justify-between">
@@ -412,23 +415,22 @@ export default function PortfolioPage() {
             <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
             <div className="relative border bg-white text-center mb-4">
-              <div className="absolute w-full h-full opacity-10">
-                {settings && (
-                  <Line
-                    options={costVsValueLineOptionsCopy(settings.currency)}
-                    data={buildCostVsValueLineDataCopy(updateDataPoints)}
-                  />
-                )}
-              </div>
-              <div className="py-[75px]">
+              <div className="z-10 relative py-[75px]">
                 <div className="font-bold">Value</div>
                 <div className="font-bold text-4xl">
                   {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
                 </div>
-                <div className={`${getAmountTextColor(totalReturn)}`}>
+                <div className={`${getAmountTextColor(totalReturn)} flex justify-center items-center`}>
+                  {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
+                  {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
                   {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
                   {formatAsROIPercentage(totalRoi)})
                 </div>
+              </div>
+              <div className="absolute left-0 top-0 w-full h-full ">
+                {settings && (
+                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                )}
               </div>
             </div>
 
@@ -639,7 +641,7 @@ export const costVsValueLineOptions = (currency: string) => ({
   },
 });
 
-export const costVsValueLineOptionsCopy = (currency: string) => ({
+export const valueLineOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
     mode: "index",

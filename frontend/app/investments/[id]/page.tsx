@@ -28,7 +28,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
-import { FaChevronLeft } from "react-icons/fa6";
+import { FaCaretDown, FaCaretUp, FaChevronLeft } from "react-icons/fa6";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
 import { labelsByInvestmentType } from "@/app/investment-type";
 
@@ -189,7 +189,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <div className="font-bold text-4xl">
                 {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
               </div>
-              <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)}`}>
+              <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} flex items-center justify-center`}>
+                {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
+                {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
                 {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
                 {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
               </div>
