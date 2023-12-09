@@ -35,30 +35,31 @@ func (s InvestmentUpdateService) Find(query domain.FindInvestmentUpdateQuery) ([
 		return []domain.InvestmentUpdate{}, fmt.Errorf("failed to find updates: %w", err)
 	}
 
-	// TODO: do not add fake update...?
-	// if query.DateFrom != nil {
-	// 	for _, investmentID := range query.InvestmentIDs {
-	// 		lastUpdate, err := s.investmentUpdateRepository.FindLastByInvestmentIDAndDateLessThanEqual(
-	// 			investmentID,
-	// 			*query.DateFrom,
-	// 		)
-	// 		if err != nil {
-	// 			if err != domain.ErrInvestmentUpdateNotFound {
-	// 				return []domain.InvestmentUpdate{}, fmt.Errorf("failed to find last update: %w", err)
-	// 			}
-	// 		}
-	// 		if err != domain.ErrInvestmentUpdateNotFound {
-	// 			updates = append(updates, domain.NewInvestmentUpdate(
-	// 				lastUpdate.ID,
-	// 				lastUpdate.InvestmentID,
-	// 				*query.DateFrom,
-	// 				nil,
-	// 				nil,
-	// 				lastUpdate.Value,
-	// 			))
-	// 		}
-	// 	}
-	// }
+	if query.DateFrom != nil {
+		for _, investmentID := range query.InvestmentIDs {
+			lastUpdate, err := s.investmentUpdateRepository.FindLastByInvestmentIDAndDateLessThanEqual(
+				investmentID,
+				*query.DateFrom,
+			)
+			if err != nil {
+				if err != domain.ErrInvestmentUpdateNotFound {
+					return []domain.InvestmentUpdate{}, fmt.Errorf("failed to find last update: %w", err)
+				}
+			}
+			if err != domain.ErrInvestmentUpdateNotFound {
+				// add fake update
+				updates = append(updates, domain.NewInvestmentUpdate(
+					lastUpdate.ID,
+					lastUpdate.InvestmentID,
+					*query.DateFrom,
+					nil,
+					nil,
+					lastUpdate.Cost,
+					lastUpdate.Value,
+				))
+			}
+		}
+	}
 
 	sort.Slice(updates, func(a, b int) bool { return updates[a].Date.Before(updates[b].Date) })
 
