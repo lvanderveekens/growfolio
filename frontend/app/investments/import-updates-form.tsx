@@ -45,9 +45,9 @@ const ImportUpdatesForm: React.FC<ImportUpdatesFormProps> = ({
         </div>
         <div className="p-4 mb-4 text-white bg-black overflow-x-auto">
           <div>Date,Deposit,Withdrawal,Value</div>
-          <div>2023-08-01,100,50,2000</div>
-          <div>2023-08-09,100,50,5000</div>
-          <div>2023-08-17,100,50,12000</div>
+          <div>2023-08-01,100,,100</div>
+          <div>2023-09-01,50,,200</div>
+          <div>2023-10-01,,,210</div>
         </div>
         <div className="mb-4">
           Notice that the amounts are in cents.

@@ -125,56 +125,55 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         {investment.locked && <InvestmentIsLockedMessage />}
 
-        {investmentUpdates.length === 0 && <div className="mb-4">No updates found.</div>}
-        {investmentUpdates.length > 0 && (
-          <div className="overflow-x-auto bg-white">
-            <div className="border border-b-0 p-4 flex gap-4 justify-end">
-              <Button
-                className="w-full lg:w-auto "
-                variant="primary"
-                type="submit"
-                onClick={() => setShowUpdateInvestmentModal(true)}
-                disabled={investment.locked}
-              >
-                Add update
-              </Button>
-              {showUpdateInvestmentModal && settings && (
-                <Modal title="Add update" onClose={() => setShowUpdateInvestmentModal(false)}>
-                  <AddUpdateForm
-                    onAdd={() => {
-                      setShowUpdateInvestmentModal(false);
-                      fetchInvestmentUpdates();
-                    }}
-                    investmentId={params.id}
-                    currency={settings.currency}
-                  />
-                </Modal>
-              )}
-              <Button
-                className="w-full lg:w-auto "
-                variant="primary"
-                type="submit"
-                onClick={() => setShowImportUpdatesModal(true)}
-                disabled={investment.locked}
-              >
-                Import updates
-              </Button>
-              {showImportUpdatesModal && (
-                <Modal title="Import updates" onClose={() => setShowImportUpdatesModal(false)}>
-                  <ImportUpdatesForm
-                    onImport={() => {
-                      setShowImportUpdatesModal(false);
-                      fetchInvestmentUpdates();
-                    }}
-                    investmentId={params.id}
-                  />
-                </Modal>
-              )}
-            </div>
+        <div className="bg-white overflow-x-auto">
+          <div className="border border-b-0 p-4 lg:flex lg:gap-4 lg:justify-end">
+            <Button
+              className="w-full lg:w-auto mb-4 lg:mb-0"
+              variant="primary"
+              type="submit"
+              onClick={() => setShowUpdateInvestmentModal(true)}
+              disabled={investment.locked}
+            >
+              Add update
+            </Button>
+            {showUpdateInvestmentModal && settings && (
+              <Modal title="Add update" onClose={() => setShowUpdateInvestmentModal(false)}>
+                <AddUpdateForm
+                  onAdd={() => {
+                    setShowUpdateInvestmentModal(false);
+                    fetchInvestmentUpdates();
+                  }}
+                  investmentId={params.id}
+                  currency={settings.currency}
+                />
+              </Modal>
+            )}
+            <Button
+              className="w-full lg:w-auto "
+              variant="primary"
+              type="submit"
+              onClick={() => setShowImportUpdatesModal(true)}
+              disabled={investment.locked}
+            >
+              Import updates
+            </Button>
+            {showImportUpdatesModal && (
+              <Modal title="Import updates" onClose={() => setShowImportUpdatesModal(false)}>
+                <ImportUpdatesForm
+                  onImport={() => {
+                    setShowImportUpdatesModal(false);
+                    fetchInvestmentUpdates();
+                  }}
+                  investmentId={params.id}
+                />
+              </Modal>
+            )}
+          </div>
 
-            <table>
+          <div className="border-x w-full overflow-x-auto">
+            <table className="border-collapse">
               <thead>
-                <tr className="bg-gray-100">
+                <tr className="">
                   <th>Date</th>
                   <th>Deposit</th>
                   <th>Withdrawal</th>
@@ -185,7 +184,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               <tbody>
                 {investmentUpdates.map((update, index) => {
                   return (
-                    <tr key={update.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+                    <tr key={update.id} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
                       <td>{update.date}</td>
                       <td>{settings && formatAmountInCentsAsCurrencyString(update.deposit, settings.currency)}</td>
                       <td>{settings && formatAmountInCentsAsCurrencyString(update.withdrawal, settings.currency)}</td>
@@ -202,21 +201,29 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                 })}
               </tbody>
             </table>
-            {showDeleteUpdateModal && selectedUpdate && (
-              <Modal title="Delete update" onClose={closeDeleteUpdateModal}>
-                Are you sure?
-                <div className="mt-4 flex gap-4 justify-between lg:justify-end">
-                  <Button className="w-full lg:w-auto" variant="secondary" onClick={closeDeleteUpdateModal}>
-                    Cancel
-                  </Button>
-                  <Button className="w-full lg:w-auto" variant="danger" onClick={() => deleteUpdate(selectedUpdate.id)}>
-                    Delete
-                  </Button>
-                </div>
-              </Modal>
-            )}
           </div>
-        )}
+          {investmentUpdates.length === 0 && (
+            <div className="border border-t-0 p-4 flex justify-center items-center h-[300px]">
+              <div className="text-center">
+                <div className="text-2xl font-bold mb-4">No updates added yet</div>
+                <div>Click 'Add update' on top to get started.</div>
+              </div>
+            </div>
+          )}
+          {showDeleteUpdateModal && selectedUpdate && (
+            <Modal title="Delete update" onClose={closeDeleteUpdateModal}>
+              Are you sure?
+              <div className="mt-4 flex gap-4 justify-between lg:justify-end">
+                <Button className="w-full lg:w-auto" variant="secondary" onClick={closeDeleteUpdateModal}>
+                  Cancel
+                </Button>
+                <Button className="w-full lg:w-auto" variant="danger" onClick={() => deleteUpdate(selectedUpdate.id)}>
+                  Delete
+                </Button>
+              </div>
+            </Modal>
+          )}
+        </div>
       </div>
     </AppLayout>
   );

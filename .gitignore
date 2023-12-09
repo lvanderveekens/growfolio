@@ -24,6 +24,6 @@ main
 growfolio-backend
 
 .env
-.env.prd
+.env.*
 
 .DS_Store
