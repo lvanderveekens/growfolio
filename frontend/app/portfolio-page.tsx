@@ -210,6 +210,25 @@ export default function PortfolioPage() {
     };
   };
 
+  const buildCostVsValueLineDataCopy = (
+    updateDataPoints: UpdateDataPoint[]
+  ) => {
+    return {
+      datasets: [
+        {
+          label: "Value",
+          borderColor: "black",
+          backgroundColor: "black",
+          pointStyle: false,
+          data: updateDataPoints.map((x) => ({
+            x: x.date,
+            y: x.value / 100,
+          })),
+        },
+      ],
+    };
+  };
+
   const buildReturnLineData = (
     dateWithCostAndValue: UpdateDataPoint[]
   ) => {
@@ -392,15 +411,24 @@ export default function PortfolioPage() {
 
             <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
-            <div className="border py-[75px] bg-white text-center mb-4">
-              <div className="font-bold">
-                Value
+            <div className="relative border bg-white text-center mb-4">
+              <div className="absolute w-full h-full opacity-10">
+                {settings && (
+                  <Line
+                    options={costVsValueLineOptionsCopy(settings.currency)}
+                    data={buildCostVsValueLineDataCopy(updateDataPoints)}
+                  />
+                )}
               </div>
-              <div className="font-bold text-4xl">
-                {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
-              </div>
-              <div className={`${getAmountTextColor(totalReturn)}`}>
-                {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} ({formatAsROIPercentage(totalRoi)})
+              <div className="py-[75px]">
+                <div className="font-bold">Value</div>
+                <div className="font-bold text-4xl">
+                  {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
+                </div>
+                <div className={`${getAmountTextColor(totalReturn)}`}>
+                  {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
+                  {formatAsROIPercentage(totalRoi)})
+                </div>
               </div>
             </div>
 
@@ -609,6 +637,33 @@ export const costVsValueLineOptions = (currency: string) => ({
       },
     },
   },
+});
+
+export const costVsValueLineOptionsCopy = (currency: string) => ({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      enabled: false
+    }
+  },
+  scales: {
+    y: {
+      display: false
+    },
+    y2: {
+      display: false
+    },
+    x: {
+      display: false
+    }
+  }
 });
 
 export const returnLineOptions = (currency: string) => ({
