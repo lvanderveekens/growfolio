@@ -109,7 +109,7 @@ func (h InvestmentUpdateHandler) DeleteInvestmentUpdate(c *gin.Context) (respons
 }
 
 func toInvestmentUpdateDto(u domain.InvestmentUpdate) investmentUpdateDto {
-	return newInvestmentUpdateDto(u.ID, u.Date.Format("2006-01-02"), u.InvestmentID, u.Deposit, u.Withdrawal, u.Value)
+	return newInvestmentUpdateDto(u.ID, u.Date.Format("2006-01-02"), u.InvestmentID, u.Deposit, u.Withdrawal, u.Cost, u.Value)
 }
 
 type investmentUpdateDto struct {
@@ -118,16 +118,18 @@ type investmentUpdateDto struct {
 	Date         string `json:"date"`
 	Deposit      *int64 `json:"deposit"`
 	Withdrawal   *int64 `json:"withdrawal"`
+	Cost         int64  `json:"cost"`
 	Value        int64  `json:"value"`
 }
 
-func newInvestmentUpdateDto(id, date, investmentId string, deposit, withdrawal *int64, value int64) investmentUpdateDto {
+func newInvestmentUpdateDto(id, date, investmentId string, deposit, withdrawal *int64, cost, value int64) investmentUpdateDto {
 	return investmentUpdateDto{
 		ID:           id,
 		InvestmentID: investmentId,
 		Date:         date,
 		Deposit:      deposit,
 		Withdrawal:   withdrawal,
+		Cost:         cost,
 		Value:        value,
 	}
 }

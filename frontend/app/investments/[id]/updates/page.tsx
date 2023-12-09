@@ -177,6 +177,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                   <th>Date</th>
                   <th>Deposit</th>
                   <th>Withdrawal</th>
+                  <th>Cost</th>
                   <th>Value</th>
                   <th>Actions</th>
                 </tr>
@@ -188,6 +189,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                       <td>{update.date}</td>
                       <td>{settings && formatAmountInCentsAsCurrencyString(update.deposit, settings.currency)}</td>
                       <td>{settings && formatAmountInCentsAsCurrencyString(update.withdrawal, settings.currency)}</td>
+                      <td>{settings && formatAmountInCentsAsCurrencyString(update.cost, settings.currency)}</td>
                       <td>{settings && formatAmountInCentsAsCurrencyString(update.value, settings.currency)}</td>
                       <td>
                         <FaRegTrashCan

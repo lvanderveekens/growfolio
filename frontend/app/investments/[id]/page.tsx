@@ -3,7 +3,6 @@
 import AppLayout from "@/app/app-layout";
 import { api } from "@/app/axios";
 import { Button } from "@/app/button";
-import { calculateCostForDate } from "@/app/calculator";
 import Dropdown from "@/app/dropdown";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
@@ -86,7 +85,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const calculateUpdateDataPoints = () => {
     const updateDataPoints = investmentUpdates.map((update) => {
-      const cost = calculateCostForDate(update.date, investmentUpdates);
+      const cost = update.cost
       const value = update.value;
 
       let returnValue = 0;

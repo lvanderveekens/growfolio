@@ -27,7 +27,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import AppLayout from "./app-layout";
 import { api } from "./axios";
 import { Button } from "./button";
-import { calculateCost, calculateCostForDate, calculateValueForDate } from "./calculator";
+import { calculateCostForDate, calculateValueForDate } from "./calculator";
 import Dropdown from "./dropdown";
 import { buildMonthlyChangeBarData, buildYearlyChangeBarData, monthlyChangeBarOptions, yearlyChangeBarOptions } from "./investments/[id]/page";
 import { useLocalStorage } from "./localstorage";
@@ -97,7 +97,7 @@ export default function OverviewPage() {
         }
 
         const value = lastUpdateForInvestment?.value ?? 0;
-        const cost = calculateCost(investmentUpdatesForInvestment);
+        const cost = lastUpdateForInvestment?.cost ?? 0;
 
         let returnValue = 0
         let roi = 0
@@ -141,7 +141,7 @@ export default function OverviewPage() {
         cost: cost,
         return: returnValue,
         roi: roi,
-      };
+      } as UpdateDataPoint;
     });
   }
 
@@ -736,8 +736,9 @@ export interface InvestmentUpdate {
   id: string;
   investmentId: string;
   date: string;
-  deposit: number;
-  withdrawal: number;
+  deposit?: number;
+  withdrawal?: number;
+  cost: number;
   value: number;
 }
 
