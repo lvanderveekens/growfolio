@@ -193,6 +193,7 @@ export default function PortfolioPage() {
           label: "Cost",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
+          tension: 0.4,
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.cost / 100,
@@ -202,24 +203,7 @@ export default function PortfolioPage() {
           label: "Value",
           borderColor: chartBackgroundColors[1],
           backgroundColor: chartBackgroundColors[1],
-          data: updateDataPoints.map((x) => ({
-            x: x.date,
-            y: x.value / 100,
-          })),
-        },
-      ],
-    };
-  };
-
-  const valueLineData = (
-    updateDataPoints: UpdateDataPoint[]
-  ) => {
-    return {
-      datasets: [
-        {
-          label: "Value",
-          borderColor: "#e5e7eb", // same color as default tailwind 'border' class
-          pointStyle: false,
+          tension: 0.4,
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.value / 100,
@@ -238,6 +222,7 @@ export default function PortfolioPage() {
           label: "Return",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
+          tension: 0.4,
           data: dateWithCostAndValue.map((x) => ({
             x: x.date,
             y: (x.value - x.cost) / 100,
@@ -256,6 +241,7 @@ export default function PortfolioPage() {
           label: "ROI",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
+          tension: 0.4,
           data: updateDataPoints.map((x) => {
             return {
               x: x.date,
@@ -377,27 +363,49 @@ export default function PortfolioPage() {
     }
 
     return (
-      <div className="">
-        <div className="font-bold flex justify-between">
-          <div>{investmentRow.name}</div>
-          <div>{formatAmountInCentsAsCurrencyString(investmentRow.value, settings.currency)}</div>
-        </div>
-        <div className="flex justify-between">
-          <div>Type</div>
-          <div>{labelsByInvestmentType[investmentRow.type]}</div>
-        </div>
-        <div className="flex justify-between">
-          <div>Return</div>
-          <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
-            {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
-            {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
-            {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
-            {formatAsROIPercentage(investmentRow.roi)})
+      <div className="relative p-4">
+        <div className="relative z-10">
+          <div className="font-bold flex justify-between">
+            <div>{investmentRow.name}</div>
+            <div>{formatAmountInCentsAsCurrencyString(investmentRow.value, settings.currency)}</div>
+          </div>
+          <div className="flex justify-between">
+            <div>Type</div>
+            <div>{labelsByInvestmentType[investmentRow.type]}</div>
+          </div>
+          <div className="flex justify-between">
+            <div>Return</div>
+            <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
+              {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
+              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
+              {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
+              {formatAsROIPercentage(investmentRow.roi)})
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div>Last update</div>
+            <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
           </div>
         </div>
-        <div className="flex justify-between">
-          <div>Last update</div>
-          <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
+        <div className="absolute left-0 top-0 w-full h-full ">
+          {settings && (
+            <Line
+              options={valueLineOptions(settings.currency)}
+              data={valueLineData(
+                investmentUpdates
+                  .filter((u) => u.investmentId === investmentRow.id)
+                  .map((u) => {
+                    return {
+                      date: u.date,
+                      value: u.value,
+                      cost: u.cost,
+                      return: 0,
+                      roi: 0,
+                    } as UpdateDataPoint;
+                  })
+              )}
+            />
+          )}
         </div>
       </div>
     );
@@ -414,23 +422,25 @@ export default function PortfolioPage() {
 
             <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
-            <div className="relative border bg-white text-center mb-4">
-              <div className="z-10 relative py-[75px]">
-                <div className="font-bold">Value</div>
-                <div className="font-bold text-4xl">
-                  {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
+            <div className="relative border border bg-white text-center mb-4">
+              <div className="relative">
+                <div className="z-10 relative py-[75px]">
+                  <div className="font-bold">Value</div>
+                  <div className="font-bold text-4xl">
+                    {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
+                  </div>
+                  <div className={`${getAmountTextColor(totalReturn)} flex justify-center items-center`}>
+                    {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
+                    {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
+                    {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
+                    {formatAsROIPercentage(totalRoi)})
+                  </div>
                 </div>
-                <div className={`${getAmountTextColor(totalReturn)} flex justify-center items-center`}>
-                  {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
-                  {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
-                  {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
-                  {formatAsROIPercentage(totalRoi)})
+                <div className="absolute left-0 top-0 w-full h-full ">
+                  {settings && (
+                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                  )}
                 </div>
-              </div>
-              <div className="absolute left-0 top-0 w-full h-full ">
-                {settings && (
-                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
-                )}
               </div>
             </div>
 
@@ -447,7 +457,7 @@ export default function PortfolioPage() {
                 {investmentRows.map((investmentRow) => {
                   return (
                     <Link
-                      className="bg-white border hover:bg-gray-100 p-4"
+                      className="bg-white border hover:bg-gray-100"
                       key={investmentRow.id}
                       href={`/investments/${investmentRow.id}`}
                     >
@@ -1006,8 +1016,8 @@ const getLaterDate = (date1: string, date2: string): string => {
   return new Date(date1) > new Date(date2) ? date1 : date2;
 };
 
-export const getLastUpdateDate = (investmentRows: InvestmentRow[])=> investmentRows.reduce<string | null>(
-  (result, investmentRow) => {
+export const getLastUpdateDate = (investmentRows: InvestmentRow[]) =>
+  investmentRows.reduce<string | null>((result, investmentRow) => {
     if (result === null) {
       return investmentRow.lastUpdateDate ?? null;
     }
@@ -1015,6 +1025,21 @@ export const getLastUpdateDate = (investmentRows: InvestmentRow[])=> investmentR
       return result;
     }
     return getLaterDate(result, investmentRow.lastUpdateDate);
-  },
-  null
-);
+  }, null);
+
+export const valueLineData = (updateDataPoints: UpdateDataPoint[]) => {
+  return {
+    datasets: [
+      {
+        label: "Value",
+        borderColor: "#F3F4F6", // same color as bg-gray-100
+        pointStyle: false,
+        tension: 0.4,
+        data: updateDataPoints.map((x) => ({
+          x: x.date,
+          y: x.value / 100,
+        })),
+      },
+    ],
+  };
+};

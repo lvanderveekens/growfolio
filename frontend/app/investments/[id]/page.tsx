@@ -6,7 +6,7 @@ import { Button } from "@/app/button";
 import Dropdown from "@/app/dropdown";
 import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
-import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor } from "@/app/portfolio-page";
+import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor, valueLineData, valueLineOptions } from "@/app/portfolio-page";
 import { Settings } from "@/app/settings/settings";
 import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
 import {
@@ -184,16 +184,23 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <div className="">Last update: {investment.lastUpdateDate ?? "Never"}</div>
             </div>
 
-            <div className="border bg-white py-[75px] text-center mb-4">
-              <div className="font-bold">Value</div>
-              <div className="font-bold text-4xl">
-                {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
+            <div className="relative border bg-white text-center mb-4">
+              <div className="z-10 relative py-[75px]">
+                <div className="font-bold">Value</div>
+                <div className="font-bold text-4xl">
+                  {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
+                </div>
+                <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} flex items-center justify-center`}>
+                  {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
+                  {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
+                  {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
+                  {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
+                </div>
               </div>
-              <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} flex items-center justify-center`}>
-                {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
-                {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
-                {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
-                {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
+              <div className="absolute left-0 top-0 w-full h-full ">
+                {settings && (
+                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                )}
               </div>
             </div>
 
@@ -324,6 +331,7 @@ const buildCostVsValueLineData = (updateRows: UpdateDataPoint[]) => {
         label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
+        tension: 0.4,
         data: updateRows.map((x) => ({
           x: x.date,
           y: x.cost / 100,
@@ -333,6 +341,7 @@ const buildCostVsValueLineData = (updateRows: UpdateDataPoint[]) => {
         label: "Value",
         borderColor: chartBackgroundColors[1],
         backgroundColor: chartBackgroundColors[1],
+        tension: 0.4,
         data: updateRows.map((x) => ({
           x: x.date,
           y: x.value / 100,
@@ -574,6 +583,7 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
         label: "Return",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
+        tension: 0.4,
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (x.value - x.cost) / 100,
@@ -644,6 +654,7 @@ const buildROILineData = (updateDataPoints: UpdateDataPoint[]) => {
         label: "ROI",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
+        tension: 0.4,
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (((x.value - x.cost) / x.cost) * 100).toFixed(2),
