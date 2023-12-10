@@ -453,11 +453,10 @@ export default function PortfolioPage() {
                     >
                       {investmentRow.locked ? (
                         <div key={investmentRow.id} className="relative h-full">
-                          <div className="absolute w-full h-full bg-white opacity-60"></div>
                           <div className="absolute w-full h-full flex items-center justify-center">
                             <BiLockAlt size={32} />
                           </div>
-                          {renderInvestment(investmentRow)}
+                          <div className="opacity-30">{renderInvestment(investmentRow)}</div>
                         </div>
                       ) : (
                         renderInvestment(investmentRow)
