@@ -94,14 +94,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     const updateDataPoints = investmentUpdates.map((update) => {
       const cost = update.cost
       const value = update.value;
-
-      let returnValue = 0;
-      let roi = 0;
-
-      if (value && cost) {
-        returnValue = value - cost;
-        roi = returnValue / cost;
-      }
+      const returnValue = value - cost;
+      const roi = returnValue / cost;
 
       return {
         id: update.id,
@@ -244,7 +238,12 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-            {updateDataPoints.length === 0 && <div>There are no data points yet.</div>}
+            {updateDataPoints.length === 0 && (
+              <>
+                <div className="mb-4">There are no investment updates yet.</div>
+                <div className="mb-4">Click on 'Manage updates' to get started.</div>
+              </>
+            )}
 
             {updateDataPoints.length > 0 && (
               <>

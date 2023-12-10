@@ -105,14 +105,16 @@ export default function PortfolioPage() {
 
         const value = lastUpdateForInvestment?.value ?? 0;
         const cost = lastUpdateForInvestment?.cost ?? 0;
+        const returnValue = value - cost;
+        const roi = returnValue / cost;
 
-        let returnValue = 0
-        let roi = 0
+        // let returnValue = 0
+        // let roi = 0
 
-        if (value && cost) {
-          returnValue = value - cost
-          roi = returnValue / cost;
-        }
+        // if (value && cost) {
+        //   returnValue = value - cost
+        //   roi = returnValue / cost;
+        // }
 
         return {
           id: i.id,
@@ -131,10 +133,8 @@ export default function PortfolioPage() {
     }
   }, [investments, investmentUpdates, lastYearInvestmentUpdates]);
 
-  const calculateUpdateDataPoints = (investmentUpdates) => {
-    const uniqueUpdateDates = Array.from(
-      new Set(investmentUpdates.map((update) => update.date))
-    );
+  const calculateUpdateDataPoints = (investmentUpdates: InvestmentUpdate[]) => {
+    const uniqueUpdateDates = Array.from(new Set(investmentUpdates.map((update) => update.date)));
 
     return uniqueUpdateDates.map((date) => {
       const value = calculateValueForDate(date, investmentUpdates);
@@ -437,7 +437,10 @@ export default function PortfolioPage() {
                 </div>
                 <div className="absolute left-0 top-0 w-full h-full ">
                   {settings && (
-                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(lastYearUpdateDataPoints)} />
+                    <Line
+                      options={valueLineOptions(settings.currency)}
+                      data={valueLineData(lastYearUpdateDataPoints)}
+                    />
                   )}
                 </div>
               </div>
@@ -450,7 +453,12 @@ export default function PortfolioPage() {
                 <ClipLoader size={28} aria-label="Loading Spinner" data-testid="loader" />
               </div>
             )}
-            {!loading && investmentRows.length === 0 && <div className="mb-4">There are no investments yet.</div>}
+            {!loading && investmentRows.length === 0 && (
+              <>
+                <div className="mb-4">There are no investments yet.</div>
+                <div className="mb-4">Click on 'Add investment' to get started.</div>
+              </>
+            )}
             {!loading && investmentRows.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                 {investmentRows.map((investmentRow) => {
@@ -511,7 +519,15 @@ export default function PortfolioPage() {
 
           <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
-          {updateDataPoints.length === 0 && <div>There are no data points yet.</div>}
+          {updateDataPoints.length === 0 && (
+            <>
+              <div className="mb-4">There are no investment updates yet.</div>
+              {investmentRows.length === 0 && <div className="mb-4">Click on 'Add investment' to get started.</div>}
+              {investmentRows.length > 0 && (
+                <div className="mb-4">Go to an investment and click on 'Manage updates' to get started.</div>
+              )}
+            </>
+          )}
 
           {updateDataPoints.length > 0 && (
             <>
@@ -807,7 +823,7 @@ export interface InvestmentRow {
   cost: number;
   value: number;
   return: number;
-  roi?: number;
+  roi: number;
   locked: boolean;
 }
 
@@ -945,10 +961,7 @@ export function convertToDate(range: DateRange): Date | null {
 export const calculateMonthlyChangeDataPoints = (
   updateDataPoints: UpdateDataPoint[]
 ) => {
-  const firstAndLastUpdatesByYearMonth = new Map<
-    string,
-    [UpdateDataPoint, UpdateDataPoint]
-  >();
+  const firstAndLastUpdatesByYearMonth = new Map<string, [UpdateDataPoint, UpdateDataPoint]>();
 
   let currentYearMonth: string | null = null;
   let firstUpdateOfYearMonth: UpdateDataPoint | null = null;
@@ -959,22 +972,14 @@ export const calculateMonthlyChangeDataPoints = (
       currentYearMonth = yearMonth;
       firstUpdateOfYearMonth = updateDataPoint;
 
-      firstAndLastUpdatesByYearMonth.set(yearMonth, [
-        firstUpdateOfYearMonth!!,
-        firstUpdateOfYearMonth!!,
-      ]);
+      firstAndLastUpdatesByYearMonth.set(yearMonth, [firstUpdateOfYearMonth!!, firstUpdateOfYearMonth!!]);
     } else {
-      firstAndLastUpdatesByYearMonth.set(yearMonth, [
-        firstUpdateOfYearMonth!!,
-        updateDataPoint,
-      ]);
+      firstAndLastUpdatesByYearMonth.set(yearMonth, [firstUpdateOfYearMonth!!, updateDataPoint]);
     }
   }
 
   const dataPoints: MonthlyChangeDataPoint[] = [];
-  const firstAndLastUpdatesByYearMonthEntries = Array.from(
-    firstAndLastUpdatesByYearMonth.entries()
-  );
+  const firstAndLastUpdatesByYearMonthEntries = Array.from( firstAndLastUpdatesByYearMonth.entries());
 
   for (let i = 1; i < firstAndLastUpdatesByYearMonthEntries.length; i++) {
     const previousYearMonth = firstAndLastUpdatesByYearMonthEntries[i - 1];
@@ -998,6 +1003,8 @@ export const calculateMonthlyChangeDataPoints = (
     });
   }
 
+  console.log("calculated monthly change data points")
+  console.log(dataPoints)
   return dataPoints;
 }; 
 

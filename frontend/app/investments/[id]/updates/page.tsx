@@ -208,7 +208,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             <div className="border border-t-0 p-4 flex justify-center items-center h-[300px]">
               <div className="text-center">
                 <div className="text-2xl font-bold mb-4">No updates added yet</div>
-                <div>Click 'Add update' on top to get started.</div>
+                <div>Click on 'Add update' to get started.</div>
               </div>
             </div>
           )}
