@@ -55,9 +55,12 @@ ChartJS.register(
 export default function PortfolioPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
+  const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
   
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
+  const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
+
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
   
@@ -79,8 +82,11 @@ export default function PortfolioPage() {
   }, [selectedDateRange]);
 
   useEffect(() => {
-    const updateDataPoints = calculateUpdateDataPoints()
+    const updateDataPoints = calculateUpdateDataPoints(investmentUpdates)
     setUpdateDataPoints(updateDataPoints);
+
+    const allUpdateDataPoints = calculateUpdateDataPoints(lastYearInvestmentUpdates)
+    setLastYearUpdateDataPoints(allUpdateDataPoints);
 
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
@@ -123,9 +129,9 @@ export default function PortfolioPage() {
 
       setInvestmentRows(investmentRows);
     }
-  }, [investments, investmentUpdates]);
+  }, [investments, investmentUpdates, lastYearInvestmentUpdates]);
 
-  const calculateUpdateDataPoints = () => {
+  const calculateUpdateDataPoints = (investmentUpdates) => {
     const uniqueUpdateDates = Array.from(
       new Set(investmentUpdates.map((update) => update.date))
     );
@@ -164,18 +170,15 @@ export default function PortfolioPage() {
   };
 
   const fetchInvestmentUpdates = async () => {
-    const dateFrom = convertToDate(selectedDateRange)
-      ?.toISOString()
-      ?.split("T")
-      ?.[0]
+    const dateFrom = convertToDate(selectedDateRange)?.toISOString()?.split("T")?.[0];
+    api
+      .get(`/investment-updates`, { params: { ...(dateFrom && { dateFrom: dateFrom }) } })
+      .then((res) => setInvestmentUpdates(res.data));
 
-    api.get(`/investment-updates`, {
-        params: {
-          ...(dateFrom && { dateFrom: dateFrom }), 
-        },
-      }
-    )
-    .then((res) => setInvestmentUpdates(res.data));
+    const lastYearDateFrom = convertToDate(DateRange.LAST_YEAR)?.toISOString()?.split("T")?.[0];
+    api
+      .get(`/investment-updates`, { params: { ...(lastYearDateFrom && { dateFrom: lastYearDateFrom }) } })
+      .then((res) => setLastYearInvestmentUpdates(res.data));
   };
 
   const fetchSettings = async () => {
@@ -193,7 +196,6 @@ export default function PortfolioPage() {
           label: "Cost",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
-          tension: 0.4,
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.cost / 100,
@@ -203,7 +205,6 @@ export default function PortfolioPage() {
           label: "Value",
           borderColor: chartBackgroundColors[1],
           backgroundColor: chartBackgroundColors[1],
-          tension: 0.4,
           data: updateDataPoints.map((x) => ({
             x: x.date,
             y: x.value / 100,
@@ -222,7 +223,6 @@ export default function PortfolioPage() {
           label: "Return",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
-          tension: 0.4,
           data: dateWithCostAndValue.map((x) => ({
             x: x.date,
             y: (x.value - x.cost) / 100,
@@ -241,7 +241,6 @@ export default function PortfolioPage() {
           label: "ROI",
           borderColor: chartBackgroundColors[0],
           backgroundColor: chartBackgroundColors[0],
-          tension: 0.4,
           data: updateDataPoints.map((x) => {
             return {
               x: x.date,
@@ -392,7 +391,7 @@ export default function PortfolioPage() {
             <Line
               options={valueLineOptions(settings.currency)}
               data={valueLineData(
-                investmentUpdates
+                lastYearInvestmentUpdates
                   .filter((u) => u.investmentId === investmentRow.id)
                   .map((u) => {
                     return {
@@ -438,7 +437,7 @@ export default function PortfolioPage() {
                 </div>
                 <div className="absolute left-0 top-0 w-full h-full ">
                   {settings && (
-                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(lastYearUpdateDataPoints)} />
                   )}
                 </div>
               </div>

@@ -52,8 +52,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string>()
 
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([])
+  const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
+  const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([])
+
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
 
@@ -72,8 +75,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   }, [selectedDateRange]);
 
   useEffect(() => {
-    const updateDataPoints = calculateUpdateDataPoints()
+    const updateDataPoints = calculateUpdateDataPoints(investmentUpdates)
     setUpdateDataPoints(updateDataPoints);
+
+    const lastYearUpdateDataPoints = calculateUpdateDataPoints(lastYearInvestmentUpdates)
+    setLastYearUpdateDataPoints(lastYearUpdateDataPoints);
 
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
@@ -81,10 +87,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     setYearlyChangeDataPoints(
       calculateYearlyChangeDataPoints(updateDataPoints)
     );
-  }, [investmentUpdates]);
+  }, [investmentUpdates, lastYearInvestmentUpdates]);
 
 
-  const calculateUpdateDataPoints = () => {
+  const calculateUpdateDataPoints = (investmentUpdates: InvestmentUpdate[]) => {
     const updateDataPoints = investmentUpdates.map((update) => {
       const cost = update.cost
       const value = update.value;
@@ -126,17 +132,15 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   };
 
   const fetchInvestmentUpdates = () => {
-    const dateFrom = convertToDate(selectedDateRange)
-      ?.toISOString()
-      ?.split("T")?.[0];
-
+    const dateFrom = convertToDate(selectedDateRange)?.toISOString()?.split("T")?.[0];
     api
-      .get(`/investment-updates?investmentId=${params.id}`, {
-        params: {
-          ...(dateFrom && { dateFrom: dateFrom }),
-        },
-      })
+      .get(`/investment-updates?investmentId=${params.id}`, { params: { ...(dateFrom && { dateFrom: dateFrom }) } })
       .then((res) => setInvestmentUpdates(res.data));
+
+    const lastYearDateFrom = convertToDate(DateRange.LAST_YEAR)?.toISOString()?.split("T")?.[0];
+    api
+      .get(`/investment-updates?investmentId=${params.id}`, { params: { ...(lastYearDateFrom && { dateFrom: lastYearDateFrom }) } })
+      .then((res) => setLastYearInvestmentUpdates(res.data));
   };
 
   const deleteInvestment = () => {
@@ -199,7 +203,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
               <div className="absolute left-0 top-0 w-full h-full ">
                 {settings && (
-                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(lastYearUpdateDataPoints)} />
                 )}
               </div>
             </div>
@@ -331,7 +335,6 @@ const buildCostVsValueLineData = (updateRows: UpdateDataPoint[]) => {
         label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
-        tension: 0.4,
         data: updateRows.map((x) => ({
           x: x.date,
           y: x.cost / 100,
@@ -341,7 +344,6 @@ const buildCostVsValueLineData = (updateRows: UpdateDataPoint[]) => {
         label: "Value",
         borderColor: chartBackgroundColors[1],
         backgroundColor: chartBackgroundColors[1],
-        tension: 0.4,
         data: updateRows.map((x) => ({
           x: x.date,
           y: x.value / 100,
@@ -583,7 +585,6 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
         label: "Return",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
-        tension: 0.4,
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (x.value - x.cost) / 100,
@@ -654,7 +655,6 @@ const buildROILineData = (updateDataPoints: UpdateDataPoint[]) => {
         label: "ROI",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
-        tension: 0.4,
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (((x.value - x.cost) / x.cost) * 100).toFixed(2),
