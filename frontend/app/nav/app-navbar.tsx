@@ -102,6 +102,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
 
           <div>
             <Button
+              className="border-2 px-8"
               variant="tertiary"
               onClick={() => {
                 api.post(`/auth/logout`).then((res) => {
@@ -121,9 +122,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         {/* mobile */}
         <div className={`${isOpen ? "block" : "hidden"} pb-4 lg md:hidden`}>
           <div className="flex flex-col gap-4">
-            {!isLoadingUser && user && (
-              <div className="font-normal">{user.email}</div>
-            )}
+            {!isLoadingUser && user && <div className="font-normal">{user.email}</div>}
             <Link className="hover:text-black" href="/">
               <div className="flex items-center">Portfolio</div>
             </Link>
@@ -134,7 +133,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               <div className="flex items-center">Settings</div>
             </Link>
             <Button
-              variant='tertiary'
+              variant="tertiary"
               onClick={() => {
                 api.post(`/auth/logout`).then((res) => {
                   if (window.location.pathname === "/") {

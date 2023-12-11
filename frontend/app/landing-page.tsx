@@ -102,7 +102,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
             <div className="lg:col-span-5">
               <div className="text-xl lg:text-3xl font-bold mb-8">
-                All investments in one place.
+                All investments in one place
               </div>
               <div className="text-lg lg:text-2xl">
                 Have all your investments, be it stocks, bonds,
@@ -127,7 +127,7 @@ export default function LandingPage() {
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
               <div className="text-xl lg:text-3xl font-bold mb-8">
-                Visualize your portfolio growth.
+                Visualize your portfolio growth
               </div>
               <div className="text-lg lg:text-2xl">
                 Charts and graphs make it easy to understand your portfolio's
@@ -140,7 +140,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="lg:col-span-5">
               <div className="text-xl lg:text-3xl font-bold mb-8">
-                Mobile-friendly.
+                Mobile-friendly
               </div>
               <div className="text-lg lg:text-2xl">
                 Access your investment data anytime, anywhere, right from your
@@ -165,7 +165,7 @@ export default function LandingPage() {
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
               <div className="text-xl lg:text-3xl font-bold mb-8">
-                By an investor, for investors.
+                By an investor, for investors
               </div>
               <div className="text-lg lg:text-2xl">
                 Benefit from a platform developed by an active investor who

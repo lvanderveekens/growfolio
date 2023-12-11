@@ -49,7 +49,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
 
         <div>
           <Button
-            className={`font-bold px-8`}
+            className="border-2 px-8"
             variant="tertiary"
             onClick={() => {
               router.push("/login");
