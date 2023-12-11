@@ -413,7 +413,10 @@ export default function PortfolioPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Portfolio</h1>
 
-            <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
+            <div className="mb-4">
+              <span className="font-bold">Last update: </span>
+              <span>{lastUpdateDate ?? "Never"}</span>
+            </div>
 
             <div className="mb-4">
               <Dropdown
@@ -447,10 +450,7 @@ export default function PortfolioPage() {
                 </div>
                 <div className="absolute left-0 top-0 w-full h-full ">
                   {settings && (
-                    <Line
-                      options={valueLineOptions(settings.currency)}
-                      data={valueLineData(updateDataPoints)}
-                    />
+                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
                   )}
                 </div>
               </div>
@@ -495,7 +495,7 @@ export default function PortfolioPage() {
             )}
 
             <Button
-              className="mb-4 w-full sm:w-auto"
+              className="w-full sm:w-auto"
               variant="primary"
               type="submit"
               onClick={() => {

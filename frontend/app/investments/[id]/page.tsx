@@ -170,8 +170,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {investment.locked && <InvestmentIsLockedMessage />}
 
             <div className="mb-4">
-              <div className="">Type: {labelsByInvestmentType[investment.type]}</div>
-              <div className="">Last update: {investment.lastUpdateDate ?? "Never"}</div>
+              <span className="font-bold">Last update: </span>
+              <span>{investment.lastUpdateDate ?? "Never"}</span>
             </div>
 
             <div className="mb-4">
@@ -210,7 +210,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            <div>
+            <div className="">
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
                 variant="secondary"
@@ -257,7 +257,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <>
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">Cost vs value</h1>
+                    <h1 className="font-bold mb-4">Cost vs value</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Line
@@ -269,7 +269,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">Return</h1>
+                    <h1 className="font-bold mb-4">Return</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Line
@@ -281,14 +281,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">ROI</h1>
+                    <h1 className="font-bold mb-4">ROI</h1>
                     <div className="w-full h-full">
                       <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
                     </div>
                   </div>
 
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">Monthly change</h1>
+                    <h1 className="font-bold mb-4">Monthly change</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Bar
@@ -300,7 +300,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square">
-                    <h1 className="text-xl font-bold mb-4">Yearly change</h1>
+                    <h1 className="font-bold mb-4">Yearly change</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Bar
