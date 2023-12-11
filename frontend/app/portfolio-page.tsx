@@ -10,6 +10,7 @@ import {
   ChartData,
   Chart as ChartJS,
   ChartOptions,
+  Filler,
   Legend,
   LineElement,
   LinearScale,
@@ -49,7 +50,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler,
 );
 
 export default function PortfolioPage() {
@@ -680,13 +682,10 @@ export const valueLineOptions = (currency: string) => ({
     }
   },
   scales: {
-    y: {
-      display: false
-    },
-    y2: {
-      display: false
-    },
     x: {
+      display: false
+    },
+    y: {
       display: false
     }
   }
@@ -1037,8 +1036,13 @@ export const valueLineData = (updateDataPoints: UpdateDataPoint[]) => {
   return {
     datasets: [
       {
+        // #F9FAFB same as bg-gray-50
+        // #F3F4F6 same as bg-gray-100
+        // #E5E7EB same as bg-gray-200
         label: "Value",
-        borderColor: "#F3F4F6", // same color as bg-gray-100
+        borderColor: "#F3F4F6", 
+        backgroundColor: "#F9FAFB", 
+        fill: 'origin',
         pointStyle: false,
         data: updateDataPoints.map((x) => ({
           x: x.date,
