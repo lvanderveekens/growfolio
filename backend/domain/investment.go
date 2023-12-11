@@ -5,12 +5,15 @@ import "time"
 type InvestmentType string
 
 const (
-	InvestmentTypeStock     InvestmentType = "stock"
-	InvestmentTypeBond      InvestmentType = "bond"
-	InvestmentTypeCommodity InvestmentType = "commodity"
-	InvestmentTypeFund      InvestmentType = "fund"
-	InvestmentTypeCrypto    InvestmentType = "crypto"
-	InvestmentTypeCash      InvestmentType = "cash"
+	InvestmentTypeStock      InvestmentType = "stock"
+	InvestmentTypeBond       InvestmentType = "bond"
+	InvestmentTypeCommodity  InvestmentType = "commodity"
+	InvestmentTypeFund       InvestmentType = "fund"
+	InvestmentTypeCrypto     InvestmentType = "crypto"
+	InvestmentTypeCash       InvestmentType = "cash"
+	InvestmentTypeP2PLending InvestmentType = "p2pLending"
+	InvestmentTypeRealEstate InvestmentType = "realEstate"
+	InvestmentTypeForex      InvestmentType = "forex"
 )
 
 type CreateInvestmentCommand struct {
