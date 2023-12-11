@@ -1040,7 +1040,6 @@ export const valueLineData = (updateDataPoints: UpdateDataPoint[]) => {
         label: "Value",
         borderColor: "#F3F4F6", // same color as bg-gray-100
         pointStyle: false,
-        tension: 0.4,
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: x.value / 100,
