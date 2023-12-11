@@ -256,7 +256,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {updateDataPoints.length > 0 && (
               <>
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-                  <div className="aspect-square">
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Cost vs value</h1>
                     <div className="w-full h-full">
                       {settings && (
@@ -268,7 +268,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     </div>
                   </div>
 
-                  <div className="aspect-square">
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Return</h1>
                     <div className="w-full h-full">
                       {settings && (
@@ -280,14 +280,14 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     </div>
                   </div>
 
-                  <div className="aspect-square">
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">ROI</h1>
                     <div className="w-full h-full">
                       <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
                     </div>
                   </div>
 
-                  <div className="aspect-square">
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Monthly change</h1>
                     <div className="w-full h-full">
                       {settings && (
@@ -299,7 +299,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                     </div>
                   </div>
 
-                  <div className="aspect-square">
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Yearly change</h1>
                     <div className="w-full h-full">
                       {settings && (

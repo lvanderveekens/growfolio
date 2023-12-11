@@ -540,77 +540,73 @@ export default function PortfolioPage() {
           )}
 
           {updateDataPoints.length > 0 && (
-            <>
-              <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Allocation</h3>
-                  <div className="w-full h-full">
-                    <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
-                  </div>
-                </div>
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Allocation by type</h3>
-                  <div className="w-full h-full">
-                    <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
-                  </div>
-                </div>
+            <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
 
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Cost vs value</h3>
-
-                  <div className="w-full h-full">
-                    {settings && (
-                      <Line
-                        options={costVsValueLineOptions(settings.currency)}
-                        data={buildCostVsValueLineData(updateDataPoints)}
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">ROI</h3>
-
-                  <div className="w-full h-full">
-                    <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
-                  </div>
-                </div>
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Return</h3>
-
-                  <div className="w-full h-full">
-                    {settings && (
-                      <Line
-                        options={returnLineOptions(settings.currency)}
-                        data={buildReturnLineData(updateDataPoints)}
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Monthly change</h3>
-                  <div className="w-full h-full">
-                    {settings && (
-                      <Bar
-                        options={monthlyChangeBarOptions(settings.currency)}
-                        data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="aspect-square">
-                  <h3 className="font-bold mb-4">Yearly change</h3>
-
-                  <div className="w-full h-full">
-                    {settings && (
-                      <Bar
-                        options={yearlyChangeBarOptions(settings.currency)}
-                        data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
-                      />
-                    )}
-                  </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Allocation</h3>
+                <div className="w-full h-full">
+                  <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
                 </div>
               </div>
-            </>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Allocation by type</h3>
+                <div className="w-full h-full">
+                  <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Cost vs value</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Line
+                      options={costVsValueLineOptions(settings.currency)}
+                      data={buildCostVsValueLineData(updateDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">ROI</h3>
+
+                <div className="w-full h-full">
+                  <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
+                </div>
+              </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Return</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Line options={returnLineOptions(settings.currency)} data={buildReturnLineData(updateDataPoints)} />
+                  )}
+                </div>
+              </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Monthly change</h3>
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={monthlyChangeBarOptions(settings.currency)}
+                      data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Yearly change</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={yearlyChangeBarOptions(settings.currency)}
+                      data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </main>
