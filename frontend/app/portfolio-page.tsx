@@ -57,11 +57,11 @@ ChartJS.register(
 export default function PortfolioPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
-  const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
+  // const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([]);
   const [investmentRows, setInvestmentRows] = useState<InvestmentRow[]>([]);
   
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
-  const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
+  // const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([]);
 
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
@@ -86,9 +86,6 @@ export default function PortfolioPage() {
   useEffect(() => {
     const updateDataPoints = calculateUpdateDataPoints(investmentUpdates)
     setUpdateDataPoints(updateDataPoints);
-
-    const allUpdateDataPoints = calculateUpdateDataPoints(lastYearInvestmentUpdates)
-    setLastYearUpdateDataPoints(allUpdateDataPoints);
 
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
@@ -133,7 +130,7 @@ export default function PortfolioPage() {
 
       setInvestmentRows(investmentRows);
     }
-  }, [investments, investmentUpdates, lastYearInvestmentUpdates]);
+  }, [investments, investmentUpdates]);
 
   const calculateUpdateDataPoints = (investmentUpdates: InvestmentUpdate[]) => {
     const uniqueUpdateDates = Array.from(new Set(investmentUpdates.map((update) => update.date)));
@@ -176,11 +173,6 @@ export default function PortfolioPage() {
     api
       .get(`/investment-updates`, { params: { ...(dateFrom && { dateFrom: dateFrom }) } })
       .then((res) => setInvestmentUpdates(res.data));
-
-    const lastYearDateFrom = convertToDate(DateRange.LAST_YEAR)?.toISOString()?.split("T")?.[0];
-    api
-      .get(`/investment-updates`, { params: { ...(lastYearDateFrom && { dateFrom: lastYearDateFrom }) } })
-      .then((res) => setLastYearInvestmentUpdates(res.data));
   };
 
   const fetchSettings = async () => {
@@ -393,7 +385,7 @@ export default function PortfolioPage() {
             <Line
               options={valueLineOptions(settings.currency)}
               data={valueLineData(
-                lastYearInvestmentUpdates
+                investmentUpdates
                   .filter((u) => u.investmentId === investmentRow.id)
                   .map((u) => {
                     return {
@@ -423,6 +415,22 @@ export default function PortfolioPage() {
 
             <div className="mb-4">Last update: {lastUpdateDate ?? "Never"}</div>
 
+            <div className="mb-4">
+              <Dropdown
+                className="lg:w-auto"
+                dropdownClassName="lg:w-[180px]"
+                selected={{
+                  label: selectedDateRange,
+                  value: selectedDateRange,
+                }}
+                onChange={(option) => setSelectedDateRange(option.value)}
+                options={Object.values(DateRange).map((dateRange) => ({
+                  label: dateRange,
+                  value: dateRange,
+                }))}
+              />
+            </div>
+
             <div className="relative border border bg-white text-center mb-4">
               <div className="relative">
                 <div className="z-10 relative py-[75px]">
@@ -441,7 +449,7 @@ export default function PortfolioPage() {
                   {settings && (
                     <Line
                       options={valueLineOptions(settings.currency)}
-                      data={valueLineData(lastYearUpdateDataPoints)}
+                      data={valueLineData(updateDataPoints)}
                     />
                   )}
                 </div>
@@ -533,22 +541,6 @@ export default function PortfolioPage() {
 
           {updateDataPoints.length > 0 && (
             <>
-              <div className="mb-4">
-                <Dropdown
-                  className="lg:w-auto"
-                  dropdownClassName="lg:w-[180px]"
-                  selected={{
-                    label: selectedDateRange,
-                    value: selectedDateRange,
-                  }}
-                  onChange={(option) => setSelectedDateRange(option.value)}
-                  options={Object.values(DateRange).map((dateRange) => ({
-                    label: dateRange,
-                    value: dateRange,
-                  }))}
-                />
-              </div>
-
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                 <div className="aspect-square">
                   <h3 className="font-bold mb-4">Allocation</h3>

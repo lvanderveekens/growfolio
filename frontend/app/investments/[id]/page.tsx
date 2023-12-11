@@ -52,10 +52,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string>()
 
   const [investmentUpdates, setInvestmentUpdates] = useState<InvestmentUpdate[]>([])
-  const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([])
+  // const [lastYearInvestmentUpdates, setLastYearInvestmentUpdates] = useState<InvestmentUpdate[]>([])
 
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
-  const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([])
+  // const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([])
 
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
@@ -78,16 +78,13 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     const updateDataPoints = calculateUpdateDataPoints(investmentUpdates)
     setUpdateDataPoints(updateDataPoints);
 
-    const lastYearUpdateDataPoints = calculateUpdateDataPoints(lastYearInvestmentUpdates)
-    setLastYearUpdateDataPoints(lastYearUpdateDataPoints);
-
     setMonthlyChangeDataPoints(
       calculateMonthlyChangeDataPoints(updateDataPoints)
     );
     setYearlyChangeDataPoints(
       calculateYearlyChangeDataPoints(updateDataPoints)
     );
-  }, [investmentUpdates, lastYearInvestmentUpdates]);
+  }, [investmentUpdates]);
 
 
   const calculateUpdateDataPoints = (investmentUpdates: InvestmentUpdate[]) => {
@@ -130,11 +127,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     api
       .get(`/investment-updates?investmentId=${params.id}`, { params: { ...(dateFrom && { dateFrom: dateFrom }) } })
       .then((res) => setInvestmentUpdates(res.data));
-
-    const lastYearDateFrom = convertToDate(DateRange.LAST_YEAR)?.toISOString()?.split("T")?.[0];
-    api
-      .get(`/investment-updates?investmentId=${params.id}`, { params: { ...(lastYearDateFrom && { dateFrom: lastYearDateFrom }) } })
-      .then((res) => setLastYearInvestmentUpdates(res.data));
   };
 
   const deleteInvestment = () => {
@@ -182,6 +174,22 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               <div className="">Last update: {investment.lastUpdateDate ?? "Never"}</div>
             </div>
 
+            <div className="mb-4">
+              <Dropdown
+                className="w-full lg:w-auto"
+                dropdownClassName="w-full lg:w-[180px]"
+                selected={{
+                  label: selectedDateRange,
+                  value: selectedDateRange,
+                }}
+                onChange={(option) => setSelectedDateRange(option.value)}
+                options={Object.values(DateRange).map((dateRange) => ({
+                  label: dateRange,
+                  value: dateRange,
+                }))}
+              />
+            </div>
+
             <div className="relative border bg-white text-center mb-4">
               <div className="z-10 relative py-[75px]">
                 <div className="font-bold">Value</div>
@@ -197,7 +205,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
               </div>
               <div className="absolute left-0 top-0 w-full h-full ">
                 {settings && (
-                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(lastYearUpdateDataPoints)} />
+                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
                 )}
               </div>
             </div>
@@ -247,21 +255,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {updateDataPoints.length > 0 && (
               <>
-                <div className="mb-4">
-                  <Dropdown
-                    className="w-full lg:w-auto"
-                    dropdownClassName="w-full lg:w-[180px]"
-                    selected={{
-                      label: selectedDateRange,
-                      value: selectedDateRange,
-                    }}
-                    onChange={(option) => setSelectedDateRange(option.value)}
-                    options={Object.values(DateRange).map((dateRange) => ({
-                      label: dateRange,
-                      value: dateRange,
-                    }))}
-                  />
-                </div>
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                   <div className="aspect-square">
                     <h1 className="text-xl font-bold mb-4">Cost vs value</h1>
