@@ -60,7 +60,7 @@ func newEmptyResponse(status int) response[empty] {
 	return response[empty]{Status: status, Body: empty{}}
 }
 
-func createHandlerFunc[T any](f func(c *gin.Context) (response[T], error)) gin.HandlerFunc {
+func createHandlerFuncWithResponse[T any](f func(c *gin.Context) (response[T], error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		response, err := f(c)
 		if err != nil {
@@ -77,6 +77,24 @@ func createHandlerFunc[T any](f func(c *gin.Context) (response[T], error)) gin.H
 		}
 
 		c.JSON(response.Status, response.Body)
+	}
+}
+
+func createHandlerFunc(f func(c *gin.Context) error) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := f(c)
+		if err != nil {
+			slog.Error(fmt.Sprintf("%+v", err))
+
+			if err, ok := err.(Error); ok {
+				c.JSON(err.Status, err)
+				return
+			}
+
+			status := http.StatusInternalServerError
+			c.JSON(status, NewError(status, http.StatusText(status)))
+			return
+		}
 	}
 }
 

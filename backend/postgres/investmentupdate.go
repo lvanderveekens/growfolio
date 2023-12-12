@@ -77,12 +77,33 @@ func (r InvestmentUpdateRepository) FindByID(id string) (domain.InvestmentUpdate
 	return r.toDomainInvestmentUpdate(entity)
 }
 
+func (r InvestmentUpdateRepository) FindByInvestmentID(investmentID string) ([]domain.InvestmentUpdate, error) {
+	queryBuilder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Select("*").
+		From("investment_update").
+		Where(sq.Eq{"investment_id": investmentID}).
+		OrderBy("date DESC")
+
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	entities := []InvestmentUpdate{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select investment updates: %w", err)
+	}
+
+	return r.toDomainInvestmentUpdates(entities)
+}
+
 func (r InvestmentUpdateRepository) Find(findQuery domain.FindInvestmentUpdateQuery) ([]domain.InvestmentUpdate, error) {
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	queryBuilder := psql.
 		Select("*").
-		From("investment_update")
-	queryBuilder = queryBuilder.Where(sq.Eq{"investment_id": findQuery.InvestmentIDs})
+		From("investment_update").
+		Where(sq.Eq{"investment_id": findQuery.InvestmentIDs})
 
 	if findQuery.DateFrom != nil {
 		queryBuilder = queryBuilder.Where(sq.Expr("date >= ?", *findQuery.DateFrom))

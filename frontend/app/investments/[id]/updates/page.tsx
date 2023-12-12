@@ -73,6 +73,37 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
       });
   }
 
+  const exportUpdates = () => {
+    api
+      .get(`/investments/${params.id}/updates/csv`)
+      .then((res) => {
+        const blob = new Blob([res.data], { type: res.headers['content-type'] });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        const contentDisposition = res.headers['content-disposition'];
+        let filename = 'export.csv'; // Default filename
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+?)"/);
+          if (match) {
+            filename = match[1];
+          }
+        }
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error(`Error exporting updates: ${error}`);
+        // setLoadingUpdatesError(error);
+      })
+      .finally(() => {
+        // setLoadingUpdates(false);
+      });
+  }
+
   const deleteUpdate = (id: string) => {
     api
       .delete(`/investment-updates/${id}`)
@@ -131,6 +162,15 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
               className="w-full lg:w-auto mb-4 lg:mb-0"
               variant="secondary"
               type="submit"
+              onClick={exportUpdates}
+              disabled={investment.locked}
+            >
+              Export
+            </Button>
+            <Button
+              className="w-full lg:w-auto mb-4 lg:mb-0"
+              variant="secondary"
+              type="submit"
               onClick={() => setShowImportUpdatesModal(true)}
               disabled={investment.locked}
             >
@@ -147,15 +187,6 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                 />
               </Modal>
             )}
-            <Button
-              className="w-full lg:w-auto mb-4 lg:mb-0"
-              variant="secondary"
-              type="submit"
-              onClick={() => {}}
-              disabled={investment.locked}
-            >
-              Export
-            </Button>
             <Button
               className="w-full lg:w-auto"
               variant="primary"

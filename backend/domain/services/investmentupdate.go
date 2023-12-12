@@ -9,6 +9,7 @@ import (
 
 type InvestmentUpdateRepository interface {
 	FindByID(id string) (domain.InvestmentUpdate, error)
+	FindByInvestmentID(investmentID string) ([]domain.InvestmentUpdate, error)
 	Find(query domain.FindInvestmentUpdateQuery) ([]domain.InvestmentUpdate, error)
 	FindLastByInvestmentIDAndDateLessThanEqual(investmentID string, date time.Time) (domain.InvestmentUpdate, error)
 
@@ -64,6 +65,10 @@ func (s InvestmentUpdateService) Find(query domain.FindInvestmentUpdateQuery) ([
 	sort.Slice(updates, func(a, b int) bool { return updates[a].Date.Before(updates[b].Date) })
 
 	return updates, nil
+}
+
+func (s InvestmentUpdateService) FindByInvestmentID(investmentID string) ([]domain.InvestmentUpdate, error) {
+	return s.investmentUpdateRepository.FindByInvestmentID(investmentID)
 }
 
 func (s InvestmentUpdateService) FindByID(id string) (domain.InvestmentUpdate, error) {

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"growfolio/domain"
 	"growfolio/domain/services"
-	"log/slog"
+	"growfolio/pointer"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -182,67 +184,21 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to read investment")
 	}
 
-	csvFormFile, err := c.FormFile("csvFile")
+	records, err := h.readInvestmentUpdateCSVFile(c)
 	if err != nil {
-		return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
-	}
-
-	slog.Info("Received file: " + csvFormFile.Filename)
-
-	csvFile, err := csvFormFile.Open()
-	if err != nil {
-		return response[empty]{}, fmt.Errorf("failed to open CSV file: %w", err)
-	}
-	defer csvFile.Close()
-
-	csvReader := csv.NewReader(csvFile)
-	records, err := csvReader.ReadAll()
-	if err != nil {
-		return response[empty]{}, fmt.Errorf("failed to read CSV records: %w", err)
+		return response[empty]{}, errors.Wrap(err, "failed to read investment update CSV file")
 	}
 
 	commands := make([]domain.CreateInvestmentUpdateCommand, 0)
-
-	for i := 1; i < len(records); i++ { // skipping the header row
-		record := records[i]
-		dateString := record[0]
-		depositString := record[1]
-		withdrawalString := record[2]
-		valueString := record[3]
-
-		date, err := time.Parse("2006-01-02", dateString)
+	for _, record := range records {
+		command, err := record.toCreateInvestmentUpdateCommand(investment)
 		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to parse date: %w", err)
+			return response[empty]{}, errors.Wrap(err, "failed to map record to command")
 		}
-
-		var deposit *int64
-		if depositString != "" {
-			parsed, err := strconv.ParseInt(depositString, 10, 64)
-			if err != nil {
-				return response[empty]{}, fmt.Errorf("failed to parse deposit: %w", err)
-			}
-			deposit = &parsed
-		}
-
-		var withdrawal *int64
-		if withdrawalString != "" {
-			parsed, err := strconv.ParseInt(withdrawalString, 10, 64)
-			if err != nil {
-				return response[empty]{}, fmt.Errorf("failed to parse withdrawal: %w", err)
-			}
-			withdrawal = &parsed
-		}
-
-		value, err := strconv.ParseInt(valueString, 10, 64)
-		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to parse value: %w", err)
-		}
-
-		commands = append(commands, domain.NewCreateInvestmentUpdateCommand(investment, date, deposit, withdrawal, value))
+		commands = append(commands, command)
 	}
 
 	for _, command := range commands {
-		slog.Info("Received update: " + fmt.Sprintf("%+v", command))
 		_, err := h.investmentUpdateService.Create(command)
 		if err != nil {
 			return response[empty]{}, fmt.Errorf("failed to create update: %w", err)
@@ -250,6 +206,97 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 	}
 
 	return newEmptyResponse(200), nil
+}
+
+func (h InvestmentHandler) readInvestmentUpdateCSVFile(c *gin.Context) ([]InvestmentUpdateCSVRecord, error) {
+	csvFormFile, err := c.FormFile("csvFile")
+	if err != nil {
+		return []InvestmentUpdateCSVRecord{}, NewError(http.StatusBadRequest, err.Error())
+	}
+
+	csvFile, err := csvFormFile.Open()
+	if err != nil {
+		return []InvestmentUpdateCSVRecord{}, fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer csvFile.Close()
+
+	csvReader := csv.NewReader(csvFile)
+
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return []InvestmentUpdateCSVRecord{}, fmt.Errorf("failed to read CSV records: %w", err)
+	}
+
+	updateRecords := make([]InvestmentUpdateCSVRecord, 0)
+	for i := 1; i < len(records); i++ { // skipping the header row
+		record := records[i]
+		updateRecords = append(updateRecords, newInvestmentUpdateCSVRecord(
+			record[0],
+			record[1],
+			record[2],
+			record[3],
+		))
+	}
+	return updateRecords, nil
+}
+
+func (h InvestmentHandler) ExportUpdates(c *gin.Context) error {
+	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
+	tokenUserID := tokenClaims["userId"].(string)
+
+	id := c.Param("id")
+	investment, err := h.investmentService.FindByID(id)
+	if err != nil {
+		if err == domain.ErrInvestmentNotFound {
+			return NewError(http.StatusBadRequest, err.Error())
+		}
+		return fmt.Errorf("failed to find investment by id %s: %w", id, err)
+	}
+
+	if investment.UserID != tokenUserID {
+		return NewError(http.StatusForbidden, "not allowed to read investment")
+	}
+
+	updates, err := h.investmentUpdateService.FindByInvestmentID(investment.ID)
+	if err != nil {
+		return errors.Wrapf(err, "failed to find investment updates by investment id %s", id)
+	}
+
+	records := make([]InvestmentUpdateCSVRecord, 0)
+	for _, update := range updates {
+		records = append(records, toInvestmentUpdateCSVRecord(update))
+	}
+
+	filename := fmt.Sprintf("%s_updates_export_%s.csv", investment.Name, time.Now().Format("20060102_150405"))
+	filename = strings.ReplaceAll(filename, " ", "_")
+
+	file, err := os.CreateTemp("", filename)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create tmp CSV file")
+	}
+	defer os.Remove(file.Name())
+
+	csvWriter := csv.NewWriter(file)
+	defer csvWriter.Flush()
+
+	if err := csvWriter.Write([]string{"Date", "Deposit", "Withdrawal", "Value"}); err != nil {
+		return errors.Wrapf(err, "failed to write to tmp CSV file")
+	}
+	for _, record := range records {
+		if err := csvWriter.Write([]string{record.Date, record.Deposit, record.Withdrawal, record.Value}); err != nil {
+			return errors.Wrapf(err, "failed to write to tmp CSV file")
+		}
+	}
+
+	csvWriter.Flush()
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	c.Header("Content-Type", "text/csv")
+
+	c.File(file.Name())
+
+	return nil
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {
@@ -327,4 +374,63 @@ type investmentDto struct {
 
 func newInvestmentDto(id string, t domain.InvestmentType, name string, locked bool, lastUpdateDate *string) investmentDto {
 	return investmentDto{ID: id, Type: t, Name: name, Locked: locked, LastUpdateDate: lastUpdateDate}
+}
+
+type InvestmentUpdateCSVRecord struct {
+	Date       string
+	Deposit    string
+	Withdrawal string
+	Value      string
+}
+
+func newInvestmentUpdateCSVRecord(date, deposit, withdrawal, value string) InvestmentUpdateCSVRecord {
+	return InvestmentUpdateCSVRecord{
+		Date:       date,
+		Deposit:    deposit,
+		Withdrawal: withdrawal,
+		Value:      value,
+	}
+}
+
+func (r InvestmentUpdateCSVRecord) toCreateInvestmentUpdateCommand(
+	investment domain.Investment,
+) (domain.CreateInvestmentUpdateCommand, error) {
+	date, err := time.Parse("2006-01-02", r.Date)
+	if err != nil {
+		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse date: %w", err)
+	}
+
+	var deposit *int64
+	if r.Deposit != "" {
+		parsed, err := strconv.ParseInt(r.Deposit, 10, 64)
+		if err != nil {
+			return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse deposit: %w", err)
+		}
+		deposit = &parsed
+	}
+
+	var withdrawal *int64
+	if r.Withdrawal != "" {
+		parsed, err := strconv.ParseInt(r.Withdrawal, 10, 64)
+		if err != nil {
+			return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse withdrawal: %w", err)
+		}
+		withdrawal = &parsed
+	}
+
+	value, err := strconv.ParseInt(r.Value, 10, 64)
+	if err != nil {
+		return domain.CreateInvestmentUpdateCommand{}, fmt.Errorf("failed to parse value: %w", err)
+	}
+
+	return domain.NewCreateInvestmentUpdateCommand(investment, date, deposit, withdrawal, value), nil
+}
+
+func toInvestmentUpdateCSVRecord(update domain.InvestmentUpdate) InvestmentUpdateCSVRecord {
+	return newInvestmentUpdateCSVRecord(
+		update.Date.Format("2006-01-02"),
+		pointer.IntToString(update.Deposit),
+		pointer.IntToString(update.Withdrawal),
+		strconv.FormatInt(update.Value, 10),
+	)
 }
