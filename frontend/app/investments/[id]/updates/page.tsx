@@ -129,6 +129,35 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
           <div className="border border-b-0 p-4 lg:flex lg:gap-4 lg:justify-end">
             <Button
               className="w-full lg:w-auto mb-4 lg:mb-0"
+              variant="secondary"
+              type="submit"
+              onClick={() => setShowImportUpdatesModal(true)}
+              disabled={investment.locked}
+            >
+              Import
+            </Button>
+            {showImportUpdatesModal && (
+              <Modal title="Import updates" onClose={() => setShowImportUpdatesModal(false)}>
+                <ImportUpdatesForm
+                  onImport={() => {
+                    setShowImportUpdatesModal(false);
+                    fetchInvestmentUpdates();
+                  }}
+                  investmentId={params.id}
+                />
+              </Modal>
+            )}
+            <Button
+              className="w-full lg:w-auto mb-4 lg:mb-0"
+              variant="secondary"
+              type="submit"
+              onClick={() => {}}
+              disabled={investment.locked}
+            >
+              Export
+            </Button>
+            <Button
+              className="w-full lg:w-auto"
               variant="primary"
               type="submit"
               onClick={() => setShowUpdateInvestmentModal(true)}
@@ -145,26 +174,6 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
                   }}
                   investmentId={params.id}
                   currency={settings.currency}
-                />
-              </Modal>
-            )}
-            <Button
-              className="w-full lg:w-auto "
-              variant="primary"
-              type="submit"
-              onClick={() => setShowImportUpdatesModal(true)}
-              disabled={investment.locked}
-            >
-              Import updates
-            </Button>
-            {showImportUpdatesModal && (
-              <Modal title="Import updates" onClose={() => setShowImportUpdatesModal(false)}>
-                <ImportUpdatesForm
-                  onImport={() => {
-                    setShowImportUpdatesModal(false);
-                    fetchInvestmentUpdates();
-                  }}
-                  investmentId={params.id}
                 />
               </Modal>
             )}

@@ -216,7 +216,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                 variant="secondary"
                 onClick={() => router.push(`/investments/${params.id}/updates`)}
               >
-                Manage updates
+                View updates
               </Button>
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
@@ -249,7 +249,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             {updateDataPoints.length === 0 && (
               <>
                 <div className="mb-4">There are no investment updates yet.</div>
-                <div className="mb-4">Click on 'Manage updates' to get started.</div>
+                <div className="mb-4">Click on 'View updates' to get started.</div>
               </>
             )}
 

@@ -534,7 +534,7 @@ export default function PortfolioPage() {
               <div className="mb-4">There are no investment updates yet.</div>
               {investmentRows.length === 0 && <div className="mb-4">Click on 'Add investment' to get started.</div>}
               {investmentRows.length > 0 && (
-                <div className="mb-4">Go to an investment and click on 'Manage updates' to get started.</div>
+                <div className="mb-4">Go to an investment and click on 'View updates' to get started.</div>
               )}
             </>
           )}
