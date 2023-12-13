@@ -156,10 +156,12 @@ export default function LandingPage() {
             </div>
           </div>
 
+          {/* TODO: insert 'No strings attached' */}
+
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="order-2 lg:order-none lg:col-span-6">
               <img
-                src="/why-4.jpeg"
+                src="/why-5.jpeg"
                 className="mx-auto w-auto max-w-full max-h-[550px]"
               />
             </div>

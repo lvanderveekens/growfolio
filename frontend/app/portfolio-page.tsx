@@ -356,7 +356,7 @@ export default function PortfolioPage() {
     }
 
     return (
-      <div className="relative p-4">
+      <div className="relative p-4 group">
         <div className="relative z-10">
           <div className="font-bold flex justify-between">
             <div>{investmentRow.name}</div>
@@ -380,7 +380,7 @@ export default function PortfolioPage() {
             <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
           </div>
         </div>
-        <div className="absolute left-0 top-0 w-full h-full ">
+        <div className="absolute left-0 top-0 w-full h-full group-hover:hidden">
           {settings && (
             <Line
               options={valueLineOptions(settings.currency)}
@@ -474,7 +474,7 @@ export default function PortfolioPage() {
                 {investmentRows.map((investmentRow) => {
                   return (
                     <Link
-                      className="bg-white border hover:bg-gray-100"
+                      className="bg-white hover:bg-gray-100 border relative"
                       key={investmentRow.id}
                       href={`/investments/${investmentRow.id}`}
                     >
@@ -860,6 +860,11 @@ export const calculateYearlyChangeDataPoints = (
     if (year !== currentYear) {
       currentYear = year;
       firstUpdateOfYear = updateDataPoint;
+
+      firstAndLastUpdatesByYear.set(year, [
+        firstUpdateOfYear!!,
+        firstUpdateOfYear!!,
+      ]);
     } else {
       firstAndLastUpdatesByYear.set(year, [
         firstUpdateOfYear!!,
@@ -973,7 +978,7 @@ export const calculateMonthlyChangeDataPoints = (
     const currentYearMonth = firstAndLastUpdatesByYearMonthEntries[i];
 
     if (i == 1) {
-      // add first year
+      // add first month
       dataPoints.push({
         yearMonth: previousYearMonth[0],
         value: previousYearMonth[1][1].value - previousYearMonth[1][0].value,
