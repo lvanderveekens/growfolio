@@ -872,25 +872,28 @@ export const calculateYearlyChangeDataPoints = (
       ]);
     }
   }
+  console.log("first and last updates by year");
+  console.log(firstAndLastUpdatesByYear)
 
   const dataPoints: YearlyChangeDataPoint[] = [];
   const firstAndLastUpdatesByYearEntries = Array.from(
     firstAndLastUpdatesByYear.entries()
   );
 
+  // add first year
+  if (firstAndLastUpdatesByYearEntries.length > 0 ) {
+    const firstYear = firstAndLastUpdatesByYearEntries[0]
+    dataPoints.push({
+      year: firstYear[0],
+      value: firstYear[1][1].value - firstYear[1][0].value,
+      cost: firstYear[1][1].cost - firstYear[1][0].cost,
+      return: firstYear[1][1].return - firstYear[1][0].return,
+    });
+  } 
+
   for (let i = 1; i < firstAndLastUpdatesByYearEntries.length; i++) {
     const previousYear = firstAndLastUpdatesByYearEntries[i - 1];
     const currentYear = firstAndLastUpdatesByYearEntries[i];
-
-    if (i == 1) {
-      // add first year
-      dataPoints.push({
-        year: previousYear[0],
-        value: previousYear[1][1].value - previousYear[1][0].value,
-        cost: previousYear[1][1].cost - previousYear[1][0].cost,
-        return: previousYear[1][1].return - previousYear[1][0].return,
-      });
-    }
 
     dataPoints.push({
       year: currentYear[0],
@@ -899,6 +902,8 @@ export const calculateYearlyChangeDataPoints = (
       return: currentYear[1][1].return - previousYear[1][1].return,
     });
   }
+  console.log("yearly data points")
+  console.log(dataPoints)
   return dataPoints;
 }; 
 
