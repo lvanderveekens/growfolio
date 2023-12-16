@@ -22,7 +22,7 @@ export const Button: React.FC<ButtonProps> = ({ className, variant, children, ..
         break;
       case "tertiary":
         variantClassName =
-          "text-white border-white hover:text-black hover:border-black";
+          "text-white border-white hover:text-gray-100 hover:border-gray-100";
         break;
       case "danger":
         variantClassName =

@@ -83,17 +83,17 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         {/* desktop */}
         <div className="hidden md:flex flex-grow text-xl justify-between items-center">
           <div className="flex gap-8 h-full items-center">
-            <div className="hover:text-black">
+            <div className="hover:text-gray-100">
               <Link href="/">
                 <div className="flex items-center">Portfolio</div>
               </Link>
             </div>
-            <div className="hover:text-black">
+            <div className="hover:text-gray-100">
               <Link href="/profile">
                 <div className="flex items-center">Profile</div>
               </Link>
             </div>
-            <div className="hover:text-black">
+            <div className="hover:text-gray-100">
               <Link href="/settings">
                 <div className="flex items-center">Settings</div>
               </Link>
@@ -123,13 +123,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         <div className={`${isOpen ? "block" : "hidden"} pb-4 lg md:hidden`}>
           <div className="flex flex-col gap-4">
             {!isLoadingUser && user && <div className="font-normal">{user.email}</div>}
-            <Link className="hover:text-black" href="/">
+            <Link className="hover:text-gray-100" href="/">
               <div className="flex items-center">Portfolio</div>
             </Link>
-            <Link className="hover:text-black" href="/profile">
+            <Link className="hover:text-gray-100" href="/profile">
               <div className="flex items-center">Profile</div>
             </Link>
-            <Link className="hover:text-black" href="/settings">
+            <Link className="hover:text-gray-100" href="/settings">
               <div className="flex items-center">Settings</div>
             </Link>
             <Button

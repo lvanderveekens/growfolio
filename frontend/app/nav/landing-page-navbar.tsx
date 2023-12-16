@@ -36,13 +36,13 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       {/* desktop */}
       <div className="hidden md:flex flex-grow text-xl justify-between items-center">
         <div className="flex gap-8">
-          <Link href="#why" className="hover:text-black">
+          <Link href="#why" className="hover:text-gray-100">
             Why
           </Link>
-          <Link href="#pricing" className="hover:text-black">
+          <Link href="#pricing" className="hover:text-gray-100">
             Pricing
           </Link>
-          <Link href="#contact" className="hover:text-black">
+          <Link href="#contact" className="hover:text-gray-100">
             Contact
           </Link>
         </div>
@@ -64,21 +64,21 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       <div className={`${isOpen ? "block" : "hidden"} pb-4 text-lg md:hidden`}>
         <div className="flex flex-col gap-4">
           <Link
-            className={`hover:text-green-400`}
+            className={`hover:text-gray-100`}
             href="#why"
             onClick={toggleNavbar}
           >
             Why
           </Link>
           <Link
-            className={`hover:text-green-400`}
+            className={`hover:text-gray-100`}
             href="#pricing"
             onClick={toggleNavbar}
           >
             Pricing
           </Link>
           <Link
-            className={`hover:text-green-400`}
+            className={`hover:text-gray-100`}
             href="#contact"
             onClick={toggleNavbar}
           >
