@@ -168,27 +168,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {investment.locked && <InvestmentIsLockedMessage />}
 
-            <div className="mb-4">
-              <span className="font-bold">Last update: </span>
-              <span>{investment.lastUpdateDate ?? "Never"}</span>
-            </div>
-
-            <div className="mb-4">
-              <Dropdown
-                className="w-full lg:w-auto"
-                dropdownClassName="w-full lg:w-[180px]"
-                selected={{
-                  label: selectedDateRange,
-                  value: selectedDateRange,
-                }}
-                onChange={(option) => setSelectedDateRange(option.value)}
-                options={Object.values(DateRange).map((dateRange) => ({
-                  label: dateRange,
-                  value: dateRange,
-                }))}
-              />
-            </div>
-
             <div className="relative border bg-white text-center mb-4">
               <div className="z-10 relative py-[75px]">
                 <div className="font-bold">Value</div>
@@ -200,6 +179,10 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
                   {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
                   {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
+                </div>
+                <div className="mt-4">
+                  <span className="">Last update: </span>
+                  <span>{investment.lastUpdateDate ?? "Never"}</span>
                 </div>
               </div>
               <div className="absolute left-0 top-0 w-full h-full ">
@@ -254,6 +237,22 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {updateDataPoints.length > 0 && (
               <>
+                <div className="mb-4">
+                  <Dropdown
+                    className="w-full lg:w-auto"
+                    dropdownClassName="w-full lg:w-[180px]"
+                    selected={{
+                      label: selectedDateRange,
+                      value: selectedDateRange,
+                    }}
+                    onChange={(option) => setSelectedDateRange(option.value)}
+                    options={Object.values(DateRange).map((dateRange) => ({
+                      label: dateRange,
+                      value: dateRange,
+                    }))}
+                  />
+                </div>
+
                 <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                   <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Cost vs value</h1>
@@ -354,7 +353,6 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                       )}
                     </div>
                   </div>
-
                 </div>
               </>
             )}
