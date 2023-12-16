@@ -156,16 +156,25 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* TODO: insert 'No strings attached' */}
-
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="order-2 lg:order-none lg:col-span-6">
               <img
-                src="/why-5.jpeg"
+                src="/why-4.png"
                 className="mx-auto w-auto max-w-full max-h-[550px]"
               />
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
+              <div className="text-xl lg:text-3xl font-bold mb-8">
+                No strings attached
+              </div>
+              <div className="text-lg lg:text-2xl">
+                Already using a spreadsheet to track your portfolio? You can seamlessly import and export your investment updates using CSV files.
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
+            <div className="lg:col-span-5">
               <div className="text-xl lg:text-3xl font-bold mb-8">
                 By an investor, for investors
               </div>
@@ -173,6 +182,12 @@ export default function LandingPage() {
                 Benefit from a platform developed by an active investor who
                 understands your needs and priorities firsthand.
               </div>
+            </div>
+            <div className="lg:col-start-7 lg:col-span-6">
+              <img
+                src="/why-5.jpeg"
+                className="mx-auto w-auto max-w-full max-h-[550px]"
+              />
             </div>
           </div>
         </div>
@@ -205,7 +220,7 @@ export default function LandingPage() {
                   <FcCheckmark className="inline-block" /> Allocation charts
                 </div>
                 <div>
-                  <FcCheckmark className="inline-block" /> CSV imports
+                  <FcCheckmark className="inline-block" /> CSV imports/exports
                 </div>
                 <div>
                   <FcCheckmark className="inline-block" /> Support
