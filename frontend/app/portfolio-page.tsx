@@ -30,7 +30,7 @@ import { api } from "./axios";
 import { Button } from "./button";
 import { calculateCostForDate, calculateValueForDate } from "./calculator";
 import Dropdown from "./dropdown";
-import { buildMonthlyChangeBarData, buildYearlyChangeBarData, monthlyChangeBarOptions, yearlyChangeBarOptions } from "./investments/[id]/page";
+import { buildMonthlyCostBarData as buildMonthlyCostChangeBarData, buildMonthlyROIChangeBarData, buildMonthlyReturnBarData as buildMonthlyReturnChangeBarData, buildYearlyChangeBarData, buildYearlyCostBarData as buildYearlyCostChangeBarData, buildYearlyROIBarData as buildYearlyROIChangeBarData, buildYearlyReturnBarData as buildYearlyReturnChangeBarData, monthlyChangeBarOptions, monthlyROIBarOptions, yearlyChangeBarOptions, yearlyROIBarOptions as yearlyROIChangeBarOptions } from "./investments/[id]/page";
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
 import { Settings } from "./settings/settings";
@@ -215,8 +215,8 @@ export default function PortfolioPage() {
       datasets: [
         {
           label: "Return",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
+          borderColor: chartBackgroundColors[2],
+          backgroundColor: chartBackgroundColors[2],
           data: dateWithCostAndValue.map((x) => ({
             x: x.date,
             y: (x.value - x.cost) / 100,
@@ -233,8 +233,8 @@ export default function PortfolioPage() {
       datasets: [
         {
           label: "ROI",
-          borderColor: chartBackgroundColors[0],
-          backgroundColor: chartBackgroundColors[0],
+          borderColor: chartBackgroundColors[4],
+          backgroundColor: chartBackgroundColors[4],
           data: updateDataPoints.map((x) => {
             return {
               x: x.date,
@@ -326,14 +326,14 @@ export default function PortfolioPage() {
     }, []);
 
     return {
-      labels: investmentTypeWithValues.map((i) => capitalize(i.type)),
+      labels: investmentTypeWithValues.map((i) => labelsByInvestmentType[i.type]),
       datasets: [
         {
           label: "Value",
           backgroundColor: chartBackgroundColors,
           data: investmentTypeWithValues.map((i) => {
             return i.value;
-          }) 
+          }),
         },
       ],
     };
@@ -541,7 +541,6 @@ export default function PortfolioPage() {
 
           {updateDataPoints.length > 0 && (
             <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-
               <div className="aspect-square bg-white p-4 border">
                 <h3 className="font-bold mb-4">Allocation</h3>
                 <div className="w-full h-full">
@@ -567,13 +566,7 @@ export default function PortfolioPage() {
                   )}
                 </div>
               </div>
-              <div className="aspect-square bg-white p-4 border">
-                <h3 className="font-bold mb-4">ROI</h3>
 
-                <div className="w-full h-full">
-                  <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
-                </div>
-              </div>
               <div className="aspect-square bg-white p-4 border">
                 <h3 className="font-bold mb-4">Return</h3>
 
@@ -583,25 +576,85 @@ export default function PortfolioPage() {
                   )}
                 </div>
               </div>
+
               <div className="aspect-square bg-white p-4 border">
-                <h3 className="font-bold mb-4">Monthly change</h3>
+                <h3 className="font-bold mb-4">ROI</h3>
+
+                <div className="w-full h-full">
+                  <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Monthly cost change</h3>
                 <div className="w-full h-full">
                   {settings && (
                     <Bar
                       options={monthlyChangeBarOptions(settings.currency)}
-                      data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
+                      data={buildMonthlyCostChangeBarData(monthlyChangeDataPoints)}
                     />
                   )}
                 </div>
               </div>
+
               <div className="aspect-square bg-white p-4 border">
-                <h3 className="font-bold mb-4">Yearly change</h3>
+                <h3 className="font-bold mb-4">Monthly return change</h3>
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={monthlyChangeBarOptions(settings.currency)}
+                      data={buildMonthlyReturnChangeBarData(monthlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Monthly ROI change</h3>
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={monthlyROIBarOptions()}
+                      data={buildMonthlyROIChangeBarData(monthlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Yearly cost change</h3>
 
                 <div className="w-full h-full">
                   {settings && (
                     <Bar
                       options={yearlyChangeBarOptions(settings.currency)}
-                      data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
+                      data={buildYearlyCostChangeBarData(yearlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Yearly return change</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={yearlyChangeBarOptions(settings.currency)}
+                      data={buildYearlyReturnChangeBarData(yearlyChangeDataPoints)}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">Yearly ROI change</h3>
+
+                <div className="w-full h-full">
+                  {settings && (
+                    <Bar
+                      options={yearlyROIChangeBarOptions()}
+                      data={buildYearlyROIChangeBarData(yearlyChangeDataPoints)}
                     />
                   )}
                 </div>
@@ -686,6 +739,9 @@ export const returnLineOptions = (currency: string) => ({
     intersect: false,
   },
   plugins: {
+    legend: {
+      display: false
+    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -727,6 +783,9 @@ export const roiLineOptions: ChartOptions = {
     intersect: false,
   },
   plugins: {
+    legend: {
+      display: false
+    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -827,6 +886,7 @@ export interface MonthlyChangeDataPoint {
   value: number;
   cost: number;
   return: number;
+  roi: number;
 }
 
 export interface YearlyChangeDataPoint {
@@ -834,6 +894,7 @@ export interface YearlyChangeDataPoint {
   value: number;
   cost: number;
   return: number;
+  roi: number;
 }
 
 export const chartBackgroundColors = [
@@ -888,6 +949,7 @@ export const calculateYearlyChangeDataPoints = (
       value: firstYear[1][1].value - firstYear[1][0].value,
       cost: firstYear[1][1].cost - firstYear[1][0].cost,
       return: firstYear[1][1].return - firstYear[1][0].return,
+      roi: firstYear[1][1].roi - firstYear[1][0].roi,
     });
   } 
 
@@ -900,6 +962,7 @@ export const calculateYearlyChangeDataPoints = (
       value: currentYear[1][1].value - previousYear[1][1].value,
       cost: currentYear[1][1].cost - previousYear[1][1].cost,
       return: currentYear[1][1].return - previousYear[1][1].return,
+      roi: currentYear[1][1].roi - previousYear[1][1].roi,
     });
   }
   console.log("yearly data points")
@@ -989,6 +1052,7 @@ export const calculateMonthlyChangeDataPoints = (
         value: previousYearMonth[1][1].value - previousYearMonth[1][0].value,
         cost: previousYearMonth[1][1].cost - previousYearMonth[1][0].cost,
         return: previousYearMonth[1][1].return - previousYearMonth[1][0].return,
+        roi: previousYearMonth[1][1].roi - previousYearMonth[1][0].roi,
       });
     }
 
@@ -997,6 +1061,7 @@ export const calculateMonthlyChangeDataPoints = (
       value: currentYearMonth[1][1].value - previousYearMonth[1][1].value,
       cost: currentYearMonth[1][1].cost - previousYearMonth[1][1].cost,
       return: currentYearMonth[1][1].return - previousYearMonth[1][1].return,
+      roi: currentYearMonth[1][1].roi - previousYearMonth[1][1].roi,
     });
   }
 

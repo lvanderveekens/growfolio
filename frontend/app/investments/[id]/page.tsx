@@ -288,25 +288,70 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly change</h1>
+                    <h1 className="font-bold mb-4">Monthly cost change</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Bar
                           options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyChangeBarData(monthlyChangeDataPoints)}
+                          data={buildMonthlyCostBarData(monthlyChangeDataPoints)}
                         />
                       )}
                     </div>
                   </div>
 
                   <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Yearly change</h1>
+                    <h1 className="font-bold mb-4">Monthly return change</h1>
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={monthlyChangeBarOptions(settings.currency)}
+                          data={buildMonthlyReturnBarData(monthlyChangeDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h1 className="font-bold mb-4">Monthly ROI change</h1>
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar options={monthlyROIBarOptions()} data={buildMonthlyROIChangeBarData(monthlyChangeDataPoints)} />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h3 className="font-bold mb-4">Yearly cost change</h3>
+
                     <div className="w-full h-full">
                       {settings && (
                         <Bar
                           options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyChangeBarData(yearlyChangeDataPoints)}
+                          data={buildYearlyCostBarData(yearlyChangeDataPoints)}
                         />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h3 className="font-bold mb-4">Yearly return change</h3>
+
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={yearlyChangeBarOptions(settings.currency)}
+                          data={buildYearlyReturnBarData(yearlyChangeDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h3 className="font-bold mb-4">Yearly ROI change</h3>
+
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar options={yearlyROIBarOptions()} data={buildYearlyROIBarData(yearlyChangeDataPoints)} />
                       )}
                     </div>
                   </div>
@@ -434,6 +479,9 @@ export const monthlyChangeBarOptions = (currency: string) => ({
     intersect: false,
   },
   plugins: {
+    legend: {
+      display: false
+    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -470,6 +518,52 @@ export const monthlyChangeBarOptions = (currency: string) => ({
   },
 });
 
+export const monthlyROIBarOptions = () => ({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAsROIPercentage(context.parsed.y);
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      stacked: true,
+      type: "time",
+      time: {
+        unit: "month",
+        tooltipFormat: "YYYY-MM",
+      },
+    },
+    y: {
+      stacked: true,
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAsROIPercentage(value);
+        },
+      },
+    },
+  },
+});
+
 export const yearlyChangeBarOptions = (currency: string) => ({
   maintainAspectRatio: false,
   interaction: {
@@ -477,6 +571,9 @@ export const yearlyChangeBarOptions = (currency: string) => ({
     intersect: false,
   },
   plugins: {
+    legend: {
+      display: false
+    },
     tooltip: {
       callbacks: {
         label: function (context) {
@@ -507,6 +604,52 @@ export const yearlyChangeBarOptions = (currency: string) => ({
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
           return formatAmountAsCurrencyString(value, currency);
+        },
+      },
+    },
+  },
+});
+
+export const yearlyROIBarOptions = () => ({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAsROIPercentage(context.parsed.y);
+          }
+
+          return label;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      stacked: true,
+      type: "time",
+      time: {
+        unit: "year",
+        tooltipFormat: "YYYY",
+      },
+    },
+    y: {
+      stacked: true,
+      ticks: {
+        callback: function (value: any, index: any, ticks: any) {
+          return formatAsROIPercentage(value);
         },
       },
     },
@@ -568,6 +711,7 @@ interface MonthlyChangeDataPoint {
   value: number;
   cost: number;
   return: number;
+  roi: number;
 }
 
 const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
@@ -575,8 +719,8 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
     datasets: [
       {
         label: "Return",
-        borderColor: chartBackgroundColors[0],
-        backgroundColor: chartBackgroundColors[0],
+        borderColor: chartBackgroundColors[2],
+        backgroundColor: chartBackgroundColors[2],
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (x.value - x.cost) / 100,
@@ -586,14 +730,14 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
   };
 };
 
-export const buildMonthlyChangeBarData = (
+export const buildMonthlyCostBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
   console.log("building monthly change bar data")
   return {
     datasets: [
       {
-        label: "Cost",
+        label: "Cost change",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
@@ -601,10 +745,28 @@ export const buildMonthlyChangeBarData = (
           y: dataPoint.cost / 100,
         })),
       },
+      // {
+      //   label: "Return",
+      //   borderColor: chartBackgroundColors[1],
+      //   backgroundColor: chartBackgroundColors[1],
+      //   data: monthlyChangeDataPoints.map((dataPoint) => ({
+      //     x: dataPoint.yearMonth,
+      //     y: dataPoint.return / 100,
+      //   })),
+      // },
+    ],
+  };
+};
+
+export const buildMonthlyReturnBarData = (
+  monthlyChangeDataPoints: MonthlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
       {
-        label: "Return",
-        borderColor: chartBackgroundColors[1],
-        backgroundColor: chartBackgroundColors[1],
+        label: "Return change",
+        borderColor: chartBackgroundColors[2],
+        backgroundColor: chartBackgroundColors[2],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
           x: dataPoint.yearMonth,
           y: dataPoint.return / 100,
@@ -614,24 +776,33 @@ export const buildMonthlyChangeBarData = (
   };
 };
 
-export const buildYearlyChangeBarData = (
+export const buildMonthlyROIChangeBarData = (
+  monthlyChangeDataPoints: MonthlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
+      {
+        label: "ROI change",
+        borderColor: chartBackgroundColors[4],
+        backgroundColor: chartBackgroundColors[4],
+        data: monthlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.yearMonth,
+          y: dataPoint.roi,
+        })),
+      },
+    ],
+  };
+};
+
+export const buildYearlyReturnBarData = (
   yearlyChangeDataPoints: YearlyChangeDataPoint[]
 ): ChartData<"bar"> => {
   return {
     datasets: [
       {
-        label: "Cost",
-        borderColor: chartBackgroundColors[0],
-        backgroundColor: chartBackgroundColors[0],
-        data: yearlyChangeDataPoints.map((dataPoint) => ({
-          x: dataPoint.year,
-          y: dataPoint.cost / 100,
-        })),
-      },
-      {
-        label: "Return",
-        borderColor: chartBackgroundColors[1],
-        backgroundColor: chartBackgroundColors[1],
+        label: "Return change",
+        borderColor: chartBackgroundColors[2],
+        backgroundColor: chartBackgroundColors[2],
         data: yearlyChangeDataPoints.map((dataPoint) => ({
           x: dataPoint.year,
           y: dataPoint.return / 100,
@@ -640,13 +811,59 @@ export const buildYearlyChangeBarData = (
     ],
   };
 };
+
+export const buildYearlyROIBarData = (
+  yearlyChangeDataPoints: YearlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
+      {
+        label: "ROI change",
+        borderColor: chartBackgroundColors[4],
+        backgroundColor: chartBackgroundColors[4],
+        data: yearlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.year,
+          y: dataPoint.roi,
+        })),
+      },
+    ],
+  };
+};
+
+export const buildYearlyCostBarData = (
+  yearlyChangeDataPoints: YearlyChangeDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
+      {
+        label: "Cost change",
+        borderColor: chartBackgroundColors[0],
+        backgroundColor: chartBackgroundColors[0],
+        data: yearlyChangeDataPoints.map((dataPoint) => ({
+          x: dataPoint.year,
+          y: dataPoint.cost / 100,
+        })),
+      },
+      // {
+      //   label: "Return",
+      //   borderColor: chartBackgroundColors[1],
+      //   backgroundColor: chartBackgroundColors[1],
+      //   data: yearlyChangeDataPoints.map((dataPoint) => ({
+      //     x: dataPoint.year,
+      //     y: dataPoint.return / 100,
+      //   })),
+      // },
+    ],
+  };
+};
+
 const buildROILineData = (updateDataPoints: UpdateDataPoint[]) => {
   return {
     datasets: [
       {
         label: "ROI",
-        borderColor: chartBackgroundColors[0],
-        backgroundColor: chartBackgroundColors[0],
+        borderColor: chartBackgroundColors[4],
+        backgroundColor: chartBackgroundColors[4],
         data: updateDataPoints.map((x) => ({
           x: x.date,
           y: (((x.value - x.cost) / x.cost) * 100).toFixed(2),
