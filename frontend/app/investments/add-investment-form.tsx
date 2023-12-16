@@ -51,7 +51,6 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       newErrors.name = "Name is required";
       valid = false;
     }
-    console.log(initialValue)
     if (!initialValue) {
       newErrors.initialValue = "Initial value is required";
       valid = false;

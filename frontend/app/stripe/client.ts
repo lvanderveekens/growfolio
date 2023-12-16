@@ -1,7 +1,6 @@
 import { api } from "../axios";
 
 export const createCheckoutSession = () => {
-  console.log();
   return api
     .post(`/stripe/checkout-sessions`, {
       cancelUrl: window.location.href,

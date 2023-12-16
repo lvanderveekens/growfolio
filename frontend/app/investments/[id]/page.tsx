@@ -31,6 +31,7 @@ import { Bar, Line } from "react-chartjs-2";
 import { FaCaretDown, FaCaretUp, FaChevronLeft } from "react-icons/fa6";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
 import { labelsByInvestmentType } from "@/app/investment-type";
+import { MonthlyDataPoint, calculateMonthlyDataPoints, calculateMonthlyROI, calculateTimeWeightedReturn } from "@/app/data-points";
 
 ChartJS.register(
   ArcElement,
@@ -57,6 +58,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [updateDataPoints, setUpdateDataPoints] = useState<UpdateDataPoint[]>([])
   // const [lastYearUpdateDataPoints, setLastYearUpdateDataPoints] = useState<UpdateDataPoint[]>([])
 
+  const [monthlyDataPoints, setMonthlyDataPoints] = useState<MonthlyDataPoint[]>([])
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([])
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([])
 
@@ -78,12 +80,9 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
     const updateDataPoints = calculateUpdateDataPoints(investmentUpdates)
     setUpdateDataPoints(updateDataPoints);
 
-    setMonthlyChangeDataPoints(
-      calculateMonthlyChangeDataPoints(updateDataPoints)
-    );
-    setYearlyChangeDataPoints(
-      calculateYearlyChangeDataPoints(updateDataPoints)
-    );
+    setMonthlyDataPoints(calculateMonthlyDataPoints(updateDataPoints));
+    setMonthlyChangeDataPoints( calculateMonthlyChangeDataPoints(updateDataPoints));
+    setYearlyChangeDataPoints(calculateYearlyChangeDataPoints(updateDataPoints));
   }, [investmentUpdates]);
 
 
@@ -269,12 +268,62 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square bg-white p-4 border">
+                    <h1 className="font-bold mb-4">Monthly cost</h1>
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={monthlyChangeBarOptions(settings.currency)}
+                          data={buildMonthlyCostBarData(monthlyChangeDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h3 className="font-bold mb-4">Yearly cost</h3>
+
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={yearlyChangeBarOptions(settings.currency)}
+                          data={buildYearlyCostBarData(yearlyChangeDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
                     <h1 className="font-bold mb-4">Return</h1>
                     <div className="w-full h-full">
                       {settings && (
                         <Line
                           options={returnLineOptions(settings.currency)}
                           data={buildReturnLineData(updateDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h1 className="font-bold mb-4">Monthly return</h1>
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={monthlyChangeBarOptions(settings.currency)}
+                          data={buildMonthlyReturnBarData(monthlyDataPoints)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="aspect-square bg-white p-4 border">
+                    <h3 className="font-bold mb-4">Yearly return</h3>
+
+                    <div className="w-full h-full">
+                      {settings && (
+                        <Bar
+                          options={yearlyChangeBarOptions(settings.currency)}
+                          data={buildYearlyReturnBarData(yearlyChangeDataPoints)}
                         />
                       )}
                     </div>
@@ -288,73 +337,24 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   </div>
 
                   <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly cost change</h1>
+                    <h1 className="font-bold mb-4">Monthly ROI</h1>
                     <div className="w-full h-full">
                       {settings && (
-                        <Bar
-                          options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyCostBarData(monthlyChangeDataPoints)}
-                        />
+                        <Bar options={monthlyROIBarOptions()} data={buildMonthlyROIBarData(monthlyDataPoints)} />
                       )}
                     </div>
                   </div>
 
                   <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly return change</h1>
+                    <h3 className="font-bold mb-4">Yearly ROI</h3>
+
                     <div className="w-full h-full">
                       {settings && (
-                        <Bar
-                          options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyReturnBarData(monthlyChangeDataPoints)}
-                        />
+                        <Bar options={yearlyROIBarOptions()} data={buildYearlyROIBarData(monthlyDataPoints)} />
                       )}
                     </div>
                   </div>
 
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly ROI change</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar options={monthlyROIBarOptions()} data={buildMonthlyROIChangeBarData(monthlyChangeDataPoints)} />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly cost change</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyCostBarData(yearlyChangeDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly return change</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyReturnBarData(yearlyChangeDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly ROI change</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar options={yearlyROIBarOptions()} data={buildYearlyROIBarData(yearlyChangeDataPoints)} />
-                      )}
-                    </div>
-                  </div>
                 </div>
               </>
             )}
@@ -733,11 +733,10 @@ const buildReturnLineData = (updateDataPoints: UpdateDataPoint[]) => {
 export const buildMonthlyCostBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
-  console.log("building monthly change bar data")
   return {
     datasets: [
       {
-        label: "Cost change",
+        label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: monthlyChangeDataPoints.map((dataPoint) => ({
@@ -759,6 +758,24 @@ export const buildMonthlyCostBarData = (
 };
 
 export const buildMonthlyReturnBarData = (
+  monthlyDataPoints: MonthlyDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
+      {
+        label: "Return",
+        borderColor: chartBackgroundColors[2],
+        backgroundColor: chartBackgroundColors[2],
+        data: monthlyDataPoints.map((dataPoint) => ({
+          x: dataPoint.yearMonth,
+          y: ((dataPoint.endingValue - dataPoint.netDeposits) - dataPoint.startingValue) / 100,
+        })),
+      },
+    ],
+  };
+};
+
+export const buildMonthlyReturnChangeBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
 ): ChartData<"bar"> => {
   return {
@@ -775,6 +792,25 @@ export const buildMonthlyReturnBarData = (
     ],
   };
 };
+
+export const buildMonthlyROIBarData = (
+  monthlyDataPoints: MonthlyDataPoint[]
+): ChartData<"bar"> => {
+  return {
+    datasets: [
+      {
+        label: "ROI",
+        borderColor: chartBackgroundColors[4],
+        backgroundColor: chartBackgroundColors[4],
+        data: monthlyDataPoints.map((monthlyDataPoint) => ({
+          x: monthlyDataPoint.yearMonth,
+          y: calculateMonthlyROI(monthlyDataPoint),
+        })),
+      },
+    ],
+  };
+};
+
 
 export const buildMonthlyROIChangeBarData = (
   monthlyChangeDataPoints: MonthlyChangeDataPoint[]
@@ -800,7 +836,7 @@ export const buildYearlyReturnBarData = (
   return {
     datasets: [
       {
-        label: "Return change",
+        label: "Return",
         borderColor: chartBackgroundColors[2],
         backgroundColor: chartBackgroundColors[2],
         data: yearlyChangeDataPoints.map((dataPoint) => ({
@@ -813,21 +849,34 @@ export const buildYearlyReturnBarData = (
 };
 
 export const buildYearlyROIBarData = (
-  yearlyChangeDataPoints: YearlyChangeDataPoint[]
+  monthlyDataPoints: MonthlyDataPoint[]
 ): ChartData<"bar"> => {
+  const monthlyDataPointsByYear = groupByYear(monthlyDataPoints)
   return {
     datasets: [
       {
-        label: "ROI change",
+        label: "ROI",
         borderColor: chartBackgroundColors[4],
         backgroundColor: chartBackgroundColors[4],
-        data: yearlyChangeDataPoints.map((dataPoint) => ({
-          x: dataPoint.year,
-          y: dataPoint.roi,
+        data: Array.from(monthlyDataPointsByYear.entries()).map(([key, value]) => ({
+          x: key,
+          y: calculateTimeWeightedReturn(value),
         })),
       },
     ],
   };
+};
+
+const groupByYear = (monthlyDataPoints: MonthlyDataPoint[]) => {
+  return monthlyDataPoints.reduce((map, obj) => {
+    console.log(obj)
+    const year = obj.yearMonth.split('-')[0];
+    if (!map.has(year)) {
+      map.set(year, []);
+    }
+    map.get(year)!.push(obj);
+    return map;
+  }, new Map<string, MonthlyDataPoint[]>());
 };
 
 export const buildYearlyCostBarData = (
@@ -836,7 +885,7 @@ export const buildYearlyCostBarData = (
   return {
     datasets: [
       {
-        label: "Cost change",
+        label: "Cost",
         borderColor: chartBackgroundColors[0],
         backgroundColor: chartBackgroundColors[0],
         data: yearlyChangeDataPoints.map((dataPoint) => ({

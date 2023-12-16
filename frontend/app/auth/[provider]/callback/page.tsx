@@ -8,7 +8,6 @@ import ClipLoader from "react-spinners/ClipLoader";
 
 export default function AuthProviderCallbackPage({ params, }: { params: { provider: string } }) {
   const queryString = window.location.search;
-  console.log("queryString=" + queryString)
   const router = useRouter();
 
   useEffect(() => {
