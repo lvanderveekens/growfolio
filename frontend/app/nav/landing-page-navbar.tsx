@@ -22,7 +22,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
   return (
     <nav className="sticky top-0 z-50 bg-green-400 text-white px-4 w-full lg:flex lg:items-center font-bold gap-8">
       <div className="flex justify-between items-center w-full sm:w-auto">
-        <div className="text-3xl py-4">
+        <div className="text-3xl py-4 italic">
           <Link href="/">
             <AiOutlineStock size={40} className="inline mr-1" />
             growfolio

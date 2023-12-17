@@ -13,7 +13,7 @@ export default function LoginPage({ params, }: { params: { provider: string } })
     <div className="">
       <div className='container flex justify-center items-center min-h-screen '>
         <div className="bg-white rounded-md border w-full lg:w-[400px]">
-          <div className="px-4 lg:px-8 py-8 text-4xl text-green-400 font-bold text-center border-b-[1px]">
+          <div className="italic px-4 lg:px-8 py-8 text-4xl text-green-400 font-bold text-center border-b-[1px]">
             <AiOutlineStock size={48} className="inline mr-1" />
             growfolio
           </div>

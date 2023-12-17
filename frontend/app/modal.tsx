@@ -15,10 +15,7 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (
-        modalBackgroundRef.current &&
-        modalBackgroundRef.current.contains(event.target)
-      ) {
+      if (modalBackgroundRef.current && modalBackgroundRef.current.contains(event.target)) {
         onClose();
       }
     };
