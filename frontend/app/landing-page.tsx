@@ -62,6 +62,21 @@ export default function LandingPage() {
     router.push("/login")
   }
 
+  const createDemoSession = () => {
+    console.log("create demo session...");
+    api
+      .post("/demo-sessions")
+      .then((res) => {
+        console.log("created");
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        window.location.reload();
+      });
+  }
+
   return (
     <div>
       <LandingPageNavbar />
@@ -72,20 +87,27 @@ export default function LandingPage() {
           <div className="absolute z-[-1] top-0 left-0 w-full h-full bg-[url('/hero-background.png')] bg-center blur-md"></div>
           <div className="container">
             <div className="w-full lg:w-2/4 mx-auto">
-              <div className="text-4xl lg:text-5xl font-bold mb-8">
-                Watch your investment portfolio grow.
-              </div>
+              <div className="text-4xl lg:text-5xl font-bold mb-8">Watch your investment portfolio grow.</div>
               <div className="text-xl lg:text-2xl mb-8">
-                Growfolio is an investment tracking app that helps you monitor
-                and manage your portfolio's growth and performance.
+                Growfolio is an investment tracking app that helps you monitor and manage your portfolio's growth and
+                performance.
               </div>
-              <Button
-                className="w-full lg:w-auto px-8 py-4 mb-8 font-bold text-lg lg:text-2xl"
-                variant="primary"
-                onClick={redirectToLogin}
-              >
-                Get Started for Free
-              </Button>
+              <div className="mb-8">
+                <Button
+                  className="w-full lg:w-auto mb-4 lg:mb-0 border-2 px-8 py-4 mr-4 font-bold text-lg lg:text-2xl"
+                  variant="primary"
+                  onClick={redirectToLogin}
+                >
+                  Get Started
+                </Button>
+                <Button
+                  className="w-full lg:w-auto border-2 px-8 py-4 font-bold text-lg lg:text-2xl"
+                  variant="quaternary"
+                  onClick={createDemoSession}
+                >
+                  Live Demo
+                </Button>
+              </div>
               <div>No credit card required.</div>
             </div>
           </div>
@@ -95,99 +117,70 @@ export default function LandingPage() {
       {/* why section */}
       <div id="why" className="scroll-mt-[50px] py-[50px] lg:py-[100px] bg-white">
         <div className="container">
-          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
-            Why Growfolio?
-          </h2>
+          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Why Growfolio?</h2>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center">
             <div className="lg:col-span-5">
-              <div className="text-xl lg:text-3xl font-bold mb-8">
-                All investments in one place
-              </div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">All investments in one place</div>
               <div className="text-lg lg:text-2xl">
-                Have all your investments, be it stocks, bonds,
-                cryptocurrencies, or any asset, neatly organized in one place.
-                No more flipping between apps to get the big picture.
+                Have all your investments, be it stocks, bonds, cryptocurrencies, or any asset, neatly organized in one
+                place. No more flipping between apps to get the big picture.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
-              <img
-                src="/why-1.png"
-                className="mx-auto w-auto max-w-full max-h-[550px]"
-              />
+              <img src="/why-1.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="order-2 lg:order-none lg:col-span-6">
-              <img
-                src="/why-2.png"
-                className="mx-auto w-auto max-w-full max-h-[550px]"
-              />
+              <img src="/why-2.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-              <div className="text-xl lg:text-3xl font-bold mb-8">
-                Visualize your portfolio growth
-              </div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">Visualize your portfolio growth</div>
               <div className="text-lg lg:text-2xl">
-                Charts and graphs make it easy to understand your portfolio's
-                performance at a glance. No more deciphering endless rows and
-                columns of numbers.
+                Charts and graphs make it easy to understand your portfolio's performance at a glance. No more
+                deciphering endless rows and columns of numbers.
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="lg:col-span-5">
-              <div className="text-xl lg:text-3xl font-bold mb-8">
-                Mobile-friendly
-              </div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">Mobile-friendly</div>
               <div className="text-lg lg:text-2xl">
-                Access your investment data anytime, anywhere, right from your
-                smartphone. Stay informed about your portfolio's performance,
-                even when you're on the move.
+                Access your investment data anytime, anywhere, right from your smartphone. Stay informed about your
+                portfolio's performance, even when you're on the move.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
-              <img
-                src="/why-3.png"
-                className="mx-auto w-auto max-w-full max-h-[550px]"
-              />
+              <img src="/why-3.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="order-2 lg:order-none lg:col-span-6">
-              <img
-                src="/why-4.png"
-                className="mx-auto w-auto max-w-full max-h-[550px]"
-              />
+              <img src="/why-4.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-              <div className="text-xl lg:text-3xl font-bold mb-8">
-                No strings attached
-              </div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">No strings attached</div>
               <div className="text-lg lg:text-2xl">
-                Already using a spreadsheet to track your portfolio? You can seamlessly import and export your investment updates using CSV files.
+                Already using a spreadsheet to track your portfolio? You can seamlessly import and export your
+                investment updates using CSV files.
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="lg:col-span-5">
-              <div className="text-xl lg:text-3xl font-bold mb-8">
-                By an investor, for investors
-              </div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">By an investor, for investors</div>
               <div className="text-lg lg:text-2xl">
-                Benefit from a platform developed by an active investor who
-                understands your needs and priorities firsthand.
+                Benefit from a platform developed by an active investor who understands your needs and priorities
+                firsthand.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
-              <img
-                src="/why-5.jpeg"
-                className="mx-auto w-auto max-w-full max-h-[550px]"
-              />
+              <img src="/why-5.jpeg" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
           </div>
         </div>
@@ -196,18 +189,12 @@ export default function LandingPage() {
       {/* pricing section */}
       <div id="pricing" className="scroll-mt-[50px] py-[50px] lg:py-[100px]">
         <div className="container">
-          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
-            Pricing
-          </h2>
+          <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Pricing</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px] lg:text-2xl">
             <div className="shadow-lg flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
-              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
-                Basic
-              </div>
-              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
-                $0
-              </div>
+              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">Basic</div>
+              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">$0</div>
               <div className="mb-[50px]">
                 This includes:
                 <div>
@@ -227,39 +214,26 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="text-center">
-                <Button
-                  className="px-8 py-4 font-bold lg:text-2xl"
-                  variant="primary"
-                  onClick={redirectToLogin}
-                >
+                <Button className="px-8 py-4 font-bold lg:text-2xl" variant="primary" onClick={redirectToLogin}>
                   Sign up
                 </Button>
               </div>
             </div>
 
             <div className="shadow-lg flex flex-col rounded-3xl border border border-1 bg-white px-[50px] py-[50px] lg:py-[100px]">
-              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">
-                Premium
-              </div>
-              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">
-                $4.99/mo
-              </div>
+              <div className="text-2xl lg:text-3xl font-bold text-center mb-[50px]">Premium</div>
+              <div className="text-4xl lg:text-6xl font-bold text-center mb-[50px] lg:mb-[100px]">$4.99/mo</div>
               <div className="mb-[50px]">
                 This includes:
                 <div>
                   <FcCheckmark className="inline-block" /> Everything in Basic
                 </div>
                 <div>
-                  <FcCheckmark className="inline-block" /> Track unlimited
-                  investments
+                  <FcCheckmark className="inline-block" /> Track unlimited investments
                 </div>
               </div>
               <div className="text-center mt-auto">
-                <Button
-                  className="px-8 py-4 font-bold lg:text-2xl"
-                  variant="primary"
-                  onClick={redirectToLogin}
-                >
+                <Button className="px-8 py-4 font-bold lg:text-2xl" variant="primary" onClick={redirectToLogin}>
                   Sign up
                 </Button>
               </div>
@@ -270,9 +244,7 @@ export default function LandingPage() {
 
       {/* contact section */}
       <div id="contact" className="scroll-mt-[50px] py-[50px] lg:py-[100px] bg-white">
-        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">
-          Contact
-        </h2>
+        <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
         <div className="container lg:text-2xl ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px]">
             <div className="relative">
@@ -313,30 +285,15 @@ export default function LandingPage() {
                     required
                   />
                 </label>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="px-8 py-4 font-bold"
-                  disabled={contactSubmitting}
-                >
-                  {contactSubmitting ? (
-                    <span>Sending...</span>
-                  ) : (
-                    <span>Send</span>
-                  )}
+                <Button type="submit" variant="primary" className="px-8 py-4 font-bold" disabled={contactSubmitting}>
+                  {contactSubmitting ? <span>Sending...</span> : <span>Send</span>}
                 </Button>
               </form>
             </div>
           </div>
-          {contactSuccessMessage && (
-            <div className="text-center mt-[50px] lg:mt-[100px] ">
-              {contactSuccessMessage}
-            </div>
-          )}
+          {contactSuccessMessage && <div className="text-center mt-[50px] lg:mt-[100px] ">{contactSuccessMessage}</div>}
           {contactErrorMessage && (
-            <div className="text-center mt-[50px] lg:mt-[100px] text-red-500">
-              {contactErrorMessage}
-            </div>
+            <div className="text-center mt-[50px] lg:mt-[100px] text-red-500">{contactErrorMessage}</div>
           )}
         </div>
       </div>

@@ -5,7 +5,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     className?: string
-    variant: "primary" | "secondary" | "tertiary" | "danger"
+    variant: "primary" | "secondary" | "tertiary" | "quaternary" | "danger"
 }
 
 export const Button: React.FC<ButtonProps> = ({ className, variant, children, ...rest }) => {
@@ -23,6 +23,10 @@ export const Button: React.FC<ButtonProps> = ({ className, variant, children, ..
       case "tertiary":
         variantClassName =
           "text-white border-white hover:text-gray-100 hover:border-gray-100";
+        break;
+      case "quaternary":
+        variantClassName =
+          "text-green-400 border-green-400 hover:text-white hover:bg-green-400";
         break;
       case "danger":
         variantClassName =

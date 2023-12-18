@@ -63,14 +63,19 @@ func main() {
 	}
 	eventPublisher := services.NewEventPublisher(eventHandlers)
 
-	tokenService := api.NewTokenService(os.Getenv("JWT_SECRET"), mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")))
+	tokenService := api.NewTokenService(
+		os.Getenv("JWT_SECRET"),
+		mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")),
+		os.Getenv("DOMAIN"),
+		mustParseBool(os.Getenv("USE_SECURE_COOKIES")),
+	)
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
-	authHandler := api.NewAuthHandler(userService, tokenService, os.Getenv("DOMAIN"), mustParseBool(os.Getenv("USE_SECURE_COOKIES")))
+	authHandler := api.NewAuthHandler(userService, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)
 	settingsHandler := api.NewSettingsHandler(settingsService)
 	feedbackHandler := api.NewFeedbackHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_FEEDBACK_CHANNEL_ID"), &userRepository)
@@ -82,6 +87,7 @@ func main() {
 		os.Getenv("FRONTEND_HOST"),
 	)
 	contactHandler := api.NewContactHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_CONTACT_CHANNEL_ID"))
+	demoHandler := api.NewDemoHandler(userService, tokenService)
 
 	handlers := api.NewHandlers(
 		investmentHandler,
@@ -92,6 +98,7 @@ func main() {
 		feedbackHandler,
 		stripeHandler,
 		contactHandler,
+		demoHandler,
 	)
 	middlewares := api.NewMiddlewares(api.TokenMiddleware(tokenService))
 	server := api.NewServer(

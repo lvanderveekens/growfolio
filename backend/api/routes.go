@@ -27,6 +27,8 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		public.POST("/stripe/webhook", createHandlerFuncWithResponse(s.handlers.stripe.Webhook))
 
 		public.POST("/contact", createHandlerFuncWithResponse(s.handlers.contact.SendContactMessage))
+
+		public.POST("/demo-sessions", createHandlerFunc(s.handlers.demo.CreateDemoSession))
 	}
 
 	private := r.Group("")

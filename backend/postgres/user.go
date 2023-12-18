@@ -18,10 +18,18 @@ type User struct {
 	Provider         string    `db:"provider"`
 	AccountType      string    `db:"account_type"`
 	StripeCustomerID *string   `db:"stripe_customer_id"`
+	IsDemo           bool      `db:"is_demo"`
 }
 
 func (u User) toDomainUser() domain.User {
-	return domain.NewUser(u.ID, u.Email, u.Provider, domain.AccountType(u.AccountType), u.StripeCustomerID)
+	return domain.NewUser(
+		u.ID,
+		u.Email,
+		u.Provider,
+		domain.AccountType(u.AccountType),
+		u.StripeCustomerID,
+		u.IsDemo,
+	)
 }
 
 type UserRepository struct {
@@ -74,10 +82,10 @@ func (r UserRepository) FindByStripeCustomerID(stripeCustomerID string) (domain.
 func (r UserRepository) Create(user domain.User) (domain.User, error) {
 	var entity User
 	err := r.db.QueryRowx(`
-		INSERT INTO "user" (id, email, provider, account_type) 
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO "user" (id, email, provider, account_type, is_demo) 
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING *
-	`, user.ID, user.Email, user.Provider, user.AccountType).StructScan(&entity)
+	`, user.ID, user.Email, user.Provider, user.AccountType, user.IsDemo).StructScan(&entity)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to insert user: %w", err)
 	}

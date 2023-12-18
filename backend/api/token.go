@@ -10,19 +10,23 @@ import (
 
 type TokenService struct {
 	jwtSecret          string
-	JwtExireAfterHours int
+	jwtExireAfterHours int
+	domain             string
+	useSecureCookies   bool
 }
 
-func NewTokenService(jwtSecret string, jwtExpireAfterHours int) TokenService {
+func NewTokenService(jwtSecret string, jwtExpireAfterHours int, domain string, useSecureCookie bool) TokenService {
 	return TokenService{
 		jwtSecret:          jwtSecret,
-		JwtExireAfterHours: jwtExpireAfterHours,
+		jwtExireAfterHours: jwtExpireAfterHours,
+		domain:             domain,
+		useSecureCookies:   useSecureCookie,
 	}
 }
 
 func (s TokenService) generateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":    time.Now().Add(time.Duration(s.JwtExireAfterHours) * time.Hour).Unix(),
+		"exp":    time.Now().Add(time.Duration(s.jwtExireAfterHours) * time.Hour).Unix(),
 		"userId": userID,
 	})
 
@@ -44,6 +48,14 @@ func (s TokenService) validateToken(tokenString string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 	return token, nil
+}
+
+func (s TokenService) setCookie(c *gin.Context, jwt string) {
+	c.SetCookie("token", jwt, s.jwtExireAfterHours*60*60, "/", s.domain, s.useSecureCookies, true)
+}
+
+func (s TokenService) unsetCookie(c *gin.Context) {
+	c.SetCookie("token", "", -1, "/", s.domain, false, true)
 }
 
 func TokenMiddleware(tokenService TokenService) gin.HandlerFunc {

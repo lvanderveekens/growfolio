@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE "user" ADD COLUMN is_demo BOOLEAN DEFAULT false;  
+
+COMMIT;

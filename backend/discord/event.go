@@ -23,7 +23,9 @@ func NewDiscordEventHandler(discordBotToken, discordEventChannelID string) Disco
 func (h DiscordEventHandler) Handle(event any) error {
 	switch v := event.(type) {
 	case domain.UserCreatedEvent:
-		h.sendMessageToChannel("New user: " + v.User.Email)
+		if !v.User.IsDemo {
+			h.sendMessageToChannel("New user: " + v.User.Email)
+		}
 	default:
 		slog.Warn(fmt.Sprintf("Ignoring unhandled event: %+v", event))
 	}
