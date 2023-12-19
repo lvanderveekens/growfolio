@@ -20,6 +20,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
@@ -72,6 +74,7 @@ func main() {
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
+	demoUserCleaner := services.NewDemoUserCleaner()
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
@@ -109,6 +112,10 @@ func main() {
 		handlers,
 		middlewares,
 	)
+
+	c := cron.New(cron.WithSeconds(), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger)))
+	c.AddFunc("* * * * * *", demoUserCleaner.Clean)
+	c.Start()
 
 	log.Fatal(server.Start(8888))
 }
