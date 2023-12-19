@@ -76,7 +76,7 @@ export default function ProfilePage() {
                 </Button>
               </div>
             )}
-            {user && user.accountType == AccountType.PREMIUM && (
+            {user && user.accountType == AccountType.PREMIUM && !user.isDemo && (
               <div>
                 <Button
                   className="w-full sm:w-auto"

@@ -822,6 +822,7 @@ export interface User {
   email: string;
   provider: string;
   accountType: AccountType;
+  isDemo: boolean;
 }
 
 export enum AccountType {
