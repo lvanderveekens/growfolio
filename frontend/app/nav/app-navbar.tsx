@@ -127,10 +127,10 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 <div
                   className={`${
                     isUserDropdownDesktopOpen ? "block" : "hidden"
-                  } absolute right-0 min-w-full bg-green-500 whitespace-nowrap shadow-md`}
+                  } font-normal border absolute right-0 min-w-full bg-white text-black rounded-md py-2 whitespace-nowrap shadow-md`}
                 >
                   <div
-                    className="hover:cursor-pointer hover:bg-green-600 p-4"
+                    className="hover:cursor-pointer hover:bg-gray-100 px-4 py-2"
                     onClick={() => {
                       api.post(`/auth/logout`).then((res) => {
                         if (window.location.pathname === "/") {

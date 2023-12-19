@@ -5,10 +5,9 @@ import (
 	"growfolio/domain/services"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-
-	"github.com/gin-gonic/gin"
 )
 
 type DemoHandler struct {

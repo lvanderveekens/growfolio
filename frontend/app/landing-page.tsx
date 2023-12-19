@@ -26,6 +26,8 @@ export default function LandingPage() {
   const [contactSuccessMessage, setContactSuccessMessage] = useState<string>();
   const [contactErrorMessage, setContactErrorMessage] = useState<string>();
 
+  const [liveDemoSubmitting, setLiveDemoSubmitting] = useState<boolean>(false);
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setContactSubmitting(true)
@@ -63,17 +65,17 @@ export default function LandingPage() {
   }
 
   const createDemoSession = () => {
-    console.log("create demo session...");
+    setLiveDemoSubmitting(true);
     api
       .post("/demo-sessions")
       .then((res) => {
-        console.log("created");
+        window.location.reload();
       })
       .catch((err) => {
         console.error(err);
       })
       .finally(() => {
-        window.location.reload();
+        setLiveDemoSubmitting(false);
       });
   }
 
@@ -104,6 +106,7 @@ export default function LandingPage() {
                   className="w-full lg:w-auto border-2 px-8 py-4 font-bold text-lg lg:text-2xl"
                   variant="quaternary"
                   onClick={createDemoSession}
+                  disabled={liveDemoSubmitting}
                 >
                   Live Demo
                 </Button>
