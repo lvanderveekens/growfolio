@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"growfolio/domain"
+	"time"
 )
 
 const (
@@ -13,9 +14,11 @@ type UserRepository interface {
 	FindByID(id string) (domain.User, error)
 	FindByEmail(email string) (domain.User, error)
 	FindByStripeCustomerID(stripeCustomerID string) (domain.User, error)
+	FindDemoUsersCreatedBefore(createdBefore time.Time) ([]domain.User, error)
 
 	Create(user domain.User) (domain.User, error)
 	Update(user domain.User) (domain.User, error)
+	DeleteByID(id string) error
 }
 
 type UserService struct {
@@ -34,6 +37,14 @@ func NewUserService(
 		investmentRepository: investmentRepository,
 		eventPublisher:       eventPublisher,
 	}
+}
+
+func (s UserService) FindDemoUsersCreatedBefore(createdBefore time.Time) ([]domain.User, error) {
+	return s.userRepository.FindDemoUsersCreatedBefore(createdBefore)
+}
+
+func (s UserService) DeleteByID(id string) error {
+	return s.userRepository.DeleteByID(id)
 }
 
 func (s UserService) FindByEmail(email string) (domain.User, error) {

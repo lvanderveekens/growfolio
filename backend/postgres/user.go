@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"growfolio/domain"
+	"growfolio/slices"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -66,6 +68,28 @@ func (r UserRepository) FindByEmail(email string) (domain.User, error) {
 	return entity.toDomainUser(), nil
 }
 
+func (r UserRepository) FindDemoUsersCreatedBefore(createdBefore time.Time) ([]domain.User, error) {
+	queryBuilder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Select("*").
+		From(`"user"`).
+		Where(sq.Lt{"created_at": createdBefore}).
+		Where(sq.Eq{"is_demo": true}).
+		OrderBy("created_at ASC")
+
+	query, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	entities := []User{}
+	err = r.db.Select(&entities, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select users: %w", err)
+	}
+
+	return slices.Map(entities, func(u User) domain.User { return u.toDomainUser() }), nil
+}
+
 func (r UserRepository) FindByStripeCustomerID(stripeCustomerID string) (domain.User, error) {
 	entity := User{}
 	err := r.db.Get(&entity, `SELECT * FROM "user" WHERE stripe_customer_id=$1`, stripeCustomerID)
@@ -106,4 +130,9 @@ func (r UserRepository) Update(user domain.User) (domain.User, error) {
 	}
 
 	return entity.toDomainUser(), nil
+}
+
+func (r UserRepository) DeleteByID(id string) error {
+	_, err := r.db.Exec(`DELETE FROM "user" WHERE id=$1`, id)
+	return err
 }
