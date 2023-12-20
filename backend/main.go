@@ -74,10 +74,7 @@ func main() {
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
-	demoUserCleaner := services.NewDemoUserCleaner(
-		mustParseInt(os.Getenv("JWT_EXPIRE_AFTER_HOURS")),
-		userService,
-	)
+	demoUserCleaner := services.NewDemoUserCleaner(userService)
 
 	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)

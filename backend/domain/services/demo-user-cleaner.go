@@ -7,18 +7,22 @@ import (
 )
 
 type DemoUserCleaner struct {
-	jwtExireAfterHours int
-	userService        UserService
+	userService UserService
 }
 
-func NewDemoUserCleaner(jwtExireAfterHours int, userService UserService) DemoUserCleaner {
-	return DemoUserCleaner{jwtExireAfterHours: jwtExireAfterHours, userService: userService}
+func NewDemoUserCleaner(
+	userService UserService,
+) DemoUserCleaner {
+	return DemoUserCleaner{
+		userService: userService,
+	}
 }
 
 func (c DemoUserCleaner) Clean() {
 	slog.Info("Cleaning demo users...")
 
-	createdBefore := time.Now().Add(-time.Duration(c.jwtExireAfterHours) * time.Hour)
+	// tokens are only valid for 24 hours
+	createdBefore := time.Now().Add(-time.Duration(24) * time.Hour)
 	demoUsers, err := c.userService.FindDemoUsersCreatedBefore(createdBefore)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to find demo users: %+v", err))
