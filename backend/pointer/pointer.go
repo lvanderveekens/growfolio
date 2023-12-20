@@ -22,3 +22,10 @@ func IntToString(i *int64) string {
 	}
 	return strconv.FormatInt(*i, 10)
 }
+
+func IntOrNil(i int64) *int64 {
+	if i == 0 {
+		return nil
+	}
+	return &i
+}

@@ -93,7 +93,7 @@ func main() {
 		os.Getenv("FRONTEND_HOST"),
 	)
 	contactHandler := api.NewContactHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_CONTACT_CHANNEL_ID"))
-	demoHandler := api.NewDemoHandler(userService, tokenService)
+	demoHandler := api.NewDemoHandler(userService, investmentService, tokenService)
 
 	handlers := api.NewHandlers(
 		investmentHandler,
