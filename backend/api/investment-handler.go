@@ -16,20 +16,23 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentService       services.InvestmentService
-	investmentUpdateService services.InvestmentUpdateService
-	userRepository          services.UserRepository
+	investmentService          services.InvestmentService
+	investmentUpdateService    services.InvestmentUpdateService
+	userRepository             services.UserRepository
+	investmentUpdateCSVService InvestmentUpdateCSVImporter
 }
 
 func NewInvestmentHandler(
 	investmentService services.InvestmentService,
 	investmentUpdateService services.InvestmentUpdateService,
 	userRepository services.UserRepository,
+	investmentUpdateCSVService InvestmentUpdateCSVImporter,
 ) InvestmentHandler {
 	return InvestmentHandler{
-		investmentService:       investmentService,
-		investmentUpdateService: investmentUpdateService,
-		userRepository:          userRepository,
+		investmentService:          investmentService,
+		investmentUpdateService:    investmentUpdateService,
+		userRepository:             userRepository,
+		investmentUpdateCSVService: investmentUpdateCSVService,
 	}
 }
 
@@ -165,7 +168,6 @@ func (h InvestmentHandler) CreateUpdate(c *gin.Context) (response[investmentUpda
 	return newResponse(http.StatusCreated, toInvestmentUpdateDto(update)), nil
 }
 
-// TODO: how to reuse CSV shizzle with demo handler
 func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error) {
 	tokenClaims := c.Value("token").(*jwt.Token).Claims.(jwt.MapClaims)
 	tokenUserID := tokenClaims["userId"].(string)
@@ -183,60 +185,23 @@ func (h InvestmentHandler) ImportUpdates(c *gin.Context) (response[empty], error
 		return response[empty]{}, NewError(http.StatusForbidden, "not allowed to read investment")
 	}
 
-	records, err := h.readInvestmentUpdateCSVFile(c)
-	if err != nil {
-		return response[empty]{}, errors.Wrap(err, "failed to read investment update CSV file")
-	}
-
-	commands := make([]domain.CreateInvestmentUpdateCommand, 0)
-	for _, record := range records {
-		command, err := record.toCreateInvestmentUpdateCommand(investment)
-		if err != nil {
-			return response[empty]{}, errors.Wrap(err, "failed to map record to command")
-		}
-		commands = append(commands, command)
-	}
-
-	for _, command := range commands {
-		_, err := h.investmentUpdateService.Create(command)
-		if err != nil {
-			return response[empty]{}, fmt.Errorf("failed to create update: %w", err)
-		}
-	}
-
-	return newEmptyResponse(200), nil
-}
-
-func (h InvestmentHandler) readInvestmentUpdateCSVFile(c *gin.Context) ([]InvestmentUpdateCSVRecord, error) {
 	csvFormFile, err := c.FormFile("csvFile")
 	if err != nil {
-		return []InvestmentUpdateCSVRecord{}, NewError(http.StatusBadRequest, err.Error())
+		return response[empty]{}, NewError(http.StatusBadRequest, err.Error())
 	}
 
 	csvFile, err := csvFormFile.Open()
 	if err != nil {
-		return []InvestmentUpdateCSVRecord{}, fmt.Errorf("failed to open CSV file: %w", err)
+		return response[empty]{}, fmt.Errorf("failed to open CSV file: %w", err)
 	}
 	defer csvFile.Close()
 
-	csvReader := csv.NewReader(csvFile)
-
-	records, err := csvReader.ReadAll()
+	err = h.investmentUpdateCSVService.Import(csv.NewReader(csvFile), investment)
 	if err != nil {
-		return []InvestmentUpdateCSVRecord{}, fmt.Errorf("failed to read CSV records: %w", err)
+		return response[empty]{}, errors.Wrap(err, "failed to import CSV updates")
 	}
 
-	updateRecords := make([]InvestmentUpdateCSVRecord, 0)
-	for i := 1; i < len(records); i++ { // skipping the header row
-		record := records[i]
-		updateRecords = append(updateRecords, newInvestmentUpdateCSVRecord(
-			record[0],
-			record[1],
-			record[2],
-			record[3],
-		))
-	}
-	return updateRecords, nil
+	return newEmptyResponse(200), nil
 }
 
 func (h InvestmentHandler) ExportUpdates(c *gin.Context) error {
