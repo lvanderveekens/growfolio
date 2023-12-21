@@ -70,3 +70,8 @@ func (r SettingsRepository) Update(settings domain.Settings) (domain.Settings, e
 
 	return entity.toDomainSettings(), nil
 }
+
+func (r SettingsRepository) DeleteByUserID(userID string) error {
+	_, err := r.db.Exec("DELETE FROM settings WHERE user_id=$1", userID)
+	return err
+}

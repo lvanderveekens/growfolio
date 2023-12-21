@@ -7,8 +7,10 @@ import (
 
 type SettingsRepository interface {
 	FindByUserID(userID string) (domain.Settings, error)
+
 	Create(settings domain.Settings) (domain.Settings, error)
 	Update(settings domain.Settings) (domain.Settings, error)
+	DeleteByUserID(userID string) error
 }
 
 type SettingsService struct {
@@ -43,4 +45,8 @@ func (s SettingsService) Update(settings domain.Settings) (domain.Settings, erro
 	}
 
 	return s.settingsRepository.Update(settings)
+}
+
+func (s SettingsService) DeleteByUserID(userID string) error {
+	return s.settingsRepository.DeleteByUserID(userID)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"growfolio/internal/domain"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -22,20 +24,23 @@ type UserRepository interface {
 }
 
 type UserService struct {
-	userRepository       UserRepository
-	investmentRepository InvestmentRepository
-	eventPublisher       EventPublisher
+	userRepository    UserRepository
+	investmentService InvestmentService
+	eventPublisher    EventPublisher
+	settingsService   SettingsService
 }
 
 func NewUserService(
 	userRepository UserRepository,
-	investmentRepository InvestmentRepository,
+	investmentService InvestmentService,
 	eventPublisher EventPublisher,
+	settingsService SettingsService,
 ) UserService {
 	return UserService{
-		userRepository:       userRepository,
-		investmentRepository: investmentRepository,
-		eventPublisher:       eventPublisher,
+		userRepository:    userRepository,
+		investmentService: investmentService,
+		eventPublisher:    eventPublisher,
+		settingsService:   settingsService,
 	}
 }
 
@@ -44,6 +49,23 @@ func (s UserService) FindDemoUsersCreatedBefore(createdBefore time.Time) ([]doma
 }
 
 func (s UserService) DeleteByID(id string) error {
+	investments, err := s.investmentService.FindByUserID(id)
+	if err != nil {
+		return errors.Wrapf(err, "failed to find investements by user id %s", id)
+	}
+
+	for _, investment := range investments {
+		err := s.investmentService.DeleteByID(investment.ID)
+		if err != nil {
+			return errors.Wrapf(err, "failed to delete investment by id %s", investment.ID)
+		}
+	}
+
+	err = s.settingsService.DeleteByUserID(id)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete settings by user id %s", id)
+	}
+
 	return s.userRepository.DeleteByID(id)
 }
 
@@ -79,14 +101,14 @@ func (s UserService) UpgradeToPremium(user domain.User, stripeCustomerID string)
 		return fmt.Errorf("failed to update user: %w", err)
 	}
 
-	investments, err := s.investmentRepository.FindByUserID(user.ID)
+	investments, err := s.investmentService.FindByUserID(user.ID)
 	if err != nil {
 		return fmt.Errorf("failed to find investments: %w", err)
 	}
 
 	for _, investment := range investments {
 		if investment.Locked {
-			err := s.investmentRepository.UpdateLocked(investment.ID, false)
+			err := s.investmentService.UpdateLocked(investment.ID, false)
 			if err != nil {
 				return fmt.Errorf("failed to update investment: %w", err)
 			}
@@ -105,14 +127,14 @@ func (s UserService) DowngradeToBasic(user domain.User) error {
 		return fmt.Errorf("failed to update user: %w", err)
 	}
 
-	investments, err := s.investmentRepository.FindByUserID(user.ID)
+	investments, err := s.investmentService.FindByUserID(user.ID)
 	if err != nil {
 		return fmt.Errorf("failed to find investments: %w", err)
 	}
 
 	if len(investments) > MaxInvestmentsForBasicAccount {
 		for i := MaxInvestmentsForBasicAccount; i < len(investments); i++ {
-			err := s.investmentRepository.UpdateLocked(investments[i].ID, true)
+			err := s.investmentService.UpdateLocked(investments[i].ID, true)
 			if err != nil {
 				return fmt.Errorf("failed to update investment: %w", err)
 			}

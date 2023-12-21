@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"growfolio/internal/domain"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type InvestmentRepository interface {
@@ -28,6 +30,10 @@ func NewInvestmentService(
 		investmentRepository:    investmentRepository,
 		investmentUpdateService: investmentUpdateService,
 	}
+}
+
+func (s InvestmentService) UpdateLocked(id string, locked bool) error {
+	return s.UpdateLocked(id, locked)
 }
 
 func (s InvestmentService) FindByUserID(userID string) ([]domain.Investment, error) {
@@ -73,5 +79,10 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 }
 
 func (s InvestmentService) DeleteByID(id string) error {
+	err := s.investmentUpdateService.DeleteByInvestmentID(id)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete updates by investment id %s", id)
+	}
+
 	return s.investmentRepository.DeleteByID(id)
 }

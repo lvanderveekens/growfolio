@@ -73,7 +73,7 @@ func main() {
 	)
 	settingsService := services.NewSettingsService(settingsRepository)
 	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
-	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
+	userService := services.NewUserService(userRepository, investmentService, eventPublisher, settingsService)
 	demoUserCleaner := services.NewDemoUserCleaner(userService)
 	investmentUpdateCSVImporter := api.NewInvestmentUpdateCSVImporter(investmentUpdateService)
 
@@ -115,7 +115,7 @@ func main() {
 	)
 
 	c := cron.New(cron.WithSeconds(), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger)))
-	c.AddFunc("0 * * * * *", demoUserCleaner.Clean)
+	c.AddFunc("0 0 * * * *", demoUserCleaner.Clean) // every hour
 	c.Start()
 
 	log.Fatal(server.Start(8888))
