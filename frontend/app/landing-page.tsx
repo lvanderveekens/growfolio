@@ -85,7 +85,7 @@ export default function LandingPage() {
 
       {/* hero */}
       <div className="w-full">
-        <div className="mx-auto py-[120px] lg:py-[150px] relative">
+        <div className="mx-auto py-[50px] lg:py-[150px] relative">
           <div className="absolute z-[-1] top-0 left-0 w-full h-full bg-[url('/hero-background.png')] bg-center blur-md"></div>
           <div className="container">
             <div className="w-full lg:w-2/4 mx-auto">
