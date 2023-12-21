@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/csv"
 	"growfolio/domain"
 	"growfolio/domain/services"
 	"growfolio/pointer"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +15,23 @@ import (
 )
 
 type DemoHandler struct {
-	userService       services.UserService
-	investmentService services.InvestmentService
-	tokenService      TokenService
+	userService                 services.UserService
+	investmentService           services.InvestmentService
+	investmentUpdateCSVImporter InvestmentUpdateCSVImporter
+	tokenService                TokenService
 }
 
 func NewDemoHandler(
 	userService services.UserService,
 	investmentService services.InvestmentService,
+	investmentUpdateCSVImporter InvestmentUpdateCSVImporter,
 	tokenService TokenService,
 ) DemoHandler {
 	return DemoHandler{
-		userService:       userService,
-		investmentService: investmentService,
-		tokenService:      tokenService,
+		userService:                 userService,
+		investmentService:           investmentService,
+		investmentUpdateCSVImporter: investmentUpdateCSVImporter,
+		tokenService:                tokenService,
 	}
 }
 
@@ -36,90 +41,40 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 		return errors.Wrap(err, "failed to generate new UUID")
 	}
 
-	demoUser := domain.NewUser(
-		id.String(),
-		"demo@growfolio.co",
-		domain.UserProviderLocal,
-		domain.AccountTypePremium,
-		nil,
-		true,
-	)
+	demoUser := domain.NewUser(id.String(), "demo@growfolio.co", domain.UserProviderLocal, domain.AccountTypePremium,
+		nil, true)
 
 	demoUser, err = h.userService.Create(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create user")
 	}
 
-	// TODO: create demo user data
-
 	threeYearsAgo := time.Now().AddDate(-3, 0, 0)
 
-	_, err = h.investmentService.Create(domain.NewCreateInvestmentCommand(
-		domain.InvestmentTypeFund,
-		"NT World",
-		demoUser,
-		false,
-		&threeYearsAgo,
-		pointer.IntOrNil(10000),
-		10000,
-	))
+	err = h.createNTWorldInvestment(demoUser, threeYearsAgo)
 	if err != nil {
-		return errors.Wrap(err, "failed to create investment")
+		return errors.Wrap(err, "failed to create NT World investment")
 	}
 
-	_, err = h.investmentService.Create(domain.NewCreateInvestmentCommand(
-		domain.InvestmentTypeFund,
-		"NT Emerging Markets",
-		demoUser,
-		false,
-		&threeYearsAgo,
-		pointer.IntOrNil(10000),
-		10000,
-	))
+	err = h.createNTEmergingMarketsInvestment(demoUser, threeYearsAgo)
 	if err != nil {
-		return errors.Wrap(err, "failed to create investment")
+		return errors.Wrap(err, "failed to create NT Emerging Markets investment")
 	}
 
-	_, err = h.investmentService.Create(domain.NewCreateInvestmentCommand(
-		domain.InvestmentTypeFund,
-		"NT Small Cap",
-		demoUser,
-		false,
-		&threeYearsAgo,
-		pointer.IntOrNil(10000),
-		10000,
-	))
+	err = h.createNTSmallCapInvestment(demoUser, threeYearsAgo)
 	if err != nil {
-		return errors.Wrap(err, "failed to create investment")
+		return errors.Wrap(err, "failed to create NT Small Cap investment")
 	}
 
-	_, err = h.investmentService.Create(domain.NewCreateInvestmentCommand(
-		domain.InvestmentTypeCrypto,
-		"Bitcoin",
-		demoUser,
-		false,
-		&threeYearsAgo,
-		pointer.IntOrNil(10000),
-		10000,
-	))
+	err = h.createBitcoinInvestment(demoUser, threeYearsAgo)
 	if err != nil {
-		return errors.Wrap(err, "failed to create investment")
+		return errors.Wrap(err, "failed to create Bitcoin investment")
 	}
 
-	_, err = h.investmentService.Create(domain.NewCreateInvestmentCommand(
-		domain.InvestmentTypeCash,
-		"Cash",
-		demoUser,
-		false,
-		&threeYearsAgo,
-		pointer.IntOrNil(1000000),
-		1000000,
-	))
+	err = h.createCashInvestment(demoUser, threeYearsAgo)
 	if err != nil {
-		return errors.Wrap(err, "failed to create investment")
+		return errors.Wrap(err, "failed to create Cash investment")
 	}
-
-	// TODO: import updates from CSV
 
 	jwt, err := h.tokenService.generateToken(demoUser.ID)
 	if err != nil {
@@ -129,4 +84,125 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 	h.tokenService.setCookie(c, jwt)
 	c.Status(http.StatusOK)
 	return nil
+}
+
+func (h DemoHandler) createNTWorldInvestment(demoUser domain.User, initialDate time.Time) error {
+	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+		domain.InvestmentTypeFund,
+		"NT World",
+		demoUser,
+		false,
+		&initialDate,
+		pointer.IntOrNil(10000),
+		10000,
+	))
+	if err != nil {
+		return errors.Wrap(err, "failed to create investment")
+	}
+
+	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to open CSV file")
+	// }
+	// defer csvFile.Close()
+
+	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to import CSV updates")
+	// }
+	return nil
+}
+
+func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User, initialDate time.Time) error {
+	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+		domain.InvestmentTypeFund,
+		"NT Emerging Markets",
+		demoUser,
+		false,
+		&initialDate,
+		pointer.IntOrNil(10000),
+		10000,
+	))
+	if err != nil {
+		return errors.Wrap(err, "failed to create investment")
+	}
+
+	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to open CSV file")
+	// }
+	// defer csvFile.Close()
+
+	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to import CSV updates")
+	// }
+	return nil
+}
+
+func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User, initialDate time.Time) error {
+	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+		domain.InvestmentTypeFund,
+		"NT Small Cap",
+		demoUser,
+		false,
+		&initialDate,
+		pointer.IntOrNil(10000),
+		10000,
+	))
+	if err != nil {
+		return errors.Wrap(err, "failed to create investment")
+	}
+
+	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to open CSV file")
+	// }
+	// defer csvFile.Close()
+
+	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to import CSV updates")
+	// }
+	return nil
+}
+
+func (h DemoHandler) createBitcoinInvestment(demoUser domain.User, initialDate time.Time) error {
+	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+		domain.InvestmentTypeCrypto,
+		"Bitcoin",
+		demoUser,
+		false,
+		&initialDate,
+		pointer.IntOrNil(10000),
+		10000,
+	))
+	if err != nil {
+		return errors.Wrap(err, "failed to create investment")
+	}
+
+	csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	if err != nil {
+		return errors.Wrap(err, "failed to open CSV file")
+	}
+	defer csvFile.Close()
+
+	err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	if err != nil {
+		return errors.Wrap(err, "failed to import CSV updates")
+	}
+	return nil
+}
+
+func (h DemoHandler) createCashInvestment(demoUser domain.User, initialDate time.Time) error {
+	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+		domain.InvestmentTypeCash,
+		"Cash",
+		demoUser,
+		false,
+		&initialDate,
+		pointer.IntOrNil(1000000),
+		1000000,
+	))
+	return err
 }

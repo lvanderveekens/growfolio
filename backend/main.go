@@ -75,8 +75,9 @@ func main() {
 	investmentService := services.NewInvestmentService(investmentRepository, investmentUpdateService)
 	userService := services.NewUserService(userRepository, investmentRepository, eventPublisher)
 	demoUserCleaner := services.NewDemoUserCleaner(userService)
+	investmentUpdateCSVImporter := api.NewInvestmentUpdateCSVImporter(investmentUpdateService)
 
-	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository)
+	investmentHandler := api.NewInvestmentHandler(investmentService, investmentUpdateService, &userRepository, investmentUpdateCSVImporter)
 	investmentUpdateHandler := api.NewInvestmentUpdateHandler(investmentService, investmentUpdateService)
 	authHandler := api.NewAuthHandler(userService, tokenService)
 	userHandler := api.NewUserHandler(&userRepository)
@@ -90,7 +91,7 @@ func main() {
 		os.Getenv("FRONTEND_HOST"),
 	)
 	contactHandler := api.NewContactHandler(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_CONTACT_CHANNEL_ID"))
-	demoHandler := api.NewDemoHandler(userService, investmentService, tokenService)
+	demoHandler := api.NewDemoHandler(userService, investmentService, investmentUpdateCSVImporter, tokenService)
 
 	handlers := api.NewHandlers(
 		investmentHandler,
@@ -114,7 +115,7 @@ func main() {
 	)
 
 	c := cron.New(cron.WithSeconds(), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger)))
-	c.AddFunc("* * * * * *", demoUserCleaner.Clean)
+	c.AddFunc("0 * * * * *", demoUserCleaner.Clean)
 	c.Start()
 
 	log.Fatal(server.Start(8888))
