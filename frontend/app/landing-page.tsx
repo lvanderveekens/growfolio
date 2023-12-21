@@ -75,7 +75,7 @@ export default function LandingPage() {
         console.error(err);
       })
       .finally(() => {
-        setLiveDemoSubmitting(false);
+        // setLiveDemoSubmitting(false);
       });
   }
 

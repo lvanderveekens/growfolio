@@ -49,29 +49,29 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 		return errors.Wrap(err, "failed to create user")
 	}
 
-	threeYearsAgo := time.Now().AddDate(-3, 0, 0)
+	initialDate := time.Date(2021, 1, 1, 0, 0, 0, 0, time.Local)
 
-	err = h.createNTWorldInvestment(demoUser, threeYearsAgo)
+	err = h.createNTWorldInvestment(demoUser, initialDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT World investment")
 	}
 
-	err = h.createNTEmergingMarketsInvestment(demoUser, threeYearsAgo)
+	err = h.createNTEmergingMarketsInvestment(demoUser, initialDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT Emerging Markets investment")
 	}
 
-	err = h.createNTSmallCapInvestment(demoUser, threeYearsAgo)
+	err = h.createNTSmallCapInvestment(demoUser, initialDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT Small Cap investment")
 	}
 
-	err = h.createBitcoinInvestment(demoUser, threeYearsAgo)
+	err = h.createBitcoinInvestment(demoUser, initialDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to create Bitcoin investment")
 	}
 
-	err = h.createCashInvestment(demoUser, threeYearsAgo)
+	err = h.createCashInvestment(demoUser, initialDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to create Cash investment")
 	}
@@ -87,83 +87,83 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 }
 
 func (h DemoHandler) createNTWorldInvestment(demoUser domain.User, initialDate time.Time) error {
-	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT World",
 		demoUser,
 		false,
 		&initialDate,
-		pointer.IntOrNil(10000),
-		10000,
+		pointer.IntOrNil(1000),
+		1000,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to open CSV file")
-	// }
-	// defer csvFile.Close()
+	csvFile, err := os.Open("demo/NT_World_updates.csv")
+	if err != nil {
+		return errors.Wrap(err, "failed to open CSV file")
+	}
+	defer csvFile.Close()
 
-	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to import CSV updates")
-	// }
+	err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	if err != nil {
+		return errors.Wrap(err, "failed to import CSV updates")
+	}
 	return nil
 }
 
 func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User, initialDate time.Time) error {
-	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT Emerging Markets",
 		demoUser,
 		false,
 		&initialDate,
-		pointer.IntOrNil(10000),
-		10000,
+		pointer.IntOrNil(1000),
+		1000,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to open CSV file")
-	// }
-	// defer csvFile.Close()
+	csvFile, err := os.Open("demo/NT_Emerging_Markets_updates.csv")
+	if err != nil {
+		return errors.Wrap(err, "failed to open CSV file")
+	}
+	defer csvFile.Close()
 
-	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to import CSV updates")
-	// }
+	err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	if err != nil {
+		return errors.Wrap(err, "failed to import CSV updates")
+	}
 	return nil
 }
 
 func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User, initialDate time.Time) error {
-	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
+	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT Small Cap",
 		demoUser,
 		false,
 		&initialDate,
-		pointer.IntOrNil(10000),
-		10000,
+		pointer.IntOrNil(1000),
+		1000,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to open CSV file")
-	// }
-	// defer csvFile.Close()
+	csvFile, err := os.Open("demo/NT_Small_Cap_updates.csv")
+	if err != nil {
+		return errors.Wrap(err, "failed to open CSV file")
+	}
+	defer csvFile.Close()
 
-	// err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to import CSV updates")
-	// }
+	err = h.investmentUpdateCSVImporter.Import(csv.NewReader(csvFile), investment)
+	if err != nil {
+		return errors.Wrap(err, "failed to import CSV updates")
+	}
 	return nil
 }
 
@@ -174,14 +174,14 @@ func (h DemoHandler) createBitcoinInvestment(demoUser domain.User, initialDate t
 		demoUser,
 		false,
 		&initialDate,
-		pointer.IntOrNil(10000),
-		10000,
+		pointer.IntOrNil(1000),
+		1000,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	csvFile, err := os.Open("demo/bitcoin-updates.csv")
+	csvFile, err := os.Open("demo/Bitcoin_updates.csv")
 	if err != nil {
 		return errors.Wrap(err, "failed to open CSV file")
 	}
@@ -201,8 +201,8 @@ func (h DemoHandler) createCashInvestment(demoUser domain.User, initialDate time
 		demoUser,
 		false,
 		&initialDate,
-		pointer.IntOrNil(1000000),
-		1000000,
+		pointer.IntOrNil(500000),
+		500000,
 	))
 	return err
 }
