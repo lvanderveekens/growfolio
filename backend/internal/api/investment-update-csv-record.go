@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"growfolio/domain"
-	"growfolio/pointer"
+	"growfolio/internal/domain"
+	"growfolio/internal/pointer"
 	"strconv"
 	"time"
 )

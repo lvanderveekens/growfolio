@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/csv"
-	"growfolio/domain"
-	"growfolio/domain/services"
+	"growfolio/internal/domain"
+	"growfolio/internal/domain/services"
 
 	"github.com/pkg/errors"
 )

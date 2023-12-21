@@ -3,7 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"growfolio/domain"
+	"growfolio/internal/domain"
 	"time"
 
 	"errors"

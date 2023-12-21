@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"growfolio/domain"
-	"growfolio/domain/services"
+	"growfolio/internal/domain"
+	"growfolio/internal/domain/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

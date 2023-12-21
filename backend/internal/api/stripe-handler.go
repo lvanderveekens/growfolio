@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"growfolio/domain/services"
+	"growfolio/internal/domain/services"
 	"io"
 	"log/slog"
 	"net/http"

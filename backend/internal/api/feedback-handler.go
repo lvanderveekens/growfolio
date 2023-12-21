@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
-	"growfolio/domain/services"
+	"growfolio/internal/domain/services"
 	"net/http"
 
 	"github.com/bwmarrin/discordgo"

@@ -2,7 +2,7 @@ package discord
 
 import (
 	"fmt"
-	"growfolio/domain"
+	"growfolio/internal/domain"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"

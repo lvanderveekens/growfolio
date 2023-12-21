@@ -3,8 +3,8 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"growfolio/domain"
-	"growfolio/slices"
+	"growfolio/internal/domain"
+	"growfolio/internal/slices"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"

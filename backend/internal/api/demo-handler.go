@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/csv"
-	"growfolio/domain"
-	"growfolio/domain/services"
-	"growfolio/pointer"
+	"growfolio/internal/domain"
+	"growfolio/internal/domain/services"
+	"growfolio/internal/pointer"
 	"net/http"
 	"os"
 	"time"
@@ -100,7 +100,7 @@ func (h DemoHandler) createNTWorldInvestment(demoUser domain.User, initialDate t
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
 	// if err != nil {
 	// 	return errors.Wrap(err, "failed to open CSV file")
 	// }
@@ -127,7 +127,7 @@ func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User, ini
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
 	// if err != nil {
 	// 	return errors.Wrap(err, "failed to open CSV file")
 	// }
@@ -154,7 +154,7 @@ func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User, initialDat
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	// csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	// csvFile, err := os.Open("demo/bitcoin-updates.csv")
 	// if err != nil {
 	// 	return errors.Wrap(err, "failed to open CSV file")
 	// }
@@ -181,7 +181,7 @@ func (h DemoHandler) createBitcoinInvestment(demoUser domain.User, initialDate t
 		return errors.Wrap(err, "failed to create investment")
 	}
 
-	csvFile, err := os.Open("demo-data/bitcoin-updates.csv")
+	csvFile, err := os.Open("demo/bitcoin-updates.csv")
 	if err != nil {
 		return errors.Wrap(err, "failed to open CSV file")
 	}

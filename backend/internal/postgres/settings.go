@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"growfolio/domain"
+	"growfolio/internal/domain"
 	"time"
 
 	"github.com/jmoiron/sqlx"

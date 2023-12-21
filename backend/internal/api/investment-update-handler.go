@@ -2,10 +2,10 @@ package api
 
 import (
 	"fmt"
-	"growfolio/domain"
-	"growfolio/domain/services"
-	"growfolio/pointer"
-	xslices "growfolio/slices"
+	"growfolio/internal/domain"
+	"growfolio/internal/domain/services"
+	"growfolio/internal/pointer"
+	xslices "growfolio/internal/slices"
 	"net/http"
 	"slices"
 	"time"
