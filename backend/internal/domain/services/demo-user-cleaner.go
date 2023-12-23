@@ -37,7 +37,4 @@ func (c DemoUserCleaner) Clean() {
 		}
 		slog.Info(fmt.Sprintf("Deleted demo user %s", demoUser.ID))
 	}
-
-	// TODO: clean up demo user data
-	// TODO: do not forget settings
 }
