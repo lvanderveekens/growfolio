@@ -9,6 +9,7 @@
       @apply disabled:bg-gray-100;
       @apply w-full;
       @apply bg-white;
+      @apply placeholder:text-gray-400;
 
       appearance: none;
       border-radius: 0;
@@ -22,6 +23,7 @@
       @apply py-2;
       @apply w-full;
       @apply bg-white;
+      @apply placeholder:text-gray-400;
 
       appearance: none;
       border-radius: 0;

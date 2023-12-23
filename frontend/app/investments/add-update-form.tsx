@@ -128,7 +128,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         <div className="text-red-500">{errors.date}</div>
       </div>
       <div className="mb-4">
-        <label>Deposit (optional)</label>
+        <label>Deposit <span className='text-gray-400'>(optional)</span></label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -140,7 +140,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         />
       </div>
       <div className="mb-4">
-        <label>Withdrawal (optional)</label>
+        <label>Withdrawal <span className='text-gray-400'>(optional)</span></label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
