@@ -108,7 +108,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <label>Type</label>
+        <label className="font-medium">Type</label>
         <Dropdown
           className="w-full"
           placeholder="Select a type"
@@ -128,17 +128,27 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       </div>
       <div className="mb-4">
         <label>
-          <div>Name</div>
-          <input className="w-full" type="text" value={name || ""} onChange={(e) => setName(e.target.value)} />
+          <div className="font-medium">Name</div>
+          <input
+            className="w-full"
+            type="text"
+            value={name || ""}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+          />
         </label>
         <div className="text-red-500">{errors.name}</div>
       </div>
 
       <div className="mb-4">
-        <div className="">Initial update <span className="text-gray-400">(optional)</span></div>
-        <div className='border p-4'>
+        <div>
+          <span className="font-medium">Initial update</span> <span className="text-gray-400">(optional)</span>
+        </div>
+        <div className="border p-4">
           <div className="mb-4">
-            <div>Date <span className='text-gray-400'>(optional)</span></div>
+            <div>
+              <span className="font-medium">Date</span> <span className="text-gray-400">(optional)</span>
+            </div>
             <DatePicker
               className="border w-full p-2"
               wrapperClassName="w-full"
@@ -149,7 +159,9 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
             />
           </div>
           <div className="mb-4">
-            <label>Deposit <span className='text-gray-400'>(optional)</span></label>
+            <label>
+              <span className="font-medium">Deposit</span> <span className="text-gray-400">(optional)</span>
+            </label>
             <CurrencyInput
               className="border w-full px-2 py-2"
               prefix={signPrefixesByCurrency[currency]}
@@ -167,7 +179,7 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
             />
           </div>
           <div className="">
-            <label>Value</label>
+            <label className="font-medium">Value</label>
             <CurrencyInput
               className="border w-full px-2 py-2"
               prefix={signPrefixesByCurrency[currency]}

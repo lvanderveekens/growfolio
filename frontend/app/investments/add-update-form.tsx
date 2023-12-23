@@ -116,7 +116,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <label>Date</label>
+        <label className='font-medium'>Date</label>
         <DatePicker
           className="border w-full p-2"
           wrapperClassName="w-full"
@@ -128,7 +128,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         <div className="text-red-500">{errors.date}</div>
       </div>
       <div className="mb-4">
-        <label>Deposit <span className='text-gray-400'>(optional)</span></label>
+        <label><span className='font-medium'>Deposit</span> <span className='text-gray-400'>(optional)</span></label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -140,7 +140,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         />
       </div>
       <div className="mb-4">
-        <label>Withdrawal <span className='text-gray-400'>(optional)</span></label>
+        <label><span className='font-medium'>Withdrawal</span> <span className='text-gray-400'>(optional)</span></label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
@@ -152,7 +152,7 @@ const AddUpdateForm: React.FC<AddUpdateFormProps> = ({
         />
       </div>
       <div className="mb-4">
-        <label>Value</label>
+        <label className='font-medium'>Value</label>
         <CurrencyInput
           className="border w-full px-2 py-2"
           prefix={signPrefixesByCurrency[currency]}
