@@ -33,7 +33,7 @@ func NewInvestmentService(
 }
 
 func (s InvestmentService) UpdateLocked(id string, locked bool) error {
-	return s.UpdateLocked(id, locked)
+	return s.investmentRepository.UpdateLocked(id, locked)
 }
 
 func (s InvestmentService) FindByUserID(userID string) ([]domain.Investment, error) {
@@ -59,20 +59,24 @@ func (s InvestmentService) Create(command domain.CreateInvestmentCommand) (domai
 		return domain.Investment{}, fmt.Errorf("failed to create investment: %w", err)
 	}
 
-	initialDate := time.Now()
-	if command.InitialDate != nil {
-		initialDate = *command.InitialDate
-	}
+	if command.InitialUpdate != nil {
+		initialUpdate := command.InitialUpdate
 
-	_, err = s.investmentUpdateService.Create(domain.NewCreateInvestmentUpdateCommand(
-		investment,
-		initialDate,
-		command.InitialCost,
-		nil,
-		command.InitialValue,
-	))
-	if err != nil {
-		return domain.Investment{}, fmt.Errorf("failed to create update: %w", err)
+		date := time.Now()
+		if initialUpdate.Date != nil {
+			date = *initialUpdate.Date
+		}
+
+		_, err = s.investmentUpdateService.Create(domain.NewCreateInvestmentUpdateCommand(
+			investment,
+			date,
+			initialUpdate.Deposit,
+			nil,
+			initialUpdate.Value,
+		))
+		if err != nil {
+			return domain.Investment{}, fmt.Errorf("failed to create update: %w", err)
+		}
 	}
 
 	return investment, nil

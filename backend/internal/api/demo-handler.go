@@ -49,29 +49,27 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 		return errors.Wrap(err, "failed to create user")
 	}
 
-	initialDate := time.Date(2021, 1, 1, 0, 0, 0, 0, time.Local)
-
-	err = h.createNTWorldInvestment(demoUser, initialDate)
+	err = h.createNTWorldInvestment(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT World investment")
 	}
 
-	err = h.createNTEmergingMarketsInvestment(demoUser, initialDate)
+	err = h.createNTEmergingMarketsInvestment(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT Emerging Markets investment")
 	}
 
-	err = h.createNTSmallCapInvestment(demoUser, initialDate)
+	err = h.createNTSmallCapInvestment(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create NT Small Cap investment")
 	}
 
-	err = h.createBitcoinInvestment(demoUser, initialDate)
+	err = h.createBitcoinInvestment(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create Bitcoin investment")
 	}
 
-	err = h.createCashInvestment(demoUser, initialDate)
+	err = h.createCashInvestment(demoUser)
 	if err != nil {
 		return errors.Wrap(err, "failed to create Cash investment")
 	}
@@ -86,15 +84,13 @@ func (h DemoHandler) CreateDemoSession(c *gin.Context) error {
 	return nil
 }
 
-func (h DemoHandler) createNTWorldInvestment(demoUser domain.User, initialDate time.Time) error {
+func (h DemoHandler) createNTWorldInvestment(demoUser domain.User) error {
 	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT World",
 		demoUser,
 		false,
-		&initialDate,
-		pointer.IntOrNil(1000),
-		1000,
+		nil,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
@@ -113,15 +109,13 @@ func (h DemoHandler) createNTWorldInvestment(demoUser domain.User, initialDate t
 	return nil
 }
 
-func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User, initialDate time.Time) error {
+func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User) error {
 	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT Emerging Markets",
 		demoUser,
 		false,
-		&initialDate,
-		pointer.IntOrNil(1000),
-		1000,
+		nil,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
@@ -140,15 +134,13 @@ func (h DemoHandler) createNTEmergingMarketsInvestment(demoUser domain.User, ini
 	return nil
 }
 
-func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User, initialDate time.Time) error {
+func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User) error {
 	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeFund,
 		"NT Small Cap",
 		demoUser,
 		false,
-		&initialDate,
-		pointer.IntOrNil(1000),
-		1000,
+		nil,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
@@ -167,15 +159,13 @@ func (h DemoHandler) createNTSmallCapInvestment(demoUser domain.User, initialDat
 	return nil
 }
 
-func (h DemoHandler) createBitcoinInvestment(demoUser domain.User, initialDate time.Time) error {
+func (h DemoHandler) createBitcoinInvestment(demoUser domain.User) error {
 	investment, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeCrypto,
 		"Bitcoin",
 		demoUser,
 		false,
-		&initialDate,
-		pointer.IntOrNil(1000),
-		1000,
+		nil,
 	))
 	if err != nil {
 		return errors.Wrap(err, "failed to create investment")
@@ -194,15 +184,17 @@ func (h DemoHandler) createBitcoinInvestment(demoUser domain.User, initialDate t
 	return nil
 }
 
-func (h DemoHandler) createCashInvestment(demoUser domain.User, initialDate time.Time) error {
+func (h DemoHandler) createCashInvestment(demoUser domain.User) error {
 	_, err := h.investmentService.Create(domain.NewCreateInvestmentCommand(
 		domain.InvestmentTypeCash,
 		"Cash",
 		demoUser,
 		false,
-		&initialDate,
-		pointer.IntOrNil(500000),
-		500000,
+		pointer.Of(domain.NewInitialInvestmentUpdate(
+			pointer.Of(time.Date(2021, 1, 1, 0, 0, 0, 0, time.Local)),
+			pointer.Of(int64(500000)),
+			500000,
+		)),
 	))
 	return err
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"growfolio/internal/domain"
 	"growfolio/internal/domain/services"
+	"growfolio/internal/pointer"
 	"net/http"
 	"os"
 	"strings"
@@ -274,11 +275,9 @@ func toInvestmentDto(i domain.Investment) investmentDto {
 }
 
 type CreateInvestmentRequest struct {
-	Type         domain.InvestmentType `json:"type"`
-	Name         string                `json:"name"`
-	InitialDate  *string               `json:"initialDate"`
-	InitialCost  *int64                `json:"initialCost"`
-	InitialValue int64                 `json:"initialValue"`
+	Type          domain.InvestmentType    `json:"type"`
+	Name          string                   `json:"name"`
+	InitialUpdate *InitialInvestmentUpdate `json:"initialUpdate"`
 }
 
 func (r CreateInvestmentRequest) validate() error {
@@ -291,14 +290,24 @@ func (r CreateInvestmentRequest) validate() error {
 	return nil
 }
 
+type InitialInvestmentUpdate struct {
+	Date    *string `json:"date"`
+	Deposit *int64  `json:"deposit"`
+	Value   int64   `json:"value"`
+}
+
 func (r CreateInvestmentRequest) toCommand(user domain.User) (domain.CreateInvestmentCommand, error) {
-	var initialDate *time.Time
-	if r.InitialDate != nil {
-		parsed, err := time.Parse("2006-01-02", *r.InitialDate)
-		if err != nil {
-			return domain.CreateInvestmentCommand{}, fmt.Errorf("failed to parse initial date: %w", err)
+	var initialUpdate *domain.InitialInvestmentUpdate
+	if r.InitialUpdate != nil {
+		var date *time.Time
+		if r.InitialUpdate.Date != nil {
+			parsed, err := time.Parse("2006-01-02", *r.InitialUpdate.Date)
+			if err != nil {
+				return domain.CreateInvestmentCommand{}, fmt.Errorf("failed to parse initial date: %w", err)
+			}
+			date = &parsed
 		}
-		initialDate = &parsed
+		initialUpdate = pointer.Of(domain.NewInitialInvestmentUpdate(date, r.InitialUpdate.Deposit, r.InitialUpdate.Value))
 	}
 
 	return domain.NewCreateInvestmentCommand(
@@ -306,9 +315,7 @@ func (r CreateInvestmentRequest) toCommand(user domain.User) (domain.CreateInves
 		r.Name,
 		user,
 		false,
-		initialDate,
-		r.InitialCost,
-		r.InitialValue,
+		initialUpdate,
 	), nil
 }
 

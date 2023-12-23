@@ -15,7 +15,7 @@ build-production:
 	GOOS=linux GOARCH=amd64 go build -o ${BINARY_NAME} main.go
 
 run-production:
-	./${BINARY_NAME} 2>&1 > output.log &
+	./${BINARY_NAME} 2>&1 >> output.log &
 
 copy-build:
 	scp .env.prd root@${SERVER_IP}:/root/growfolio/backend/.env

@@ -51,9 +51,12 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       newErrors.name = "Name is required";
       valid = false;
     }
-    if (!initialValue) {
-      newErrors.initialValue = "Initial value is required";
-      valid = false;
+    if (initialDate || initialDeposit) {
+      console.log(initialDeposit)
+      if (!initialValue) {
+        newErrors.initialValue = "Value is required";
+        valid = false;
+      }
     }
 
     setErrors(newErrors);
@@ -72,9 +75,15 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
     const req: CreateInvestmentRequest = {
       type: type!,
       name: name!,
-      initialDate: moment(initialDate).format("YYYY-MM-DD"),
-      initialCost: initialDeposit,
-      initialValue: initialValue,
+      ...(initialValue
+        ? {
+            initialUpdate: {
+              date: moment(initialDate).format("YYYY-MM-DD"),
+              deposit: initialDeposit,
+              value: initialValue,
+            },
+          }
+        : {}),
     };
 
     api
@@ -120,70 +129,67 @@ const AddInvestmentForm: React.FC<AddInvestmentFormProps> = ({ currency }) => {
       <div className="mb-4">
         <label>
           <div>Name</div>
-          <input
-            className="w-full"
-            type="text"
-            value={name || ""}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <input className="w-full" type="text" value={name || ""} onChange={(e) => setName(e.target.value)} />
         </label>
         <div className="text-red-500">{errors.name}</div>
       </div>
+
       <div className="mb-4">
-        <div>Initial date (optional)</div>
-        <DatePicker
-          className="border w-full p-2"
-          wrapperClassName="w-full"
-          placeholderText="YYYY-MM-DD"
-          selected={initialDate}
-          onChange={(date) => date && setInitialDate(date)}
-          dateFormat="yyyy-MM-dd"
-        />
+        <div className="">Initial update (optional)</div>
+        <div className='border p-4'>
+          <div className="mb-4">
+            <div>Date (optional)</div>
+            <DatePicker
+              className="border w-full p-2"
+              wrapperClassName="w-full"
+              placeholderText="YYYY-MM-DD"
+              selected={initialDate}
+              onChange={(date) => date && setInitialDate(date)}
+              dateFormat="yyyy-MM-dd"
+            />
+          </div>
+          <div className="mb-4">
+            <label>Deposit (optional)</label>
+            <CurrencyInput
+              className="border w-full px-2 py-2"
+              prefix={signPrefixesByCurrency[currency]}
+              placeholder={signPrefixesByCurrency[currency]}
+              decimalsLimit={2}
+              onValueChange={(value, name, values) => {
+                if (values && values.float != null) {
+                  setInitialDeposit(Math.round(values.float * 100));
+                } else {
+                  setInitialDeposit(undefined);
+                }
+              }}
+              groupSeparator={groupSeparatorsByCurrency[currency]}
+              decimalSeparator={decimalSeparatorsByCurrency[currency]}
+            />
+          </div>
+          <div className="">
+            <label>Value</label>
+            <CurrencyInput
+              className="border w-full px-2 py-2"
+              prefix={signPrefixesByCurrency[currency]}
+              placeholder={signPrefixesByCurrency[currency]}
+              decimalsLimit={2}
+              onValueChange={(value, name, values) => {
+                if (values && values.float) {
+                  setInitialValue(Math.round(values.float * 100));
+                } else {
+                  setInitialValue(undefined);
+                }
+              }}
+              groupSeparator={groupSeparatorsByCurrency[currency]}
+              decimalSeparator={decimalSeparatorsByCurrency[currency]}
+            />
+            <div className="text-red-500">{errors.initialValue}</div>
+          </div>
+        </div>
       </div>
-      <div className="mb-4">
-        <label>Initial deposit (optional)</label>
-        <CurrencyInput
-          className="border w-full px-2 py-2"
-          prefix={signPrefixesByCurrency[currency]}
-          placeholder={signPrefixesByCurrency[currency]}
-          decimalsLimit={2}
-          onValueChange={(value, name, values) => {
-            if (values && values.float) {
-              setInitialDeposit(Math.round(values.float * 100));
-            } else {
-              setInitialValue(undefined);
-            }
-          }}
-          groupSeparator={groupSeparatorsByCurrency[currency]}
-          decimalSeparator={decimalSeparatorsByCurrency[currency]}
-        />
-      </div>
-      <div className="mb-4">
-        <label>Initial value</label>
-        <CurrencyInput
-          className="border w-full px-2 py-2"
-          prefix={signPrefixesByCurrency[currency]}
-          placeholder={signPrefixesByCurrency[currency]}
-          decimalsLimit={2}
-          onValueChange={(value, name, values) => {
-            if (values && values.float) {
-              setInitialValue(Math.round(values.float * 100));
-            } else {
-              setInitialValue(undefined);
-            }
-          }}
-          groupSeparator={groupSeparatorsByCurrency[currency]}
-          decimalSeparator={decimalSeparatorsByCurrency[currency]}
-        />
-        <div className="text-red-500">{errors.initialValue}</div>
-      </div>
+
       <div>
-        <Button
-          className="w-full lg:w-auto ml-auto block"
-          type="submit"
-          variant="primary"
-          disabled={submitting}
-        >
+        <Button className="w-full lg:w-auto ml-auto block" type="submit" variant="primary" disabled={submitting}>
           {submitting ? <span>Adding...</span> : <span>Add</span>}
         </Button>
       </div>

@@ -29,3 +29,7 @@ func IntOrNil(i int64) *int64 {
 	}
 	return &i
 }
+
+func Of[T any](i T) *T {
+	return &i
+}
