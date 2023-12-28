@@ -126,8 +126,8 @@ export default function LandingPage() {
             <div className="lg:col-span-5">
               <div className="text-xl lg:text-3xl font-bold mb-8">All investments in one place</div>
               <div className="text-lg lg:text-2xl">
-                Have all your investments, be it stocks, bonds, cryptocurrencies, or any asset, neatly organized in one
-                place. No more flipping between apps to get the big picture.
+                Consolidate all your investments in one platform for a comprehensive overview. No more jumping between
+                apps or spreadsheets.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
@@ -140,20 +140,20 @@ export default function LandingPage() {
               <img src="/why-2.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-              <div className="text-xl lg:text-3xl font-bold mb-8">Visualize your portfolio growth</div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">Visualize your success</div>
               <div className="text-lg lg:text-2xl">
-                Charts and graphs make it easy to understand your portfolio's performance at a glance. No more
-                deciphering endless rows and columns of numbers.
+                Use intuitive charts to visually track your financial journey, providing insights into your progress
+                over time without the need for intricate manual calculations.
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="lg:col-span-5">
-              <div className="text-xl lg:text-3xl font-bold mb-8">Mobile-friendly</div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">Effortless updates</div>
               <div className="text-lg lg:text-2xl">
-                Access your investment data anytime, anywhere, right from your smartphone. Stay informed about your
-                portfolio's performance, even when you're on the move.
+                Regularly update your investments, recording values, deposits, and withdrawals to maintain an accurate
+                and up-to-date portfolio.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
@@ -166,24 +166,24 @@ export default function LandingPage() {
               <img src="/why-4.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
             <div className="order-1 lg:order-none lg:col-span-5 lg:col-start-8">
-              <div className="text-xl lg:text-3xl font-bold mb-8">No strings attached</div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">CSV integration</div>
               <div className="text-lg lg:text-2xl">
                 Already using a spreadsheet to track your portfolio? You can seamlessly import and export your
-                investment updates using CSV files.
+                investment updates using CSV files. No strings attached.
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-[50px] lg:gap-[100px] lg:gap-0 lg:grid-cols-12 items-center mt-[50px] lg:mt-[100px]">
             <div className="lg:col-span-5">
-              <div className="text-xl lg:text-3xl font-bold mb-8">By an investor, for investors</div>
+              <div className="text-xl lg:text-3xl font-bold mb-8">Tailored for long-term investors</div>
               <div className="text-lg lg:text-2xl">
-                Benefit from a platform developed by an active investor who understands your needs and priorities
-                firsthand.
+                Created for long-term investors and those pursuing Financial Independence, Retire Early
+                (FIRE), this platform is your dedicated companion on the path to strategic wealth-building.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
-              <img src="/why-5.jpeg" className="mx-auto w-auto max-w-full max-h-[550px]" />
+              <img src="/why-5.png" className="mx-auto w-auto max-w-full max-h-[550px]" />
             </div>
           </div>
         </div>
