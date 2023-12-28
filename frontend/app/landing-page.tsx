@@ -91,8 +91,8 @@ export default function LandingPage() {
             <div className="w-full lg:w-2/4 mx-auto">
               <div className="text-4xl lg:text-5xl font-bold mb-8">Watch your investment portfolio grow.</div>
               <div className="text-xl lg:text-2xl mb-8">
-                Growfolio is an investment tracking app that helps you monitor and manage your portfolio's growth and
-                performance.
+                Growfolio lets you effortlessly manage and visualize the growth and performance
+                of your long-term investments.
               </div>
               <div className="mb-8">
                 <Button
@@ -111,7 +111,7 @@ export default function LandingPage() {
                   Live Demo
                 </Button>
               </div>
-              <div>No credit card required.</div>
+              <div>* No credit card required.</div>
             </div>
           </div>
         </div>
@@ -178,8 +178,8 @@ export default function LandingPage() {
             <div className="lg:col-span-5">
               <div className="text-xl lg:text-3xl font-bold mb-8">Tailored for long-term investors</div>
               <div className="text-lg lg:text-2xl">
-                Created for long-term investors and those pursuing Financial Independence, Retire Early
-                (FIRE), this platform is your dedicated companion on the path to strategic wealth-building.
+                Created for long-term investors and those pursuing Financial Independence, Retire Early (FIRE), this
+                platform is your dedicated companion on the path to strategic wealth-building.
               </div>
             </div>
             <div className="lg:col-start-7 lg:col-span-6">
@@ -248,7 +248,7 @@ export default function LandingPage() {
       {/* contact section */}
       <div id="contact" className="scroll-mt-[50px] py-[50px] lg:py-[100px] bg-white">
         <h2 className="text-2xl lg:text-4xl font-bold text-center mb-[50px] lg:mb-[100px]">Contact</h2>
-        <div className="container lg:text-2xl ">
+        <div className="container lg:text-xl ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[50px] lg:gap-[100px]">
             <div className="relative">
               <img
@@ -259,9 +259,9 @@ export default function LandingPage() {
             <div>
               <form className="flex flex-col" onSubmit={handleFormSubmit}>
                 <label className="">
-                  <div className="mb-4">Name</div>
+                  <div className="">Name</div>
                   <input
-                    className="border border-black w-full mb-4 lg:mb-[50px]"
+                    className="w-full mb-4 lg:mb-[50px]"
                     type="text"
                     value={contactName || ""}
                     onChange={(e) => setContactName(e.target.value)}
@@ -269,9 +269,9 @@ export default function LandingPage() {
                   />
                 </label>
                 <label className="">
-                  <div className="mb-4">Email</div>
+                  <div className="">Email</div>
                   <input
-                    className="border border-black w-full mb-4 lg:mb-[50px]"
+                    className="w-full mb-4 lg:mb-[50px]"
                     type="email"
                     value={contactEmail || ""}
                     onChange={(e) => setContactEmail(e.target.value)}
@@ -279,9 +279,9 @@ export default function LandingPage() {
                   />
                 </label>
                 <label className="">
-                  <div className="mb-4">Message</div>
+                  <div className="">Message</div>
                   <textarea
-                    className="border border-black w-full mb-4 lg:mb-[50px] resize-none"
+                    className="w-full mb-4 lg:mb-[50px] resize-none"
                     rows={8}
                     value={contactMessage || ""}
                     onChange={(e) => setContactMessage(e.target.value)}

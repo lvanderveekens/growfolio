@@ -36,8 +36,9 @@ Build runs locally, because it's killed when done on the server due to lack of r
 
 ### Backend
 
+    (local) backend $ make build-production
+
 Stop the server instance first before copying.
 
-    (local) backend $ make build-production
     (local) backend $ make copy-build
     (server) backend $ make run-production
