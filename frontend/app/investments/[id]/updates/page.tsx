@@ -156,7 +156,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
 
         {investment.locked && <InvestmentIsLockedMessage />}
 
-        <div className="bg-white overflow-x-auto">
+        <div className="bg-white overflow-x-scroll">
           <div className="border border-b-0 p-4 lg:flex lg:gap-4 lg:justify-end">
             <Button
               className="w-full lg:w-auto mb-4 lg:mb-0"
@@ -210,7 +210,7 @@ export default function InvestmentUpdatesPage({ params }: { params: { id: string
             )}
           </div>
 
-          <div className="border-x w-full overflow-x-auto">
+          <div className="border-x w-full overflow-x-scroll">
             <table className="border-collapse">
               <thead>
                 <tr className="">
