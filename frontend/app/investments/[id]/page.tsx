@@ -8,7 +8,7 @@ import { useLocalStorage } from "@/app/localstorage";
 import Modal from "@/app/modal";
 import { DateRange, Investment, InvestmentUpdate, YearlyChangeDataPoint, calculateMonthlyChangeDataPoints, calculateYearlyChangeDataPoints, chartBackgroundColors, convertToDate, getAmountTextColor, valueLineData, valueLineOptions } from "@/app/portfolio-page";
 import { Settings } from "@/app/settings/settings";
-import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "@/app/string";
+import { formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsPercentage } from "@/app/string";
 import {
   ArcElement,
   BarElement,
@@ -178,11 +178,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
                   {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
                   {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
-                  {formatAsROIPercentage(lastUpdate?.roi ?? 0)})
+                  {formatAsPercentage(lastUpdate?.roi ?? 0)})
                 </div>
                 <div className="mt-4">
                   <span className="">Last update: </span>
-                  <span>{investment.lastUpdateDate ?? "Never"}</span>
+                  <span>{investment.lastUpdate?.date ?? "Never"}</span>
                 </div>
               </div>
               <div className="absolute left-0 top-0 w-full h-full ">
@@ -534,7 +534,7 @@ export const monthlyROIBarOptions = () => ({
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAsROIPercentage(context.parsed.y);
+            label += formatAsPercentage(context.parsed.y);
           }
 
           return label;
@@ -555,7 +555,7 @@ export const monthlyROIBarOptions = () => ({
       stacked: true,
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAsROIPercentage(value);
+          return formatAsPercentage(value);
         },
       },
     },
@@ -626,7 +626,7 @@ export const yearlyROIBarOptions = () => ({
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAsROIPercentage(context.parsed.y);
+            label += formatAsPercentage(context.parsed.y);
           }
 
           return label;
@@ -647,7 +647,7 @@ export const yearlyROIBarOptions = () => ({
       stacked: true,
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAsROIPercentage(value);
+          return formatAsPercentage(value);
         },
       },
     },

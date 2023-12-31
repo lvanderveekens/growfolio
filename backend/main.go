@@ -58,8 +58,8 @@ func main() {
 		log.Fatal("Failed to migrate the database: ", err)
 	}
 
-	investmentRepository := postgres.NewInvestmentRepository(db)
 	investmentUpdateRepository := postgres.NewInvestmentUpdateRepository(db)
+	investmentRepository := postgres.NewInvestmentRepository(db, investmentUpdateRepository)
 	investmentUpdateService := services.NewInvestmentUpdateService(investmentUpdateRepository)
 	userRepository := postgres.NewUserRepository(db)
 	settingsRepository := postgres.NewSettingsRepository(db)

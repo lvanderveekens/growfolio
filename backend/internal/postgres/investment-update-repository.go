@@ -124,6 +124,25 @@ func (r InvestmentUpdateRepository) Find(findQuery domain.FindInvestmentUpdateQu
 	return r.toDomainInvestmentUpdates(entities)
 }
 
+func (r InvestmentUpdateRepository) FindLastByInvestmentID(investmentID string) (domain.InvestmentUpdate, error) {
+	entity := InvestmentUpdate{}
+	err := r.db.Get(&entity, `
+		SELECT *
+		FROM investment_update
+		WHERE investment_id = $1
+        ORDER BY date DESC
+        LIMIT 1;
+	`, investmentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.InvestmentUpdate{}, domain.ErrInvestmentUpdateNotFound
+		}
+		return domain.InvestmentUpdate{}, fmt.Errorf("failed to select investment update: %w", err)
+	}
+
+	return r.toDomainInvestmentUpdate(entity)
+}
+
 func (r InvestmentUpdateRepository) DeleteByID(id string) error {
 	_, err := uuid.Parse(id)
 	if err != nil {

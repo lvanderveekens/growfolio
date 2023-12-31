@@ -55,12 +55,12 @@ func NewInitialInvestmentUpdate(date *time.Time, deposit *int64, value int64) In
 }
 
 type Investment struct {
-	ID             string
-	Type           InvestmentType
-	Name           string
-	UserID         string
-	Locked         bool
-	LastUpdateDate *time.Time
+	ID         string
+	Type       InvestmentType
+	Name       string
+	UserID     string
+	Locked     bool
+	LastUpdate *InvestmentUpdate
 }
 
 func NewInvestment(
@@ -69,14 +69,14 @@ func NewInvestment(
 	name,
 	userID string,
 	locked bool,
-	lastUpdateDate *time.Time,
+	lastUpdate *InvestmentUpdate,
 ) Investment {
 	return Investment{
-		ID:             id,
-		Type:           t,
-		Name:           name,
-		UserID:         userID,
-		Locked:         locked,
-		LastUpdateDate: lastUpdateDate,
+		ID:         id,
+		Type:       t,
+		Name:       name,
+		UserID:     userID,
+		Locked:     locked,
+		LastUpdate: lastUpdate,
 	}
 }

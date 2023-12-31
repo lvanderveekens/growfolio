@@ -23,11 +23,18 @@ type Investment struct {
 }
 
 type InvestmentRepository struct {
-	db *sqlx.DB
+	db                         *sqlx.DB
+	investmentUpdateRepository InvestmentUpdateRepository
 }
 
-func NewInvestmentRepository(db *sqlx.DB) InvestmentRepository {
-	return InvestmentRepository{db: db}
+func NewInvestmentRepository(
+	db *sqlx.DB,
+	investmentUpdateRepository InvestmentUpdateRepository,
+) InvestmentRepository {
+	return InvestmentRepository{
+		db:                         db,
+		investmentUpdateRepository: investmentUpdateRepository,
+	}
 }
 
 func (r InvestmentRepository) FindByUserID(userID string) ([]domain.Investment, error) {
@@ -108,29 +115,22 @@ func (r InvestmentRepository) UpdateLocked(id string, locked bool) error {
 	return err
 }
 
-func (r InvestmentRepository) findLastUpdateDate(id string) (*time.Time, error) {
-	var entity InvestmentUpdate
-	err := r.db.QueryRowx(`
-		SELECT *
-		FROM investment_update
-		WHERE investment_id = $1
-        ORDER BY date DESC
-        LIMIT 1;
-	`, id).StructScan(&entity)
+func (r InvestmentRepository) toDomainInvestment(i Investment) (domain.Investment, error) {
+	lastUpdate, err := r.findLastUpdate(i)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("failed to find last update: %w", err)
+		return domain.Investment{}, fmt.Errorf("failed to find last update: %w", err)
 	}
-	return &entity.Date, nil
+
+	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID, i.Locked, lastUpdate), nil
 }
 
-func (r InvestmentRepository) toDomainInvestment(i Investment) (domain.Investment, error) {
-	lastUpdateDate, err := r.findLastUpdateDate(i.ID.String())
+func (r InvestmentRepository) findLastUpdate(i Investment) (*domain.InvestmentUpdate, error) {
+	lastUpdate, err := r.investmentUpdateRepository.FindLastByInvestmentID(i.ID.String())
 	if err != nil {
-		return domain.Investment{}, fmt.Errorf("failed to find last update date: %w", err)
+		if errors.Is(err, domain.ErrInvestmentUpdateNotFound) {
+			return nil, nil
+		}
+		return nil, err
 	}
-
-	return domain.NewInvestment(i.ID.String(), i.Type, i.Name, i.UserID, i.Locked, lastUpdateDate), nil
+	return &lastUpdate, nil
 }

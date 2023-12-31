@@ -34,7 +34,7 @@ import { buildMonthlyCostBarData as buildMonthlyCostBarData, buildMonthlyROIChan
 import { useLocalStorage } from "./localstorage";
 import Modal from "./modal";
 import { Settings } from "./settings/settings";
-import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsROIPercentage } from "./string";
+import { capitalize, formatAmountAsCurrencyString, formatAmountInCentsAsCurrencyString, formatAsPercentage } from "./string";
 import { createCheckoutSession } from "./stripe/client";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa6";
 import { MonthlyDataPoint, calculateMonthlyDataPoints } from "./data-points";
@@ -118,7 +118,7 @@ export default function PortfolioPage() {
           id: i.id,
           name: i.name,
           type: i.type,
-          lastUpdateDate: i.lastUpdateDate,
+          lastUpdateDate: i.lastUpdate?.date,
           cost: cost,
           value: value,
           return: returnValue,
@@ -277,7 +277,7 @@ export default function PortfolioPage() {
 
             if (context.parsed !== null) {
               const valueString = settings && formatAmountInCentsAsCurrencyString(context.parsed, settings.currency);
-              const totalValuePercentage = formatAsROIPercentage(
+              const totalValuePercentage = formatAsPercentage(
                 context.parsed / totalVisibleValue
               );
               label += `${valueString} (${totalValuePercentage})`;
@@ -371,7 +371,7 @@ export default function PortfolioPage() {
               {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
               {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
               {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
-              {formatAsROIPercentage(investmentRow.roi)})
+              {formatAsPercentage(investmentRow.roi)})
             </div>
           </div>
           <div className="flex justify-between">
@@ -423,7 +423,7 @@ export default function PortfolioPage() {
                     {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
                     {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
                     {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
-                    {formatAsROIPercentage(totalRoi)})
+                    {formatAsPercentage(totalRoi)})
                   </div>
                   <div className="mt-4">
                     <span className="">Last update: </span>
@@ -791,7 +791,7 @@ export const roiLineOptions: ChartOptions = {
             label += ": ";
           }
           if (context.parsed.y !== null) {
-            label += formatAsROIPercentage(context.parsed.y);
+            label += formatAsPercentage(context.parsed.y);
           }
 
           return label;
@@ -810,7 +810,7 @@ export const roiLineOptions: ChartOptions = {
     y: {
       ticks: {
         callback: function (value: any, index: any, ticks: any) {
-          return formatAsROIPercentage(value);
+          return formatAsPercentage(value);
         },
       },
     },
@@ -847,7 +847,7 @@ export interface Investment {
   type: InvestmentType;
   name: string;
   locked: boolean;
-  lastUpdateDate?: string;
+  lastUpdate?: InvestmentUpdate;
 }
 
 export interface InvestmentUpdate {

@@ -37,7 +37,7 @@ export const formatAmountAsCurrencyString = (amount?: number, currency: string) 
   });
 };
 
-export function formatAsROIPercentage(number?: number) {
+export function formatAsPercentage(number?: number, fractionDigits: number = 2) {
   if (number == undefined) {
     return "-"
   }
@@ -46,8 +46,8 @@ export function formatAsROIPercentage(number?: number) {
   }
   const percentageString = number.toLocaleString("nl-NL", {
     style: "percent",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   });
 
   return percentageString

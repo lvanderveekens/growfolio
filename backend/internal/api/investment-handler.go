@@ -265,13 +265,12 @@ func (h InvestmentHandler) ExportUpdates(c *gin.Context) error {
 }
 
 func toInvestmentDto(i domain.Investment) investmentDto {
-	var lastUpdateDate *string
-	if i.LastUpdateDate != nil {
-		formatted := (*i.LastUpdateDate).Format("2006-01-02")
-		lastUpdateDate = &formatted
+	var lastUpdate *investmentUpdateDto
+	if i.LastUpdate != nil {
+		lastUpdate = pointer.Of(toInvestmentUpdateDto(*i.LastUpdate))
 	}
 
-	return newInvestmentDto(i.ID, i.Type, i.Name, i.Locked, lastUpdateDate)
+	return newInvestmentDto(i.ID, i.Type, i.Name, i.Locked, lastUpdate)
 }
 
 type CreateInvestmentRequest struct {
@@ -336,13 +335,19 @@ func (r createInvestmentUpdateRequest) toCommand(investment domain.Investment) (
 }
 
 type investmentDto struct {
-	ID             string                `json:"id"`
-	Type           domain.InvestmentType `json:"type"`
-	Name           string                `json:"name"`
-	Locked         bool                  `json:"locked"`
-	LastUpdateDate *string               `json:"lastUpdateDate"`
+	ID         string                `json:"id"`
+	Type       domain.InvestmentType `json:"type"`
+	Name       string                `json:"name"`
+	Locked     bool                  `json:"locked"`
+	LastUpdate *investmentUpdateDto  `json:"lastUpdate"`
 }
 
-func newInvestmentDto(id string, t domain.InvestmentType, name string, locked bool, lastUpdateDate *string) investmentDto {
-	return investmentDto{ID: id, Type: t, Name: name, Locked: locked, LastUpdateDate: lastUpdateDate}
+func newInvestmentDto(
+	id string,
+	t domain.InvestmentType,
+	name string,
+	locked bool,
+	lastUpdate *investmentUpdateDto,
+) investmentDto {
+	return investmentDto{ID: id, Type: t, Name: name, Locked: locked, LastUpdate: lastUpdate}
 }
