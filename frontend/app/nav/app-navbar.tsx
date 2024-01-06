@@ -17,13 +17,18 @@ interface AppNavbarProps {
 export const AppNavbar: React.FC<AppNavbarProps> = () => {
   const [user, setUser] = useState<User>();
   const [isLoadingUser, setLoadingUser] = useState<boolean>(true);
+
   const [isUserDropdownDesktopOpen, setUserDropdownDesktopOpen] = useState<boolean>(false);
   const [isUserDropdownMobileOpen, setUserDropdownMobileOpen] = useState<boolean>(false);
+
   const userDropdownDesktopRef = useRef(null);
+  const userDropdownMobileRef = useRef(null);
 
   const [isToolsDropdownDesktopOpen, setToolsDropdownDesktopOpen] = useState<boolean>(false);
   const [isToolsDropdownMobileOpen, setToolsDropdownMobileOpen] = useState<boolean>(false);
+
   const toolsDropdownDesktopRef = useRef(null);
+  const toolsDropdownMobileRef = useRef(null);
 
   const router = useRouter();
 
@@ -59,17 +64,25 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (userDropdownDesktopRef.current && !userDropdownDesktopRef.current.contains(event.target)) {
-        closeUserDropdownDesktop();
+        setUserDropdownDesktopOpen(false);
+      }
+      if (userDropdownMobileRef.current && !userDropdownMobileRef.current.contains(event.target)) {
+        setUserDropdownMobileOpen(false);
       }
       if (toolsDropdownDesktopRef.current && !toolsDropdownDesktopRef.current.contains(event.target)) {
         setToolsDropdownDesktopOpen(false)
+      }
+      if (toolsDropdownMobileRef.current && !toolsDropdownMobileRef.current.contains(event.target)) {
+        setToolsDropdownMobileOpen(false)
       }
     };
 
     const handleEscapeKey = (event) => {
       if (event.key === "Escape") {
-        closeUserDropdownDesktop();
+        setUserDropdownDesktopOpen(false);
+        setUserDropdownMobileOpen(false);
         setToolsDropdownDesktopOpen(false)
+        setToolsDropdownMobileOpen(false)
       }
     };
 
@@ -87,31 +100,32 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 px-4 w-full bg-green-400 text-white lg:flex lg:items-center font-bold gap-8">
-        <div className="flex justify-between items-center w-full sm:w-auto">
-          <div className="text-3xl py-4 italic">
-            <Link href="/">
+      <nav className="sticky top-0 z-50 bg-green-400 text-white w-full lg:flex lg:items-center font-bold lg:h-[72px]">
+
+        <div className="flex justify-between items-center w-full sm:w-auto h-[72px] lg:h-full">
+          <div className="text-3xl italic h-full flex items-center">
+            <Link className="flex h-full items-center px-4" href="/">
               <AiOutlineStock size={40} className="inline mr-1" />
               growfolio
             </Link>
           </div>
-          <div className="sm:hidden">
-            <RxHamburgerMenu size={32} onClick={toggleMobileNav} />
+          <div className="sm:hidden h-full flex items-center px-4 hover:cursor-pointer" onClick={toggleMobileNav}>
+            <RxHamburgerMenu size={32}  />
           </div>
         </div>
 
         {/* desktop */}
-        <div className="hidden md:flex flex-grow text-xl justify-between items-center">
-          <div className="flex gap-8 h-full items-center">
-            <div className="hover:text-gray-100">
+        <div className="hidden md:flex flex-grow text-xl justify-between items-center h-full">
+          <div className="flex h-full items-center">
+            <div className="h-full flex items-center px-4 hover:bg-green-500">
               <Link href="/">
                 <div className="flex items-center">Portfolio</div>
               </Link>
             </div>
 
-            <div className="relative" ref={toolsDropdownDesktopRef}>
+            <div className="relative flex items-center h-full" ref={toolsDropdownDesktopRef}>
               <div
-                className="my-2 flex items-center gap-1 hover:text-gray-100 hover:cursor-pointer"
+                className="flex items-center gap-1 hover:text-gray-100 hover:cursor-pointer px-4 h-full hover:bg-green-500"
                 onClick={() => setToolsDropdownDesktopOpen(!isToolsDropdownDesktopOpen)}
               >
                 Tools
@@ -123,7 +137,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               <div
                 className={`${
                   isToolsDropdownDesktopOpen ? "block" : "hidden"
-                } font-normal border absolute left-0 min-w-full bg-white text-black rounded-md py-2 whitespace-nowrap shadow-md`}
+                } font-normal border absolute mt-1 top-full left-0 min-w-full bg-white text-black rounded-md py-2 whitespace-nowrap shadow-md`}
               >
                 <Link href="/tools/deposit-allocator">
                   <div className="px-4 py-2 hover:bg-gray-100">Deposit Allocator</div>
@@ -131,12 +145,12 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               </div>
             </div>
 
-            <div className="hover:text-gray-100">
+            <div className="h-full flex items-center px-4 hover:bg-green-500">
               <Link href="/profile">
                 <div className="flex items-center">Profile</div>
               </Link>
             </div>
-            <div className="hover:text-gray-100">
+            <div className="h-full flex items-center px-4 hover:bg-green-500">
               <Link href="/settings">
                 <div className="flex items-center">Settings</div>
               </Link>
@@ -145,9 +159,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
 
           {isLoadingUser && <ClipLoader color="white" size={28} aria-label="Loading Spinner" data-testid="loader" />}
           {user && (
-            <div className="relative" ref={userDropdownDesktopRef}>
+            <div className="relative flex items-center h-full" ref={userDropdownDesktopRef}>
               <div
-                className="my-2 flex items-center gap-1 hover:text-gray-100 hover:cursor-pointer"
+                className="flex items-center gap-1 hover:text-gray-100 hover:cursor-pointer px-4 h-full hover:bg-green-500"
                 onClick={toggleUserDropdownDesktop}
               >
                 {user.email}
@@ -159,7 +173,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               <div
                 className={`${
                   isUserDropdownDesktopOpen ? "block" : "hidden"
-                } font-normal border absolute right-0 min-w-full bg-white text-black rounded-md py-2 whitespace-nowrap shadow-md`}
+                } font-normal border absolute mt-1 top-full left-0 min-w-full bg-white text-black rounded-md py-2 whitespace-nowrap shadow-md`}
               >
                 <div
                   className="hover:cursor-pointer hover:bg-gray-100 px-4 py-2"
@@ -182,44 +196,46 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
 
         {/* mobile */}
         <div className={`${showMobileNav ? "block" : "hidden"} pb-4 lg md:hidden`}>
-          <div className="flex flex-col gap-4">
-            <Link className="hover:text-gray-100" href="/">
+          <div className="flex flex-col">
+            <Link className="px-4 py-2 hover:bg-green-500" href="/">
               <div className="flex items-center">Portfolio</div>
             </Link>
 
-            <div className="relative">
+            <div className="relative" ref={toolsDropdownMobileRef}>
               <div
-                className="flex justify-between items-center hover:text-gray-100 hover:cursor-pointer"
+                className="flex justify-between items-center px-4 py-2 hover:bg-green-500 hover:cursor-pointer"
                 onClick={() => setToolsDropdownMobileOpen(!isToolsDropdownMobileOpen)}
               >
                 Tools
                 {isToolsDropdownMobileOpen ? <FaCaretUp /> : <FaCaretDown />}
               </div>
-              <div className={`${isToolsDropdownMobileOpen ? "block" : "hidden"} mt-2 bg-green-500 whitespace-nowrap`}>
+              <div className={`${isToolsDropdownMobileOpen ? "block" : "hidden"} whitespace-nowrap`}>
                 <Link className="hover:text-gray-100" href="/tools/deposit-allocator">
-                  <div className="flex items-center px-4 py-2 hover:bg-green-600">Deposit Allocator</div>
+                  <div className="flex items-center pl-8 pr-4 py-2 hover:bg-green-500">
+                    Deposit Allocator
+                  </div>
                 </Link>
               </div>
             </div>
 
-            <Link className="hover:text-gray-100" href="/profile">
+            <Link className="px-4 py-2 hover:bg-green-500" href="/profile">
               <div className="flex items-center">Profile</div>
             </Link>
-            <Link className="hover:text-gray-100" href="/settings">
+            <Link className="px-4 py-2 hover:bg-green-500" href="/settings">
               <div className="flex items-center">Settings</div>
             </Link>
             {!isLoadingUser && user && (
-              <div className="relative">
+              <div className="relative" ref={userDropdownMobileRef}>
                 <div
-                  className="flex justify-between items-center hover:text-gray-100 hover:cursor-pointer"
+                  className="flex justify-between items-center px-4 py-2 hover:bg-green-500 hover:cursor-pointer"
                   onClick={toggleUserDropdownMobile}
                 >
                   {user.email}
                   {isUserDropdownMobileOpen ? <FaCaretUp /> : <FaCaretDown />}
                 </div>
-                <div className={`${isUserDropdownMobileOpen ? "block" : "hidden"} mt-2 bg-green-500 whitespace-nowrap`}>
+                <div className={`${isUserDropdownMobileOpen ? "block" : "hidden"} whitespace-nowrap`}>
                   <div
-                    className="hover:cursor-pointer hover:bg-green-600 px-4 py-2"
+                    className="hover:cursor-pointer hover:bg-green-500 pl-8 pr-4 py-2"
                     onClick={() => {
                       api.post(`/auth/logout`).then((res) => {
                         if (window.location.pathname === "/") {
