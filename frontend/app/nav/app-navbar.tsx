@@ -196,7 +196,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
                 {isToolsDropdownMobileOpen ? <FaCaretUp /> : <FaCaretDown />}
               </div>
               <div className={`${isToolsDropdownMobileOpen ? "block" : "hidden"} mt-2 bg-green-500 whitespace-nowrap`}>
-                <Link className="hover:text-gray-100" href="/profile">
+                <Link className="hover:text-gray-100" href="/tools/deposit-allocator">
                   <div className="flex items-center px-4 py-2 hover:bg-green-600">Deposit Allocator</div>
                 </Link>
               </div>
