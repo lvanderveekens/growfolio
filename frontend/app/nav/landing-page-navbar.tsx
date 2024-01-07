@@ -20,17 +20,17 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-green-400 lg:px-4 gap-4 text-white w-full lg:flex lg:items-center font-bold lg:h-[72px]">
+    <nav className="sticky top-0 z-50 bg-green-400 text-white w-full lg:flex lg:items-center font-bold lg:h-[72px]">
 
-      <div className="flex justify-between items-center w-full h-full sm:w-auto h-[72px] lg:h-auto px-4 lg:px-0">
-        <div className="text-3xl italic flex items-center h-full">
-          <Link className="flex" href="/">
+      <div className="flex justify-between items-center w-full sm:w-auto h-[72px] lg:h-full">
+        <div className="text-3xl italic h-full flex items-center">
+          <Link className="flex h-full items-center px-4" href="/">
             <AiOutlineStock size={40} className="inline mr-1" />
             growfolio
           </Link>
         </div>
-        <div className="sm:hidden hover:cursor-pointer">
-          <RxHamburgerMenu size={32} onClick={toggleNavbar} />
+        <div className="sm:hidden h-full flex items-center px-4 hover:cursor-pointer" onClick={toggleNavbar}>
+          <RxHamburgerMenu size={32} />
         </div>
       </div>
 
@@ -48,7 +48,7 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
           </Link>
         </div>
 
-        <div>
+        <div className="px-4">
           <Button
             className="border-2 px-8"
             variant="tertiary"
@@ -64,25 +64,13 @@ export const LandingPageNavbar: React.FC<LandingPageNavbarProps> = () => {
       {/* mobile */}
       <div className={`${isOpen ? "block" : "hidden"} pb-4 text-lg md:hidden`}>
         <div className="flex flex-col">
-          <Link
-            className="px-4 py-2 hover:bg-green-500"
-            href="#why"
-            onClick={toggleNavbar}
-          >
+          <Link className="px-4 py-2 hover:bg-green-500" href="#why" onClick={toggleNavbar}>
             Why
           </Link>
-          <Link
-            className="px-4 py-2 hover:bg-green-500"
-            href="#pricing"
-            onClick={toggleNavbar}
-          >
+          <Link className="px-4 py-2 hover:bg-green-500" href="#pricing" onClick={toggleNavbar}>
             Pricing
           </Link>
-          <Link
-            className="px-4 py-2 hover:bg-green-500"
-            href="#contact"
-            onClick={toggleNavbar}
-          >
+          <Link className="px-4 py-2 hover:bg-green-500" href="#contact" onClick={toggleNavbar}>
             Contact
           </Link>
           <Button
