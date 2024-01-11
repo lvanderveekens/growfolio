@@ -355,21 +355,21 @@ export default function PortfolioPage() {
     }
 
     return (
-      <div className="relative p-4 group">
-        <div className="relative z-10">
+      <div className="relative group">
+        <div className="relative z-10 p-4 ">
           <div className="font-bold flex justify-between">
             <div>{investmentRow.name}</div>
             <div>{formatAmountInCentsAsCurrencyString(investmentRow.value, settings.currency)}</div>
           </div>
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <div>Type</div>
             <div>{labelsByInvestmentType[investmentRow.type]}</div>
-          </div>
+          </div> */}
           <div className="flex justify-between">
             <div>Return</div>
             <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
-              {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
-              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
+              {/* {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
+              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />} */}
               {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
               {formatAsPercentage(investmentRow.roi)})
             </div>
@@ -379,7 +379,7 @@ export default function PortfolioPage() {
             <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
           </div>
         </div>
-        <div className="absolute left-0 top-0 w-full h-full group-hover:hidden">
+        <div className="w-full h-[100px] pr-2">
           {settings && (
             <Line
               options={valueLineOptions(settings.currency)}
@@ -412,25 +412,29 @@ export default function PortfolioPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Portfolio</h1>
 
-            <div className="relative border border bg-white text-center mb-4">
+            <div className="relative border border bg-white mb-4">
               <div className="relative">
-                <div className="z-10 relative py-[75px]">
-                  <div className="font-bold">Value</div>
-                  <div className="font-bold text-4xl">
+                <div className="z-10 relative p-8">
+                  <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
                   </div>
-                  <div className={`${getAmountTextColor(totalReturn)} flex justify-center items-center`}>
-                    {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
-                    {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
-                    {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
-                    {formatAsPercentage(totalRoi)})
-                  </div>
-                  <div className="mt-4">
-                    <span className="">Last update: </span>
-                    <span>{lastUpdateDate ?? "Never"}</span>
+                  <div className="flex gap-8">
+                    <div>
+                      <div className="">Return</div>
+                      <div className={`font-bold ${getAmountTextColor(totalReturn)} `}>
+                        {/* {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
+                        {totalReturn < 0 && <FaCaretDown className="inline mr-1" />} */}
+                        {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
+                        {formatAsPercentage(totalRoi)})
+                      </div>
+                    </div>
+                    <div className="">
+                      <div className="">Last update</div>
+                      <span className="font-bold">{lastUpdateDate ?? "Never"}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute left-0 top-0 w-full h-full ">
+                <div className="w-full h-[168px] pr-2">
                   {settings && (
                     <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
                   )}
@@ -713,7 +717,7 @@ export const valueLineOptions = (currency: string) => ({
   },
   plugins: {
     legend: {
-      display: false
+      display: false,
     },
     tooltip: {
       enabled: false
@@ -721,12 +725,18 @@ export const valueLineOptions = (currency: string) => ({
   },
   scales: {
     x: {
-      display: false
+      display: false,
     },
     y: {
-      display: false
-    }
-  }
+      position: "right",
+      grid: {
+        display: false,
+      },
+    },
+    // y: {
+    //   display: false
+    // }
+  },
 });
 
 export const returnLineOptions = (currency: string) => ({
@@ -1098,8 +1108,8 @@ export const valueLineData = (updateDataPoints: UpdateDataPoint[]) => {
         // #F3F4F6 same as bg-gray-100
         // #E5E7EB same as bg-gray-200
         label: "Value",
-        borderColor: "#F3F4F6", 
-        backgroundColor: "#F9FAFB", 
+        borderColor: "#05A5E0", 
+        backgroundColor: "#05A5E01A", 
         fill: 'origin',
         pointStyle: false,
         data: updateDataPoints.map((x) => ({
