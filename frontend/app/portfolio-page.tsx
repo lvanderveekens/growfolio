@@ -68,7 +68,7 @@ export default function PortfolioPage() {
   const [monthlyChangeDataPoints, setMonthlyChangeDataPoints] = useState<MonthlyChangeDataPoint[]>([]);
   const [yearlyChangeDataPoints, setYearlyChangeDataPoints] = useState<YearlyChangeDataPoint[]>([]);
   
-  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ANY_TIME)
+  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.MAX)
   
   const [loading, setLoading] = useState(true); 
 
@@ -379,7 +379,7 @@ export default function PortfolioPage() {
             <div>{investmentRow.lastUpdateDate ?? "Never"}</div>
           </div>
         </div>
-        <div className="w-full h-[100px] pr-2">
+        <div className="w-full h-[80px] pr-2">
           {settings && (
             <Line
               options={valueLineOptions(settings.currency)}
@@ -412,6 +412,17 @@ export default function PortfolioPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Portfolio</h1>
 
+            <div className="mb-4 flex gap-4 w-full">
+              {Object.values(DateRange).map((dateRange) => (
+                <div
+                  className={`${dateRange === selectedDateRange ? "bg-green-400 text-white" : ""} p-2 rounded-lg hover:bg-green-400 hover:text-white hover:cursor-pointer `}
+                  onClick={() => setSelectedDateRange(dateRange)}
+                >
+                  {dateRange}
+                </div>
+              ))}
+            </div>
+
             <div className="relative border border bg-white mb-4">
               <div className="relative">
                 <div className="z-10 relative p-8">
@@ -434,7 +445,7 @@ export default function PortfolioPage() {
                     </div>
                   </div>
                 </div>
-                <div className="w-full h-[168px] pr-2">
+                <div className="w-full h-[150px] pr-2">
                   {settings && (
                     <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
                   )}
@@ -527,22 +538,6 @@ export default function PortfolioPage() {
 
           {updateDataPoints.length > 0 && (
             <>
-              <div className="mb-4">
-                <Dropdown
-                  className="lg:w-auto"
-                  dropdownClassName="lg:w-[180px]"
-                  selected={{
-                    label: selectedDateRange,
-                    value: selectedDateRange,
-                  }}
-                  onChange={(option) => setSelectedDateRange(option.value)}
-                  options={Object.values(DateRange).map((dateRange) => ({
-                    label: dateRange,
-                    value: dateRange,
-                  }))}
-                />
-              </div>
-
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
                 <div className="aspect-square bg-white p-4 border">
                   <h3 className="font-bold mb-4">Allocation</h3>
@@ -720,8 +715,20 @@ export const valueLineOptions = (currency: string) => ({
       display: false,
     },
     tooltip: {
-      enabled: false
-    }
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label += formatAmountAsCurrencyString(context.parsed.y, currency);
+          }
+
+          return label;
+        },
+      },
+    },
   },
   scales: {
     x: {
@@ -976,14 +983,13 @@ export const calculateYearlyChangeDataPoints = (
 }; 
 
 export enum DateRange {
-  ANY_TIME = "Any time",
-  LAST_MONTH = "Last month",
-  LAST_3_MONTHS = "Last 3 months",
-  LAST_6_MONTHS = "Last 6 months",
-  LAST_YEAR = "Last year",
-  LAST_2_YEARS = "Last 2 years",
-  LAST_5_YEARS = "Last 5 years",
-  LAST_10_YEARS = "Last 10 years",
+  // LAST_3_MONTHS = "3M",
+  LAST_6_MONTHS = "6M",
+  LAST_YEAR = "1Y",
+  LAST_2_YEARS = "2Y",
+  LAST_5_YEARS = "5Y",
+  LAST_10_YEARS = "10Y",
+  MAX = "MAX",
 }
 
 export function convertToDate(range: DateRange): Date | null {
@@ -991,12 +997,9 @@ export function convertToDate(range: DateRange): Date | null {
   var minusDays: number | null = null
 
   switch (range) {
-    case DateRange.LAST_MONTH:
-      minusDays = 30
-      break;
-    case DateRange.LAST_3_MONTHS:
-      minusDays = 3 * 30
-      break;
+    // case DateRange.LAST_3_MONTHS:
+    //   minusDays = 3 * 30
+    //   break;
     case DateRange.LAST_6_MONTHS:
       minusDays = 6 * 30
       break;
@@ -1109,7 +1112,7 @@ export const valueLineData = (updateDataPoints: UpdateDataPoint[]) => {
         // #E5E7EB same as bg-gray-200
         label: "Value",
         borderColor: "#05A5E0", 
-        backgroundColor: "#05A5E01A", 
+        backgroundColor: "#ECF8FD", 
         fill: 'origin',
         pointStyle: false,
         data: updateDataPoints.map((x) => ({

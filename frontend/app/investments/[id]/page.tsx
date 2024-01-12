@@ -66,7 +66,7 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
   const router = useRouter()
 
-  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.ANY_TIME)
+  const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.MAX)
 
   const [settings, setSettings] = useState<Settings>();
 
