@@ -106,14 +106,6 @@ export default function PortfolioPage() {
         const returnValue = value - cost;
         const roi = returnValue / cost;
 
-        // let returnValue = 0
-        // let roi = 0
-
-        // if (value && cost) {
-        //   returnValue = value - cost
-        //   roi = returnValue / cost;
-        // }
-
         return {
           id: i.id,
           name: i.name,
@@ -289,7 +281,7 @@ export default function PortfolioPage() {
     },
   };
 
-  const calculateAllocationPieData = (investments: Investment[]) => {
+  const calculateAllocationByInvestmentPieData = (investments: Investment[]) => {
     return {
       labels: investments.map((i) => i.name),
       datasets: [
@@ -304,7 +296,7 @@ export default function PortfolioPage() {
     } as ChartData<"pie">;
   };
 
-  const calculateAllocationByTypePieData = (investments: Investment[]) => {
+  const calculateAllocationByInvestmentTypePieData = (investments: Investment[]) => {
     interface InvestmentTypeWithValue {
       type: InvestmentType;
       value: number;
@@ -361,15 +353,11 @@ export default function PortfolioPage() {
             <div>{investmentRow.name}</div>
             <div>{formatAmountInCentsAsCurrencyString(investmentRow.value, settings.currency)}</div>
           </div>
-          {/* <div className="flex justify-between">
-            <div>Type</div>
-            <div>{labelsByInvestmentType[investmentRow.type]}</div>
-          </div> */}
           <div className="flex justify-between">
             <div>Return</div>
             <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
-              {/* {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
-              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />} */}
+              {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
+              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
               {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
               {formatAsPercentage(investmentRow.roi)})
             </div>
@@ -412,10 +400,12 @@ export default function PortfolioPage() {
           <div className="mb-4">
             <h1 className="text-3xl sm:text-3xl font-bold mb-4">Portfolio</h1>
 
-            <div className="mb-4 flex gap-4 w-full">
+            <div className="mb-4 flex flex-wrap gap-4 w-full">
               {Object.values(DateRange).map((dateRange) => (
                 <div
-                  className={`${dateRange === selectedDateRange ? "bg-green-400 text-white" : ""} p-2 rounded-lg hover:bg-green-400 hover:text-white hover:cursor-pointer `}
+                  className={`${
+                    dateRange === selectedDateRange ? "bg-green-400 text-white" : ""
+                  } p-2 rounded-lg hover:bg-green-400 hover:text-white hover:cursor-pointer `}
                   onClick={() => setSelectedDateRange(dateRange)}
                 >
                   {dateRange}
@@ -429,19 +419,19 @@ export default function PortfolioPage() {
                   <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
                   </div>
-                  <div className="flex gap-8">
+                  <div className="flex gap-4 sm:gap-8">
                     <div>
                       <div className="">Return</div>
-                      <div className={`font-bold ${getAmountTextColor(totalReturn)} `}>
-                        {/* {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
-                        {totalReturn < 0 && <FaCaretDown className="inline mr-1" />} */}
+                      <div className={`${getAmountTextColor(totalReturn)} `}>
+                        {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
+                        {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
                         {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
                         {formatAsPercentage(totalRoi)})
                       </div>
                     </div>
                     <div className="">
                       <div className="">Last update</div>
-                      <span className="font-bold">{lastUpdateDate ?? "Never"}</span>
+                      <span className="">{lastUpdateDate ?? "Never"}</span>
                     </div>
                   </div>
                 </div>
@@ -524,6 +514,35 @@ export default function PortfolioPage() {
             )}
           </div>
 
+          <h2 className="text-2xl font-bold mb-4">Allocation</h2>
+
+          {updateDataPoints.length === 0 && (
+            <>
+              <div className="mb-4">There are no investment updates yet.</div>
+              {investmentRows.length === 0 && <div className="mb-4">Click on 'Add investment' to get started.</div>}
+              {investmentRows.length > 0 && (
+                <div className="mb-4">Go to an investment and click on 'View updates' to get started.</div>
+              )}
+            </>
+          )}
+
+          {updateDataPoints.length > 0 && (
+            <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">By investment</h3>
+                <div className="w-full h-full">
+                  <Pie options={allocationPieOptions} data={calculateAllocationByInvestmentPieData(investments)} />
+                </div>
+              </div>
+              <div className="aspect-square bg-white p-4 border">
+                <h3 className="font-bold mb-4">By investment type</h3>
+                <div className="w-full h-full">
+                  <Pie options={allocationPieOptions} data={calculateAllocationByInvestmentTypePieData(investments)} />
+                </div>
+              </div>
+            </div>
+          )}
+
           <h2 className="text-2xl font-bold mb-4">Performance</h2>
 
           {updateDataPoints.length === 0 && (
@@ -539,19 +558,6 @@ export default function PortfolioPage() {
           {updateDataPoints.length > 0 && (
             <>
               <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-                <div className="aspect-square bg-white p-4 border">
-                  <h3 className="font-bold mb-4">Allocation</h3>
-                  <div className="w-full h-full">
-                    <Pie options={allocationPieOptions} data={calculateAllocationPieData(investments)} />
-                  </div>
-                </div>
-                <div className="aspect-square bg-white p-4 border">
-                  <h3 className="font-bold mb-4">Allocation by type</h3>
-                  <div className="w-full h-full">
-                    <Pie options={allocationPieOptions} data={calculateAllocationByTypePieData(investments)} />
-                  </div>
-                </div>
-
                 <div className="aspect-square bg-white p-4 border">
                   <h3 className="font-bold mb-4">Cost vs value</h3>
 

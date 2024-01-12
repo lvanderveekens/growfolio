@@ -168,27 +168,46 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             {investment.locked && <InvestmentIsLockedMessage />}
 
-            <div className="relative border bg-white text-center mb-4">
-              <div className="z-10 relative py-[75px]">
-                <div className="font-bold">Value</div>
-                <div className="font-bold text-4xl">
-                  {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
+            <div className="mb-4 flex flex-wrap gap-4 w-full">
+              {Object.values(DateRange).map((dateRange) => (
+                <div
+                  className={`${
+                    dateRange === selectedDateRange ? "bg-green-400 text-white" : ""
+                  } p-2 rounded-lg hover:bg-green-400 hover:text-white hover:cursor-pointer `}
+                  onClick={() => setSelectedDateRange(dateRange)}
+                >
+                  {dateRange}
                 </div>
-                <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} flex items-center justify-center`}>
-                  {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
-                  {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
-                  {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
-                  {formatAsPercentage(lastUpdate?.roi ?? 0)})
+              ))}
+            </div>
+
+            <div className="relative border border bg-white mb-4">
+              <div className="relative">
+                <div className="z-10 relative p-8">
+                  <div className="font-bold text-4xl mb-4">
+                    {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
+                  </div>
+                  <div className="flex gap-8">
+                    <div>
+                      <div className="">Return</div>
+                      <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} `}>
+                        {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
+                        {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
+                        {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
+                        {formatAsPercentage(lastUpdate?.roi ?? 0)})
+                      </div>
+                    </div>
+                    <div className="">
+                      <div className="">Last update</div>
+                      <span>{investment.lastUpdate?.date ?? "Never"}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-4">
-                  <span className="">Last update: </span>
-                  <span>{investment.lastUpdate?.date ?? "Never"}</span>
+                <div className="w-full h-[150px] pr-2">
+                  {settings && (
+                    <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
+                  )}
                 </div>
-              </div>
-              <div className="absolute left-0 top-0 w-full h-full ">
-                {settings && (
-                  <Line options={valueLineOptions(settings.currency)} data={valueLineData(updateDataPoints)} />
-                )}
               </div>
             </div>
 
@@ -236,125 +255,107 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             )}
 
             {updateDataPoints.length > 0 && (
-              <>
-                <div className="mb-4">
-                  <Dropdown
-                    className="w-full lg:w-auto"
-                    dropdownClassName="w-full lg:w-[180px]"
-                    selected={{
-                      label: selectedDateRange,
-                      value: selectedDateRange,
-                    }}
-                    onChange={(option) => setSelectedDateRange(option.value)}
-                    options={Object.values(DateRange).map((dateRange) => ({
-                      label: dateRange,
-                      value: dateRange,
-                    }))}
-                  />
-                </div>
-
-                <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Cost vs value</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Line
-                          options={costVsValueLineOptions(settings.currency)}
-                          data={buildCostVsValueLineData(updateDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly cost</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyCostBarData(monthlyChangeDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly cost</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyCostBarData(yearlyChangeDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Return</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Line
-                          options={returnLineOptions(settings.currency)}
-                          data={buildReturnLineData(updateDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly return</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={monthlyChangeBarOptions(settings.currency)}
-                          data={buildMonthlyReturnBarData(monthlyDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly return</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar
-                          options={yearlyChangeBarOptions(settings.currency)}
-                          data={buildYearlyReturnBarData(yearlyChangeDataPoints)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">ROI</h1>
-                    <div className="w-full h-full">
-                      <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h1 className="font-bold mb-4">Monthly ROI</h1>
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar options={monthlyROIBarOptions()} data={buildMonthlyROIBarData(monthlyDataPoints)} />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="aspect-square bg-white p-4 border">
-                    <h3 className="font-bold mb-4">Yearly ROI</h3>
-
-                    <div className="w-full h-full">
-                      {settings && (
-                        <Bar options={yearlyROIBarOptions()} data={buildYearlyROIBarData(monthlyDataPoints)} />
-                      )}
-                    </div>
+              <div className="mb-4 flex gap-4 grid grid-cols-1 lg:grid-cols-3">
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">Cost vs value</h1>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Line
+                        options={costVsValueLineOptions(settings.currency)}
+                        data={buildCostVsValueLineData(updateDataPoints)}
+                      />
+                    )}
                   </div>
                 </div>
-              </>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">Monthly cost</h1>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={monthlyChangeBarOptions(settings.currency)}
+                        data={buildMonthlyCostBarData(monthlyChangeDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h3 className="font-bold mb-4">Yearly cost</h3>
+
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={yearlyChangeBarOptions(settings.currency)}
+                        data={buildYearlyCostBarData(yearlyChangeDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">Return</h1>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Line
+                        options={returnLineOptions(settings.currency)}
+                        data={buildReturnLineData(updateDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">Monthly return</h1>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={monthlyChangeBarOptions(settings.currency)}
+                        data={buildMonthlyReturnBarData(monthlyDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h3 className="font-bold mb-4">Yearly return</h3>
+
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar
+                        options={yearlyChangeBarOptions(settings.currency)}
+                        data={buildYearlyReturnBarData(yearlyChangeDataPoints)}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">ROI</h1>
+                  <div className="w-full h-full">
+                    <Line options={roiLineOptions} data={buildROILineData(updateDataPoints)} />
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h1 className="font-bold mb-4">Monthly ROI</h1>
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar options={monthlyROIBarOptions()} data={buildMonthlyROIBarData(monthlyDataPoints)} />
+                    )}
+                  </div>
+                </div>
+
+                <div className="aspect-square bg-white p-4 border">
+                  <h3 className="font-bold mb-4">Yearly ROI</h3>
+
+                  <div className="w-full h-full">
+                    {settings && (
+                      <Bar options={yearlyROIBarOptions()} data={buildYearlyROIBarData(monthlyDataPoints)} />
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
           </>
         )}
