@@ -925,6 +925,8 @@ export const chartBackgroundColors = [
   "rgb(255, 205, 86)",
   "rgb(255, 86, 205)",
   "rgb(87, 255, 205)",
+  "#9B83B8",
+  "#FF9292",
 ];
 
 export const calculateYearlyChangeDataPoints = (
