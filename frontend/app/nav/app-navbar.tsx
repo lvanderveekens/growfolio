@@ -117,8 +117,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
         {/* desktop */}
         <div className="hidden md:flex flex-grow text-xl justify-between items-center h-full">
           <div className="flex h-full items-center">
-            <div className="h-full flex items-center px-4 hover:bg-green-500">
-              <Link href="/">
+            <div className="h-full ">
+              <Link href="/" className="h-full flex items-center px-4 hover:bg-green-500">
                 <div className="flex items-center">Portfolio</div>
               </Link>
             </div>
@@ -145,13 +145,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = () => {
               </div>
             </div>
 
-            <div className="h-full flex items-center px-4 hover:bg-green-500">
-              <Link href="/profile">
+            <div className="h-full">
+              <Link href="/profile" className="h-full flex items-center px-4 hover:bg-green-500">
                 <div className="flex items-center">Profile</div>
               </Link>
             </div>
-            <div className="h-full flex items-center px-4 hover:bg-green-500">
-              <Link href="/settings">
+            <div className="h-full">
+              <Link href="/settings" className="h-full flex items-center px-4 hover:bg-green-500">
                 <div className="flex items-center">Settings</div>
               </Link>
             </div>
