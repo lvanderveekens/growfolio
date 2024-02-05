@@ -356,8 +356,8 @@ export default function PortfolioPage() {
           <div className="flex justify-between">
             <div>Return</div>
             <div className={`${getAmountTextColor(investmentRow.roi ?? 0)} flex items-center`}>
-              {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
-              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />}
+              {/* {investmentRow.return > 0 && <FaCaretUp className="inline mr-1" />}
+              {investmentRow.return < 0 && <FaCaretDown className="inline mr-1" />} */}
               {formatAmountInCentsAsCurrencyString(investmentRow.return, settings.currency)} (
               {formatAsPercentage(investmentRow.roi)})
             </div>
@@ -419,19 +419,19 @@ export default function PortfolioPage() {
                   <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
                   </div>
-                  <div className="flex gap-4 sm:gap-8">
+                  <div className="flex flex-wrap gap-4 sm:gap-8">
                     <div>
-                      <div className="">Return</div>
-                      <div className={`${getAmountTextColor(totalReturn)} `}>
-                        {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
-                        {totalReturn < 0 && <FaCaretDown className="inline mr-1" />}
+                      <div className="text-gray-400">Return</div>
+                      <div className={`text-lg ${getAmountTextColor(totalReturn)} `}>
+                        {/* {totalReturn > 0 && <FaCaretUp className="inline mr-1" />}
+                        {totalReturn < 0 && <FaCaretDown className="inline mr-1" />} */}
                         {settings && formatAmountInCentsAsCurrencyString(totalReturn, settings.currency)} (
                         {formatAsPercentage(totalRoi)})
                       </div>
                     </div>
                     <div className="">
-                      <div className="">Last update</div>
-                      <span className="">{lastUpdateDate ?? "Never"}</span>
+                      <div className="text-gray-400">Last update</div>
+                      <span className="text-lg">{lastUpdateDate ?? "Never"}</span>
                     </div>
                   </div>
                 </div>

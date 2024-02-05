@@ -190,19 +190,19 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
                   <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
                   </div>
-                  <div className="flex gap-4 sm:gap-8">
+                  <div className="flex flex-wrap gap-4 sm:gap-8">
                     <div>
-                      <div className="">Return</div>
-                      <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} `}>
-                        {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
-                        {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />}
+                      <div className="text-gray-400">Return</div>
+                      <div className={`text-lg ${getAmountTextColor(lastUpdate?.return ?? 0)} `}>
+                        {/* {(lastUpdate?.return ?? 0) > 0 && <FaCaretUp className="inline mr-1" />}
+                        {(lastUpdate?.return ?? 0) < 0 && <FaCaretDown className="inline mr-1" />} */}
                         {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.return ?? 0, settings.currency)} (
                         {formatAsPercentage(lastUpdate?.roi ?? 0)})
                       </div>
                     </div>
                     <div className="">
-                      <div className="">Last update</div>
-                      <span>{investment.lastUpdate?.date ?? "Never"}</span>
+                      <div className="text-gray-400">Last update</div>
+                      <span className="text-lg">{investment.lastUpdate?.date ?? "Never"}</span>
                     </div>
                   </div>
                 </div>
