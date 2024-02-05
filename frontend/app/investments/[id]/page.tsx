@@ -32,6 +32,7 @@ import { FaCaretDown, FaCaretUp, FaChevronLeft } from "react-icons/fa6";
 import { InvestmentIsLockedMessage } from "../investment-locked-message";
 import { labelsByInvestmentType } from "@/app/investment-type";
 import { MonthlyDataPoint, calculateMonthlyDataPoints, calculateMonthlyROI, calculateTimeWeightedReturn } from "@/app/data-points";
+import AddUpdateForm from "../add-update-form";
 
 ChartJS.register(
   ArcElement,
@@ -69,6 +70,8 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
   const [selectedDateRange, setSelectedDateRange] = useLocalStorage<DateRange>("growfolio-selected-date-range", DateRange.MAX)
 
   const [settings, setSettings] = useState<Settings>();
+
+  const [showUpdateInvestmentModal, setShowUpdateInvestmentModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchInvestment()
@@ -212,6 +215,29 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
             </div>
 
             <div className="">
+
+              <Button
+                className="w-full lg:w-auto mb-4 mr-4"
+                variant="primary"
+                type="submit"
+                onClick={() => setShowUpdateInvestmentModal(true)}
+                disabled={investment.locked}
+              >
+                Add update
+              </Button>
+              {showUpdateInvestmentModal && settings && (
+                <Modal title="Add update" onClose={() => setShowUpdateInvestmentModal(false)}>
+                  <AddUpdateForm
+                    onAdd={() => {
+                      setShowUpdateInvestmentModal(false);
+                      fetchInvestmentUpdates();
+                    }}
+                    investmentId={params.id}
+                    currency={settings.currency}
+                  />
+                </Modal>
+              )}
+
               <Button
                 className="w-full lg:w-auto mb-4 mr-4"
                 variant="secondary"
