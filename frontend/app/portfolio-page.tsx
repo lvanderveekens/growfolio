@@ -415,7 +415,7 @@ export default function PortfolioPage() {
 
             <div className="relative border border bg-white mb-4">
               <div className="relative">
-                <div className="z-10 relative p-8">
+                <div className="z-10 relative px-4 py-8 sm:p-8">
                   <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(totalValue, settings.currency)}
                   </div>

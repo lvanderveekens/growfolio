@@ -186,11 +186,11 @@ export default function InvestmentPage({ params }: { params: { id: string } }) {
 
             <div className="relative border border bg-white mb-4">
               <div className="relative">
-                <div className="z-10 relative p-8">
+                <div className="z-10 relative px-4 py-8 sm:p-8">
                   <div className="font-bold text-4xl mb-4">
                     {settings && formatAmountInCentsAsCurrencyString(lastUpdate?.value ?? 0, settings.currency)}
                   </div>
-                  <div className="flex gap-8">
+                  <div className="flex gap-4 sm:gap-8">
                     <div>
                       <div className="">Return</div>
                       <div className={`${getAmountTextColor(lastUpdate?.return ?? 0)} `}>
