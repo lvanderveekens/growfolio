@@ -2,6 +2,9 @@
 
 Track your investment portfolio 💰.
 
+<img width="1406" alt="Screenshot 2024-04-02 at 11 46 47" src="https://github.com/lvanderveekens/growfolio/assets/6907423/8545df6d-8e5f-4213-b148-533c4c2c1e08">
+<img width="1406" alt="Screenshot 2024-04-02 at 11 46 58" src="https://github.com/lvanderveekens/growfolio/assets/6907423/aac684df-78b7-428c-8ad6-cfe7de03a79b">
+
 ## Server
 
 ### Log in to server
